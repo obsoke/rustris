@@ -3,7 +3,7 @@ extern crate ggez;
 mod states;
 
 use ggez::{Context, event, conf};
-use states::PlayState::*;
+use states::play_state::PlayState;
 
 fn main() {
     let mut conf = conf::Conf::new();
