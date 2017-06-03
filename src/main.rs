@@ -8,8 +8,8 @@ use states::PlayState::*;
 fn main() {
     let mut conf = conf::Conf::new();
     conf.window_title = String::from("Rustris");
-    //conf.window_width = 1920;
-    //conf.window_height = 1080;
+    conf.window_width = 1280;
+    conf.window_height = 720;
 
     let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf).expect("Could not load configuartion");
 

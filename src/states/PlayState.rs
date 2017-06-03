@@ -5,14 +5,14 @@ use std::time::Duration;
 pub struct PlayState {}
 
 impl PlayState {
-    pub fn new (ctx: &mut Context) -> GameResult<PlayState> {
+    pub fn new (_: &mut Context) -> GameResult<PlayState> {
         let state = PlayState { };
         Ok(state)
     }
 }
 
 impl event::EventHandler for PlayState {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, _: &mut Context, _: Duration) -> GameResult<()> {
         Ok(())
     }
 
