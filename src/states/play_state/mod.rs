@@ -2,11 +2,29 @@ use ggez::{Context, GameResult, graphics, event};
 use ggez::graphics::{DrawMode, Point, Rect};
 use std::time::Duration;
 
-pub struct PlayState {}
+mod well;
+mod tetromino;
+mod shapes;
+use self::well::Well;
+use self::tetromino::Piece;
+
+const BLOCK_SIZE: f32 = 30.0;
+
+pub struct Position {
+    x: u32,
+    y: u32,
+}
+
+pub struct PlayState {
+    well: Well,
+}
 
 impl PlayState {
     pub fn new (_: &mut Context) -> GameResult<PlayState> {
-        let state = PlayState { };
+        let state = PlayState {
+            well: Well::new(),
+        };
+
         Ok(state)
     }
 }
@@ -19,8 +37,7 @@ impl event::EventHandler for PlayState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
-        graphics::circle(ctx, DrawMode::Fill, Point {x: 200.0, y: 200.0}, 100.0, 32)?;
-        graphics::rectangle(ctx, DrawMode::Fill, Rect{ x: 0.0, y: 0.0, w: 100.0, h: 100.0 })?;
+        self.well.draw(ctx);
 
         graphics::present(ctx);
 
