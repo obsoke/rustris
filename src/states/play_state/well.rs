@@ -53,21 +53,21 @@ impl Well {
                     }
 
                     graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: starting_pos + (c as f32 * BLOCK_SIZE) as f32,
-                        y: (r as f32 * BLOCK_SIZE) as f32,
+                        x: starting_pos as f32 + (c as f32 * BLOCK_SIZE + (BLOCK_SIZE / 2.0)) as f32,
+                        y: (r as f32 * BLOCK_SIZE + (BLOCK_SIZE / 2.0)) as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
-                    });
+                    })?;
 
                 } else {
-                    graphics::set_color(ctx, Color::from(((255, 255, 255))));
+                    graphics::set_color(ctx, Color::from(((255, 255, 255))))?;
 
                     graphics::rectangle(ctx, DrawMode::Line, Rect {
-                        x: starting_pos + (c as f32 * BLOCK_SIZE) as f32,
-                        y: (r as f32 * BLOCK_SIZE) as f32,
+                        x: starting_pos as f32 + (c as f32 * BLOCK_SIZE + (BLOCK_SIZE / 2.0)) as f32,
+                        y: (r as f32 * BLOCK_SIZE + (BLOCK_SIZE / 2.0)) as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
-                    });
+                    })?;
                 }
 
             }
