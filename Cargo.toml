@@ -5,3 +5,4 @@ authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]
 ggez = "0.3.0"
+rand = "0.3.15"

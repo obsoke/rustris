@@ -22,9 +22,9 @@ pub enum PieceType {
 pub struct Piece {
     shape: PieceShape,
     shape_type: PieceType,
+    current_rotation_index: u32,
     pub top_left: Position,
     pub potential_top_left: Position,
-    current_rotation_index: u32,
 }
 
 impl Piece {
@@ -47,8 +47,8 @@ impl Piece {
         let middle = width / 2.0;
         let starting_pos = middle - ((BLOCK_SIZE as f32 * 10.0) / 2.0);
 
-        for r in 0 .. self.shape.len() {
-            for c in 0 .. self.shape[r].len() {
+        for (r, _) in self.shape.iter().enumerate() {
+            for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
                     if r + (self.top_left.y as usize) < 2 { // don't draw in vanish zone
                         continue;
@@ -66,10 +66,10 @@ impl Piece {
 
                     graphics::rectangle(ctx, DrawMode::Fill, Rect {
                         x: (starting_pos + (c as f32 + self.top_left.x as f32)) * BLOCK_SIZE as f32,
-                        y: (r as f32 + self.top_left.y as f32) * BLOCK_SIZE as f32,
+                        y: (r as f32 + self.top_left.y as f32 + 300 as f32) * BLOCK_SIZE as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
-                    });
+                    })?;
                 }
             }
         }
@@ -103,7 +103,7 @@ impl Piece {
                         y: (r as f32 + shadow_position.y as f32) * BLOCK_SIZE as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
-                    });
+                    })?;
                 }
             }
         }
