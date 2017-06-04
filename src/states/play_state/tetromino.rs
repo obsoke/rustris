@@ -25,6 +25,7 @@ pub struct Piece {
     current_rotation_index: u32,
     pub top_left: Position,
     pub potential_top_left: Position,
+    shadow_position: Position,
 }
 
 impl Piece {
@@ -36,6 +37,7 @@ impl Piece {
             shape_type: shape_type,
             top_left: Position { x: 4, y: 0 },
             potential_top_left: Position { x: 4, y: 0 },
+            shadow_position: Position { x: 4, y: 0 },
             current_rotation_index: 0,
         }
     }
@@ -65,8 +67,8 @@ impl Piece {
                     }
 
                     graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: (starting_pos + (c as f32 + self.top_left.x as f32)) * BLOCK_SIZE as f32,
-                        y: (r as f32 + self.top_left.y as f32 + 300 as f32) * BLOCK_SIZE as f32,
+                        x: starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE),
+                        y: ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
                     })?;
@@ -88,19 +90,19 @@ impl Piece {
             for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
                     match self.shape[r][c] {
-                        1 => graphics::set_color(ctx, Color::from((255, 0, 0)))?,
-                        2 => graphics::set_color(ctx, Color::from((0, 255, 0)))?,
-                        3 => graphics::set_color(ctx, Color::from((0, 0, 255)))?,
-                        4 => graphics::set_color(ctx, Color::from((255, 0, 255)))?,
-                        5 => graphics::set_color(ctx, Color::from((255, 255, 0)))?,
-                        6 => graphics::set_color(ctx, Color::from((0, 255, 255)))?,
-                        7 => graphics::set_color(ctx, Color::from((255, 255, 255)))?,
+                        1 => graphics::set_color(ctx, Color::from((255, 0, 0, 25)))?,
+                        2 => graphics::set_color(ctx, Color::from((0, 255, 0, 25)))?,
+                        3 => graphics::set_color(ctx, Color::from((0, 0, 255, 25)))?,
+                        4 => graphics::set_color(ctx, Color::from((255, 0, 255, 25)))?,
+                        5 => graphics::set_color(ctx, Color::from((255, 255, 0, 25)))?,
+                        6 => graphics::set_color(ctx, Color::from((0, 255, 255, 25)))?,
+                        7 => graphics::set_color(ctx, Color::from((255, 255, 255, 25)))?,
                         _ => unreachable!(),
                     }
 
                     graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: (starting_pos + (c as f32 + shadow_position.x as f32)) * BLOCK_SIZE as f32,
-                        y: (r as f32 + shadow_position.y as f32) * BLOCK_SIZE as f32,
+                        x: starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE),
+                        y: ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
                     })?;
@@ -127,6 +129,14 @@ impl Piece {
 
         self.shape = piece_type_to_shape(self.shape_type, next_index as usize);
         self.current_rotation_index = next_index;
+    }
+
+    pub fn set_shadow_position(&mut self, shadow_pos: Position) {
+        self.shadow_position = shadow_pos;
+    }
+
+    pub fn get_shadow_position(&self) -> Position {
+        self.shadow_position
     }
 }
 

@@ -92,6 +92,27 @@ impl event::EventHandler for PlayState {
             self.current_piece.top_left = self.current_piece.potential_top_left;
         }
 
+        // shadow piece
+        // TODO: put behind option
+        let mut shadow_position = self.current_piece.top_left;
+        let mut potential_shadow_position = shadow_position;
+        loop {
+            potential_shadow_position.y += 1;
+            let collision_found = self.well.check_for_landing(
+                &self.current_piece.get_shape(),
+                &potential_shadow_position
+            );
+
+            if collision_found {
+                break
+            }
+
+            shadow_position = potential_shadow_position;
+            self.current_piece.set_shadow_position(shadow_position);
+        }
+
+        // TODO: command processing??
+
         Ok(())
     }
 
@@ -100,7 +121,7 @@ impl event::EventHandler for PlayState {
         graphics::clear(ctx);
 
         self.well.draw(ctx)?;
-        self.current_piece.draw_shadow(ctx, &Position { x: 0, y: 0 })?;
+        self.current_piece.draw_shadow(ctx, &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx)?;
 
         graphics::present(ctx);
