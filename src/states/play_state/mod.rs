@@ -28,10 +28,15 @@ pub struct PlayState {
     score: u32,
     cleared_lines: u16,
     game_over: bool,
+
+    // temp
+    image: graphics::Image,
 }
 
 impl PlayState {
-    pub fn new (_: &mut Context) -> GameResult<PlayState> {
+    pub fn new (ctx: &mut Context) -> GameResult<PlayState> {
+        // TEMP
+        let image = graphics::Image::new(ctx, "/block.png")?;
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
         let state = PlayState {
@@ -43,6 +48,8 @@ impl PlayState {
             score: 0,
             cleared_lines: 0,
             game_over: false,
+
+            image: image,
         };
 
         Ok(state)
@@ -120,9 +127,9 @@ impl event::EventHandler for PlayState {
         graphics::set_background_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 255.0));
         graphics::clear(ctx);
 
-        self.well.draw(ctx)?;
-        self.current_piece.draw_shadow(ctx, &self.current_piece.get_shadow_position())?;
-        self.current_piece.draw(ctx)?;
+        self.well.draw(ctx, &self.image)?;
+        self.current_piece.draw_shadow(ctx, &self.image, &self.current_piece.get_shadow_position())?;
+        self.current_piece.draw(ctx, &self.image)?;
 
         graphics::present(ctx);
 

@@ -1,7 +1,7 @@
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Color, DrawMode, Rect};
 use super::{BLOCK_SIZE, Position};
-use super::tetromino::{Piece, PieceShape};
+use super::tetromino::{Piece, PieceShape, block_to_colour};
 
 /// The size (in pixels) of a single 'block' or 'cell' in the well or in a piece
 #[derive(Debug)]
@@ -31,7 +31,7 @@ impl Well {
     }
 
     /// Renders the well.
-    pub fn draw(&self, ctx: &mut Context) -> GameResult<()> {
+    pub fn draw(&self, ctx: &mut Context, image: &graphics::Image) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
         let width = graphics::get_screen_coordinates(&ctx).w;
@@ -41,26 +41,21 @@ impl Well {
         for (r, _) in self.data.iter().enumerate() {
             for (c, _) in self.data[r].iter().enumerate() {
                 if self.data[r][c] != 0 {
-                    match self.data[r][c] {
-                        1 => graphics::set_color(ctx, Color::from((255, 0, 0)))?,
-                        2 => graphics::set_color(ctx, Color::from((0, 255, 0)))?,
-                        3 => graphics::set_color(ctx, Color::from((0, 0, 255)))?,
-                        4 => graphics::set_color(ctx, Color::from((255, 0, 255)))?,
-                        5 => graphics::set_color(ctx, Color::from((255, 255, 0)))?,
-                        6 => graphics::set_color(ctx, Color::from((0, 255, 255)))?,
-                        7 => graphics::set_color(ctx, Color::from((255, 255, 255)))?,
-                        _ => unreachable!(),
-                    }
+                    let colour = block_to_colour(self.data[r][c], false);
+                    graphics::set_color(ctx, colour)?;
 
-                    graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32,
-                        y: (r as f32 * BLOCK_SIZE) as f32,
-                        w: BLOCK_SIZE as f32,
-                        h: BLOCK_SIZE as f32,
-                    })?;
+                    let x = starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32;
+                    let y = (r as f32 * BLOCK_SIZE) as f32;
+
+                    graphics::draw(
+                        ctx,
+                        image,
+                        graphics::Point::new(x, y),
+                        0.0
+                    )?;
 
                 } else {
-                    graphics::set_color(ctx, Color::from(((255, 255, 255))))?;
+                    graphics::set_color(ctx, Color::from(((100, 100, 100, 20))))?;
 
                     graphics::rectangle(ctx, DrawMode::Line, Rect {
                         x: starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32,

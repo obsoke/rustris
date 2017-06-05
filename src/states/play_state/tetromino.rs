@@ -1,11 +1,12 @@
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color, DrawMode, Rect};
+use ggez::graphics::{Color};
 use super::{BLOCK_SIZE, Position};
 use super::shapes::*;
 
 /// A `PieceShape` is a 4x4 array that represents the shape of a piece. A 0 is
 /// an empty space while a 1 is solid.
 pub type PieceShape = [[u32; 4]; 4];
+
 
 /// All the possible piece types that can be taken out of `PieceBag`.
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -42,7 +43,7 @@ impl Piece {
         }
     }
 
-    pub fn draw(&self, ctx: &mut Context) -> GameResult<()> {
+    pub fn draw(&self, ctx: &mut Context, image: &graphics::Image) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
         let width = graphics::get_screen_coordinates(&ctx).w;
@@ -55,23 +56,18 @@ impl Piece {
                     if r + (self.top_left.y as usize) < 2 { // don't draw in vanish zone
                         continue;
                     }
-                    match self.shape[r][c] {
-                        1 => graphics::set_color(ctx, Color::from((255, 0, 0)))?,
-                        2 => graphics::set_color(ctx, Color::from((0, 255, 0)))?,
-                        3 => graphics::set_color(ctx, Color::from((0, 0, 255)))?,
-                        4 => graphics::set_color(ctx, Color::from((255, 0, 255)))?,
-                        5 => graphics::set_color(ctx, Color::from((255, 255, 0)))?,
-                        6 => graphics::set_color(ctx, Color::from((0, 255, 255)))?,
-                        7 => graphics::set_color(ctx, Color::from((255, 255, 255)))?,
-                        _ => unreachable!(),
-                    }
+                    let colour = block_to_colour(self.shape[r][c], false);
+                    graphics::set_color(ctx, colour)?;
 
-                    graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE),
-                        y: ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32,
-                        w: BLOCK_SIZE as f32,
-                        h: BLOCK_SIZE as f32,
-                    })?;
+                    let x = starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE);
+                    let y = ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32;
+
+                    graphics::draw(
+                        ctx,
+                        image,
+                        graphics::Point::new(x, y),
+                        0.0
+                    )?;
                 }
             }
         }
@@ -79,7 +75,7 @@ impl Piece {
         Ok(())
     }
 
-    pub fn draw_shadow(&self, ctx: &mut Context, shadow_position: &Position) -> GameResult<()> {
+    pub fn draw_shadow(&self, ctx: &mut Context, image: &graphics::Image, shadow_position: &Position) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
         let width = graphics::get_screen_coordinates(&ctx).w;
@@ -89,23 +85,18 @@ impl Piece {
         for (r, _) in self.shape.iter().enumerate() {
             for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
-                    match self.shape[r][c] {
-                        1 => graphics::set_color(ctx, Color::from((255, 0, 0, 25)))?,
-                        2 => graphics::set_color(ctx, Color::from((0, 255, 0, 25)))?,
-                        3 => graphics::set_color(ctx, Color::from((0, 0, 255, 25)))?,
-                        4 => graphics::set_color(ctx, Color::from((255, 0, 255, 25)))?,
-                        5 => graphics::set_color(ctx, Color::from((255, 255, 0, 25)))?,
-                        6 => graphics::set_color(ctx, Color::from((0, 255, 255, 25)))?,
-                        7 => graphics::set_color(ctx, Color::from((255, 255, 255, 25)))?,
-                        _ => unreachable!(),
-                    }
+                    let colour = block_to_colour(self.shape[r][c], true);
+                    graphics::set_color(ctx, colour)?;
 
-                    graphics::rectangle(ctx, DrawMode::Fill, Rect {
-                        x: starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE),
-                        y: ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32,
-                        w: BLOCK_SIZE as f32,
-                        h: BLOCK_SIZE as f32,
-                    })?;
+                    let x = starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE);
+                    let y = ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32;
+
+                    graphics::draw(
+                        ctx,
+                        image,
+                        graphics::Point::new(x, y),
+                        0.0
+                    )?;
                 }
             }
         }
@@ -158,14 +149,41 @@ pub fn piece_type_to_shape(shape: PieceType, index: usize) -> PieceShape {
 
 pub fn u8_to_piece_type(num: u8) -> Option<PieceType> {
     match num {
-        0 => Some(PieceType::L),
-        1 => Some(PieceType::T),
-        2 => Some(PieceType::I),
-        3 => Some(PieceType::Z),
-        4 => Some(PieceType::J),
-        5 => Some(PieceType::S),
-        6 => Some(PieceType::O),
+        0 => Some(PieceType::I),
+        1 => Some(PieceType::J),
+        2 => Some(PieceType::L),
+        3 => Some(PieceType::O),
+        4 => Some(PieceType::S),
+        5 => Some(PieceType::T),
+        6 => Some(PieceType::Z),
         _ => unreachable!(),
+    }
+}
+
+pub fn block_to_colour(num: u32, shadow: bool) -> Color {
+    if shadow {
+        match num {
+            1 => Color::from(( 0, 255, 255, 45 )),
+            2 => Color::from(( 0, 0, 255, 45 )),
+            3 => Color::from(( 255, 165, 0, 45 )),
+            4 => Color::from(( 255, 255, 0, 45 )),
+            5 => Color::from(( 128, 255, 0, 45 )),
+            6 => Color::from(( 128, 0, 128, 45 )),
+            7 => Color::from(( 255, 0, 0, 45 )),
+            _ => unreachable!(),
+        }
+    }
+    else {
+        match num {
+            1 => Color::from(( 0, 255, 255, 255 )),
+            2 => Color::from(( 0, 0, 255, 255 )),
+            3 => Color::from(( 255, 165, 0, 255 )),
+            4 => Color::from(( 255, 255, 0, 255 )),
+            5 => Color::from(( 128, 255, 0, 255 )),
+            6 => Color::from(( 128, 0, 128, 255 )),
+            7 => Color::from(( 255, 0, 0, 255 )),
+            _ => unreachable!(),
+        }
     }
 }
 
