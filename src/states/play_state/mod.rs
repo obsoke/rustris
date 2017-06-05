@@ -6,6 +6,8 @@ mod tetromino;
 mod shapes;
 mod bag;
 mod util;
+
+use ggez::event::*;
 use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
@@ -19,7 +21,34 @@ pub struct Position {
     y: u32,
 }
 
+#[derive(Debug)]
+pub struct InputState {
+    left: bool,
+    right: bool,
+    soft_drop: bool,
+    hard_drop: bool,
+    rotate_clockwise: bool,
+    rotate_counterclockwise: bool,
+    drop: bool,
+}
+
+impl Default for InputState {
+    fn default() -> Self {
+        InputState {
+            left: false,
+            right: false,
+            soft_drop: false,
+            hard_drop: false,
+            rotate_clockwise: false,
+            rotate_counterclockwise: false,
+            drop: false,
+        }
+    }
+}
+
 pub struct PlayState {
+    input: InputState,
+
     well: Well,
     bag: PieceBag,
     current_piece: Piece,
@@ -40,6 +69,8 @@ impl PlayState {
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
         let state = PlayState {
+            input: InputState::default(),
+
             well: Well::new(),
             bag: bag,
             current_piece: first_piece,
@@ -54,26 +85,27 @@ impl PlayState {
 
         Ok(state)
     }
-}
 
-impl event::EventHandler for PlayState {
-    fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
-        use self::util::DurationExt;
-
-        if self.game_over {
-            // do game over stuff
-            return Ok(());
+    fn handle_user_input(&mut self) -> GameResult<()> {
+        if self.input.left {
+            self.current_piece.potential_top_left.x -= 1;
+        }
+        else if self.input.right {
+            self.current_piece.potential_top_left.x += 1;
         }
 
+        Ok(())
+    }
+
+    /// Advance the fall time. If enough time has passed, allow gravity to
+    /// affect the current piece.
+    /// Returns a `GameResult<false>` if a landing occured.
+    /// Returns a `GameResult<true>` if no landing occured and the piece can advance.
+    fn handle_gravity(&mut self, dt: Duration) -> GameResult<bool> {
         self.fall_timer += dt.subsec_nanos() as f64 / 1_000_000_000.0;
 
-        // get the shape of our current piece - used in collision calculations
-        // in this loop iteration
-        let current_shape = self.current_piece.get_shape();
-
-        // GRAVITY - if fall timer threshold has been hit, move current piece down by one
-        // row & reset timer
         if self.fall_timer >= FALL_SPEED {
+            let current_shape = self.current_piece.get_shape();
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1;
 
@@ -86,21 +118,23 @@ impl event::EventHandler for PlayState {
                 if self.current_piece.top_left.y < 2 {
                     println!("game over!");
                     self.game_over = true;
-                    return Ok(());
+                    return Ok(false);
                 }
 
                 // game isn't over - take another piece and move to next frame
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
-                return Ok(());
+                return Ok(false);
             }
 
             // piece did not land - advance!
             self.current_piece.top_left = self.current_piece.potential_top_left;
         }
 
-        // shadow piece
-        // TODO: put behind option
+        Ok(true)
+    }
+
+    fn handle_shadow_piece(&mut self) -> GameResult<()> {
         let mut shadow_position = self.current_piece.top_left;
         let mut potential_shadow_position = shadow_position;
         loop {
@@ -118,7 +152,119 @@ impl event::EventHandler for PlayState {
             self.current_piece.set_shadow_position(shadow_position);
         }
 
-        // TODO: command processing??
+        Ok(())
+    }
+
+    fn handle_lines_clears(&mut self) -> GameResult<()> {
+        // check for line clears
+        for r in (0 .. self.well.data.len()).rev() {
+            let mut is_row_filled = true;
+            for (c, _) in self.well.data[r].iter().enumerate() {
+                if self.well.data[r][c] == 0 {
+                    is_row_filled = false;
+                    break; // no need to continue iterating, line is not clear...
+                }
+            }
+
+            if is_row_filled {
+                // TODO: implement more line clearing algorithms
+                // TODO: make the current line clearing algorithm user selectable
+                self.well.naive_line_clear(r);
+                self.cleared_lines += 1;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn handle_collisions(&mut self) -> GameResult<()> {
+        if self.input.left || self.input.right || self.input.soft_drop {
+            let current_shape = self.current_piece.get_shape();
+            let collision_found = self.well.check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
+
+            if collision_found {
+                self.current_piece.potential_top_left = self.current_piece.top_left;
+            }
+
+            self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
+            Ok(())
+        }
+        else if self.input.rotate_clockwise || self.input.rotate_counterclockwise {
+            let next_shape = self.current_piece.get_next_shape();
+            let collision_found = self.well.check_for_collisions(&next_shape, &self.current_piece.top_left);
+
+            if !collision_found {
+                self.current_piece.change_shape();
+            }
+            else {
+                // wall kick attempt!
+                // need to do 2 checks:
+                // move one piece to the right & perform all above checks
+                let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
+                potential_position.x += 1;
+                let collision_found = self.well.check_for_collisions(&next_shape, &potential_position);
+
+                if !collision_found {
+                    self.current_piece.top_left = potential_position;
+                    self.current_piece.potential_top_left = potential_position;
+                    self.current_piece.change_shape();
+                }
+                else {
+                    let mut potential_position = self.current_piece.top_left;
+                    potential_position.x -= 1;
+                    let collision_found = self.well.check_for_collisions(&next_shape, &potential_position);
+
+                    if !collision_found {
+                        self.current_piece.top_left = potential_position;
+                        self.current_piece.potential_top_left = potential_position;
+                        self.current_piece.change_shape();
+                    }
+                }
+            }
+
+            Ok(())
+        }
+        else if self.input.hard_drop {
+            self.current_piece.top_left = self.current_piece.get_shadow_position();
+            self.well.land(&self.current_piece);
+            self.current_piece = self.bag.take_piece();
+
+            Ok(())
+        }
+        else {
+            Ok(())
+        }
+    }
+}
+
+impl event::EventHandler for PlayState {
+    fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
+        if self.game_over {
+            // do game over stuff
+            return Ok(());
+        }
+
+        println!("value of input: rotating clockwise: {:?}", self.input.rotate_clockwise);
+        println!("value of input: rotating counterClockwise: {:?}", self.input.rotate_counterclockwise);
+
+        // TODO: handle/respond user input
+        self.handle_user_input()?;
+
+        // handle gravity - return from update if our current piece landed
+        if let Ok(false) = self.handle_gravity(dt) {
+            return Ok(());
+        }
+
+        // handle shadow piece
+        // TODO: put behind option
+        self.handle_shadow_piece()?;
+
+        // TODO movement check
+        self.handle_collisions()?;
+        // TODO: rotation check
+        // TODO: hard drop check
+
+        self.handle_lines_clears()?;
 
         Ok(())
     }
@@ -134,5 +280,31 @@ impl event::EventHandler for PlayState {
         graphics::present(ctx);
 
         Ok(())
+    }
+
+    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+        println!("key off: {:?}", keycode);
+        match keycode {
+            Keycode::Left => self.input.left = false,
+            Keycode::Right => self.input.right = false,
+            Keycode::Up => self.input.soft_drop = false,
+            Keycode::Down => self.input.hard_drop = false,
+            Keycode::Z => self.input.rotate_counterclockwise = false,
+            Keycode::X => self.input.rotate_clockwise = false,
+            _ => (),
+        }
+    }
+
+    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+        println!("key hit: {:?}", keycode);
+        match keycode {
+            Keycode::Left => self.input.left = true,
+            Keycode::Right => self.input.right = true,
+            Keycode::Up => self.input.soft_drop = true,
+            Keycode::Down => self.input.hard_drop = true,
+            Keycode::Z => self.input.rotate_counterclockwise = true,
+            Keycode::X => self.input.rotate_clockwise = true,
+            _ => (),
+        }
     }
 }
