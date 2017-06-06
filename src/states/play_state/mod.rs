@@ -11,9 +11,11 @@ use ggez::event::*;
 use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
+use self::util::DurationExt;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
+const INPUT_DELAY_TIME: f64 = 0.05;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
@@ -22,26 +24,42 @@ pub struct Position {
 }
 
 #[derive(Debug)]
+pub struct InputStateField {
+    is_active: bool,
+    delay_timer: f64,
+}
+
+impl Default for InputStateField {
+    fn default() -> Self {
+        InputStateField {
+            is_active: false,
+            delay_timer: INPUT_DELAY_TIME,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct InputState {
-    left: bool,
-    right: bool,
-    soft_drop: bool,
-    hard_drop: bool,
-    rotate_clockwise: bool,
-    rotate_counterclockwise: bool,
-    drop: bool,
+    left: InputStateField,
+    right: InputStateField,
+    soft_drop: InputStateField,
+    hard_drop: InputStateField,
+    rotate_clockwise: InputStateField,
+    rotate_counterclockwise: InputStateField,
+    drop: InputStateField,
 }
 
 impl Default for InputState {
     fn default() -> Self {
+
         InputState {
-            left: false,
-            right: false,
-            soft_drop: false,
-            hard_drop: false,
-            rotate_clockwise: false,
-            rotate_counterclockwise: false,
-            drop: false,
+            left: InputStateField::default(),
+            right: InputStateField::default(),
+            soft_drop: InputStateField::default(),
+            hard_drop: InputStateField::default(),
+            rotate_clockwise: InputStateField::default(),
+            rotate_counterclockwise: InputStateField::default(),
+            drop: InputStateField::default(),
         }
     }
 }
@@ -69,12 +87,13 @@ pub struct PlayState {
     image: graphics::Image,
 }
 
+
 impl PlayState {
     pub fn new (ctx: &mut Context) -> GameResult<PlayState> {
-        // TEMP
         let image = graphics::Image::new(ctx, "/block.png")?;
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
+
         let state = PlayState {
             current_command: Command::None,
             input: InputState::default(),
@@ -94,18 +113,29 @@ impl PlayState {
         Ok(state)
     }
 
-    fn handle_user_input(&mut self) -> GameResult<()> {
-        if self.input.left {
-            println!("moved left");
-            self.current_piece.potential_top_left.x -= 1;
+    fn handle_user_input(&mut self, dt: Duration) -> GameResult<()> {
+        if self.input.left.is_active {
+            self.input.left.delay_timer += dt.as_subsec_millis();
+            if self.input.left.delay_timer >= INPUT_DELAY_TIME {
+                self.current_piece.potential_top_left.x -= 1;
+                self.input.left.delay_timer = 0.0;
+            }
         }
-        else if self.input.right {
-            println!("moved right");
-            self.current_piece.potential_top_left.x += 1;
+        else if self.input.right.is_active {
+            self.input.right.delay_timer += dt.as_subsec_millis();
+            if self.input.right.delay_timer >= INPUT_DELAY_TIME {
+                println!("moved right");
+                self.current_piece.potential_top_left.x += 1;
+                self.input.right.delay_timer = 0.0;
+            }
         }
-        else if self.input.soft_drop {
+        else if self.input.soft_drop.is_active {
             println!("soft_drop");
-            self.current_piece.potential_top_left.y += 1;
+            self.input.soft_drop.delay_timer += dt.as_subsec_millis();
+            if self.input.soft_drop.delay_timer >= INPUT_DELAY_TIME {
+                self.current_piece.potential_top_left.y += 1;
+                self.input.soft_drop.delay_timer = 0.0;
+            }
         }
 
         Ok(())
@@ -116,8 +146,6 @@ impl PlayState {
     /// Returns a `GameResult<false>` if a landing occured.
     /// Returns a `GameResult<true>` if no landing occured and the piece can advance.
     fn handle_gravity(&mut self, dt: Duration) -> GameResult<bool> {
-        use self::util::DurationExt;
-
         self.fall_timer += dt.as_subsec_millis();
 
         if self.fall_timer >= FALL_SPEED {
@@ -125,6 +153,7 @@ impl PlayState {
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1;
 
+            println!("normal");
             let did_land = self.well.check_for_landing(
                 &current_shape,
                 &self.current_piece.potential_top_left
@@ -138,6 +167,7 @@ impl PlayState {
                 }
 
                 // game isn't over - take another piece and move to next frame
+                println!("piece landing");
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
                 return Ok(false);
@@ -155,6 +185,7 @@ impl PlayState {
         let mut potential_shadow_position = shadow_position;
         loop {
             potential_shadow_position.y += 1;
+            println!("shadow");
             let collision_found = self.well.check_for_landing(
                 &self.current_piece.get_shape(),
                 &potential_shadow_position
@@ -194,7 +225,7 @@ impl PlayState {
     }
 
     fn handle_collisions(&mut self) -> GameResult<()> {
-        if self.input.left || self.input.right || self.input.soft_drop {
+        if self.input.left.is_active || self.input.right.is_active || self.input.soft_drop.is_active {
             let current_shape = self.current_piece.get_shape();
             let collision_found = self.well.check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
 
@@ -205,7 +236,7 @@ impl PlayState {
             self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
             Ok(())
         }
-        else if self.input.rotate_clockwise || self.input.rotate_counterclockwise {
+        else if self.input.rotate_clockwise.is_active || self.input.rotate_counterclockwise.is_active {
             let next_shape = self.current_piece.get_next_shape();
             let collision_found = self.well.check_for_collisions(&next_shape, &self.current_piece.top_left);
 
@@ -240,8 +271,9 @@ impl PlayState {
 
             Ok(())
         }
-        else if self.input.hard_drop {
+        else if self.input.hard_drop.is_active {
             self.current_piece.top_left = self.current_piece.get_shadow_position();
+            println!("hard drop");
             self.well.land(&self.current_piece);
             self.current_piece = self.bag.take_piece();
 
@@ -266,19 +298,18 @@ impl event::EventHandler for PlayState {
         println!("Value of current command: {:?}", self.current_command);
         println!("Value of Left: {:?}", self.input.left);
         // TODO: handle/respond user input
-        self.handle_user_input()?;
-
-        // handle gravity - return from update if our current piece landed
-        if let Ok(false) = self.handle_gravity(dt) {
-            return Ok(());
-        }
+        self.handle_user_input(dt)?;
 
         // handle shadow piece
         // TODO: put behind option
         self.handle_shadow_piece()?;
 
         self.handle_collisions()?;
-        // TODO: hard drop check
+
+        // handle gravity - return from update if our current piece landed
+        if let Ok(false) = self.handle_gravity(dt) {
+            return Ok(());
+        }
 
         self.handle_lines_clears()?;
 
@@ -302,15 +333,15 @@ impl event::EventHandler for PlayState {
         //println!("key hit: {:?}", keycode);
         match keycode {
             Keycode::Left => {
-                self.input.left = true;
+                self.input.left.is_active = true;
                 self.current_command = Command::Left;
             },
-            Keycode::Right => self.input.right = true,
-            Keycode::Up => self.input.hard_drop = true,
-            Keycode::Down => self.input.soft_drop = true,
-            Keycode::Z => self.input.rotate_counterclockwise = true,
-            Keycode::X => self.input.rotate_clockwise = true,
-            _ => unreachable!(),
+            Keycode::Right => self.input.right.is_active = true,
+            Keycode::Up => self.input.hard_drop.is_active = true,
+            Keycode::Down => self.input.soft_drop.is_active = true,
+            Keycode::Z => self.input.rotate_counterclockwise.is_active = true,
+            Keycode::X => self.input.rotate_clockwise.is_active = true,
+            _ => (),
         }
 
     }
@@ -318,15 +349,15 @@ impl event::EventHandler for PlayState {
     fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
         match keycode {
             Keycode::Left => {
-                self.input.left = false;
-                self.current_command = Command::None;
+                self.input.left.is_active = false;
+                self.input.left.delay_timer = INPUT_DELAY_TIME;
             },
-            Keycode::Right => self.input.right = false,
-            Keycode::Up => self.input.hard_drop = false,
-            Keycode::Down => self.input.soft_drop = false,
-            Keycode::Z => self.input.rotate_counterclockwise = false,
-            Keycode::X => self.input.rotate_clockwise = false,
-            _ => unreachable!(),
+            Keycode::Right => self.input.right.is_active = false,
+            Keycode::Up => self.input.hard_drop.is_active = false,
+            Keycode::Down => self.input.soft_drop.is_active = false,
+            Keycode::Z => self.input.rotate_counterclockwise.is_active = false,
+            Keycode::X => self.input.rotate_clockwise.is_active = false,
+            _ => (),
         }
     }
 }

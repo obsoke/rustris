@@ -19,12 +19,13 @@ impl Well {
     /// Add's the current piece, `current_t`, to the well.
     pub fn land(&mut self, current_t: &Piece) {
         let current_shape = current_t.get_shape();
+        println!("pos of piece being landed {:?}", current_t.top_left);
 
         for (r, _) in current_shape.iter().enumerate() {
             for (c, _) in current_shape[r].iter().enumerate() {
                 if current_shape[r][c] != 0 {
                     // add shape to well
-                    self.data[r + current_t.top_left.y as usize][c + current_t.top_left.x as usize] = current_shape[r][c];
+                    self.data[r.wrapping_add(current_t.top_left.y as usize)][c.wrapping_add(current_t.top_left.x as usize)] = current_shape[r][c];
                 }
             }
         }
@@ -125,7 +126,13 @@ impl Well {
                     if r as i32 + position.y >= self.data.len() as i32 {
                         collision_found = true;
                     }
-                    else if self.data[(r as i32 + position.y) as usize][(c as i32 + position.x) as usize] != 0{
+                    else if (c as i32 + position.x) >= self.data[r].len() as i32 {
+                        // do nothing
+                    }
+                    else if (c as i32 + position.x) < 0 {
+                        // do nothing
+                    }
+                    else if self.data[(r.wrapping_add(position.y as usize))][(c.wrapping_add(position.x as usize))] != 0{
                         collision_found = true;
                     }
                 }
