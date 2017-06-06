@@ -4,5 +4,6 @@ version = "0.1.0"
 authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]
-ggez = "0.3.0"
+ggez = { version = "0.3.0", features = ["cargo-resource-root"] }
+
 rand = "0.3.15"
