@@ -10,6 +10,7 @@ fn main() {
     conf.window_title = String::from("Rustris");
     conf.window_width = 1280;
     conf.window_height = 720;
+    conf.vsync = true;
 
     let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf).expect("Could not load configuartion");
 

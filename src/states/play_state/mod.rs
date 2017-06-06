@@ -276,9 +276,7 @@ impl PlayState {
 
 impl event::EventHandler for PlayState {
     fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
-        println!("-------------");
-        println!("-Frame Start-");
-        println!("-------------");
+        println!("[state.update] Start of update method");
         if self.game_over {
             // do game over stuff
             return Ok(());
@@ -318,18 +316,12 @@ impl event::EventHandler for PlayState {
     }
 
     fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool) {
-        println!("key down event occured:");
+        println!("[state.key_down_event] Key down event occured");
+        println!("Key: {}, Repeat?: {}", keycode, repeat);
         match keycode {
             Keycode::Left => {
-                println!("repeat of Left: {}", repeat);
-                if repeat {
-                    self.input.left.is_active = false;
-                    self.input.left.delay_timer = INPUT_DELAY_TIME;
-
-                } else {
-                    self.input.left.is_active = true;
-                    self.current_command = Command::Left;
-                }
+                self.input.left.is_active = true;
+                self.current_command = Command::Left;
             }
             Keycode::Right => self.input.right.is_active = true,
             Keycode::Up => self.input.hard_drop.is_active = true,
