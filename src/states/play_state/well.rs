@@ -96,16 +96,16 @@ impl Well {
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
                 if shape[r][c] != 0 {
-                    if c as u32 + position.x < 0 {
+                    if c as i32 + position.x < 0 {
                         collision_found = true;
                     }
-                    else if c as u32 + position.x >= self.data[r].len() as u32 {
+                    else if c as i32 + position.x >= self.data[r].len() as i32 {
                         collision_found = true;
                     }
-                    else  if r as u32 + position.y >= self.data.len()  as u32 {
+                    else  if r as i32 + position.y >= self.data.len()  as i32 {
                         collision_found = true;
                     }
-                    else if self.data[(r as u32 + position.y) as usize][(c as u32 + position.x) as usize] != 0{
+                    else if self.data[(r as i32 + position.y) as usize][(c as i32 + position.x) as usize] != 0{
                         collision_found = true;
                     }
                 }
@@ -122,10 +122,10 @@ impl Well {
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
                 if shape[r][c] != 0 {
-                    if r as u32 + position.y >= self.data.len() as u32 {
+                    if r as i32 + position.y >= self.data.len() as i32 {
                         collision_found = true;
                     }
-                    else if self.data[(r as u32 + position.y) as usize][(c as u32 + position.x) as usize] != 0{
+                    else if self.data[(r as i32 + position.y) as usize][(c as i32 + position.x) as usize] != 0{
                         collision_found = true;
                     }
                 }

@@ -17,8 +17,8 @@ const FALL_SPEED: f64 = 0.5;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 }
 
 #[derive(Debug)]
@@ -46,7 +46,14 @@ impl Default for InputState {
     }
 }
 
+#[derive(Debug, PartialEq)]
+enum Command {
+    Left,
+    None,
+}
+
 pub struct PlayState {
+    current_command: Command,
     input: InputState,
 
     well: Well,
@@ -69,6 +76,7 @@ impl PlayState {
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
         let state = PlayState {
+            current_command: Command::None,
             input: InputState::default(),
 
             well: Well::new(),
@@ -88,10 +96,16 @@ impl PlayState {
 
     fn handle_user_input(&mut self) -> GameResult<()> {
         if self.input.left {
+            println!("moved left");
             self.current_piece.potential_top_left.x -= 1;
         }
         else if self.input.right {
+            println!("moved right");
             self.current_piece.potential_top_left.x += 1;
+        }
+        else if self.input.soft_drop {
+            println!("soft_drop");
+            self.current_piece.potential_top_left.y += 1;
         }
 
         Ok(())
@@ -239,14 +253,16 @@ impl PlayState {
 
 impl event::EventHandler for PlayState {
     fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
+        println!("-------------");
+        println!("-Frame Start-");
+        println!("-------------");
         if self.game_over {
             // do game over stuff
             return Ok(());
         }
 
-        println!("value of input: rotating clockwise: {:?}", self.input.rotate_clockwise);
-        println!("value of input: rotating counterClockwise: {:?}", self.input.rotate_counterclockwise);
-
+        println!("Value of current command: {:?}", self.current_command);
+        println!("Value of Left: {:?}", self.input.left);
         // TODO: handle/respond user input
         self.handle_user_input()?;
 
@@ -259,9 +275,7 @@ impl event::EventHandler for PlayState {
         // TODO: put behind option
         self.handle_shadow_piece()?;
 
-        // TODO movement check
         self.handle_collisions()?;
-        // TODO: rotation check
         // TODO: hard drop check
 
         self.handle_lines_clears()?;
@@ -282,29 +296,35 @@ impl event::EventHandler for PlayState {
         Ok(())
     }
 
-    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
-        println!("key off: {:?}", keycode);
-        match keycode {
-            Keycode::Left => self.input.left = false,
-            Keycode::Right => self.input.right = false,
-            Keycode::Up => self.input.soft_drop = false,
-            Keycode::Down => self.input.hard_drop = false,
-            Keycode::Z => self.input.rotate_counterclockwise = false,
-            Keycode::X => self.input.rotate_clockwise = false,
-            _ => (),
-        }
-    }
-
     fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
-        println!("key hit: {:?}", keycode);
+        //println!("key hit: {:?}", keycode);
         match keycode {
-            Keycode::Left => self.input.left = true,
+            Keycode::Left => {
+                self.input.left = true;
+                self.current_command = Command::Left;
+            },
             Keycode::Right => self.input.right = true,
-            Keycode::Up => self.input.soft_drop = true,
-            Keycode::Down => self.input.hard_drop = true,
+            Keycode::Up => self.input.hard_drop = true,
+            Keycode::Down => self.input.soft_drop = true,
             Keycode::Z => self.input.rotate_counterclockwise = true,
             Keycode::X => self.input.rotate_clockwise = true,
-            _ => (),
+            _ => unreachable!(),
+        }
+
+    }
+
+    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+        match keycode {
+            Keycode::Left => {
+                self.input.left = false;
+                self.current_command = Command::None;
+            },
+            Keycode::Right => self.input.right = false,
+            Keycode::Up => self.input.hard_drop = false,
+            Keycode::Down => self.input.soft_drop = false,
+            Keycode::Z => self.input.rotate_counterclockwise = false,
+            Keycode::X => self.input.rotate_clockwise = false,
+            _ => unreachable!(),
         }
     }
 }
