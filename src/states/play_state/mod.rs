@@ -116,7 +116,9 @@ impl PlayState {
     /// Returns a `GameResult<false>` if a landing occured.
     /// Returns a `GameResult<true>` if no landing occured and the piece can advance.
     fn handle_gravity(&mut self, dt: Duration) -> GameResult<bool> {
-        self.fall_timer += dt.subsec_nanos() as f64 / 1_000_000_000.0;
+        use self::util::DurationExt;
+
+        self.fall_timer += dt.as_subsec_millis();
 
         if self.fall_timer >= FALL_SPEED {
             let current_shape = self.current_piece.get_shape();
