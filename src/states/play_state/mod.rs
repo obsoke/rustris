@@ -1,5 +1,5 @@
-use ggez::{Context, GameResult, graphics, event};
 use std::time::Duration;
+use ggez::{Context, GameResult, graphics, event};
 
 mod well;
 mod tetromino;
@@ -23,7 +23,7 @@ pub struct Position {
     y: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct InputStateField {
     is_active: bool,
     delay_timer: f64,
@@ -38,7 +38,7 @@ impl Default for InputStateField {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct InputState {
     left: InputStateField,
     right: InputStateField,
@@ -64,15 +64,9 @@ impl Default for InputState {
     }
 }
 
-#[derive(Debug, PartialEq)]
-enum Command {
-    Left,
-    None,
-}
-
 pub struct PlayState {
-    current_command: Command,
     input: InputState,
+    prev_input: InputState,
 
     well: Well,
     bag: PieceBag,
@@ -96,8 +90,8 @@ impl PlayState {
         let first_piece = bag.take_piece();
 
         let state = PlayState {
-            current_command: Command::None,
             input: InputState::default(),
+            prev_input: InputState::default(),
 
             well: Well::new(),
             bag: bag,
@@ -318,6 +312,8 @@ impl event::EventHandler for PlayState {
 
         self.handle_line_clears()?;
 
+        self.prev_input = self.input;
+
         Ok(())
     }
 
@@ -335,14 +331,9 @@ impl event::EventHandler for PlayState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool) {
-        println!("[state.key_down_event] Key down event occured");
-        println!("Key: {}, Repeat?: {}", keycode, repeat);
+    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
         match keycode {
-            Keycode::Left => {
-                self.input.left.is_active = true;
-                self.current_command = Command::Left;
-            }
+            Keycode::Left => self.input.left.is_active = true,
             Keycode::Right => self.input.right.is_active = true,
             Keycode::Up => self.input.hard_drop.is_active = true,
             Keycode::Down => self.input.soft_drop.is_active = true,
@@ -359,11 +350,26 @@ impl event::EventHandler for PlayState {
                 self.input.left.is_active = false;
                 self.input.left.delay_timer = INPUT_DELAY_TIME;
             }
-            Keycode::Right => self.input.right.is_active = false,
-            Keycode::Up => self.input.hard_drop.is_active = false,
-            Keycode::Down => self.input.soft_drop.is_active = false,
-            Keycode::Z => self.input.rotate_counterclockwise.is_active = false,
-            Keycode::X => self.input.rotate_clockwise.is_active = false,
+            Keycode::Right => {
+                self.input.right.is_active = false;
+                self.input.right.delay_timer = INPUT_DELAY_TIME;
+            },
+            Keycode::Up => {
+                self.input.hard_drop.is_active = false;
+                self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
+            },
+            Keycode::Down => {
+                self.input.soft_drop.is_active = false;
+                self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
+            },
+            Keycode::Z => {
+                self.input.rotate_counterclockwise.is_active = false;
+                self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
+            },
+            Keycode::X => {
+                self.input.rotate_clockwise.is_active = false;
+                self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
+            },
             _ => (),
         }
     }
