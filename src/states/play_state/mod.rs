@@ -81,6 +81,7 @@ pub struct PlayState {
     fall_timer: f64,
     score: u32,
     cleared_lines: u16,
+    level: u32,
     game_over: bool,
 
     // temp
@@ -105,6 +106,7 @@ impl PlayState {
             fall_timer: 0.0,
             score: 0,
             cleared_lines: 0,
+            level: 0,
             game_over: false,
 
             image: image,
@@ -191,8 +193,9 @@ impl PlayState {
         Ok(())
     }
 
-    fn handle_lines_clears(&mut self) -> GameResult<()> {
+    fn handle_line_clears(&mut self) -> GameResult<()> {
         // check for line clears
+        let mut lines_cleared = 0;
         for r in (0..self.well.data.len()).rev() {
             let mut is_row_filled = true;
             for (c, _) in self.well.data[r].iter().enumerate() {
@@ -206,11 +209,27 @@ impl PlayState {
                 // TODO: implement more line clearing algorithms
                 // TODO: make the current line clearing algorithm user selectable
                 self.well.naive_line_clear(r);
-                self.cleared_lines += 1;
+                lines_cleared += 1;
             }
         }
 
+        // add to score
+        let level = self.level;
+        match lines_cleared {
+            1 => self.increase_score(40, level),
+            2 => self.increase_score(100, level),
+            3 => self.increase_score(300, level),
+            4 => self.increase_score(1200, level),
+            _ => (),
+        }
+
+        self.cleared_lines += lines_cleared;
+
         Ok(())
+    }
+
+    fn increase_score(&mut self, base_score: u32, level: u32) {
+        self.score += base_score * (level + 1);
     }
 
     fn handle_collisions(&mut self) -> GameResult<()> {
@@ -277,6 +296,7 @@ impl PlayState {
 impl event::EventHandler for PlayState {
     fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
         println!("[state.update] Start of update method");
+        println!("[state.update] current score: {}", self.score);
         if self.game_over {
             // do game over stuff
             return Ok(());
@@ -296,7 +316,7 @@ impl event::EventHandler for PlayState {
             return Ok(());
         }
 
-        self.handle_lines_clears()?;
+        self.handle_line_clears()?;
 
         Ok(())
     }
