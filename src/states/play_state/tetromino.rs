@@ -105,8 +105,8 @@ impl Piece {
     }
 
     // this only returns the next shape, it doesn't change the current shape
-    pub fn get_next_shape(&self) -> PieceShape {
-        let next_index = next_rotation_index(self.current_rotation_index, 1);
+    pub fn get_next_shape(&self, direction: i32) -> PieceShape {
+        let next_index = next_rotation_index(self.current_rotation_index, direction);
 
         piece_type_to_shape(self.shape_type, next_index as usize)
     }
@@ -115,8 +115,8 @@ impl Piece {
         self.shape
     }
 
-    pub fn change_shape(&mut self) {
-        let next_index = next_rotation_index(self.current_rotation_index, 1);
+    pub fn change_shape(&mut self, direction: i32) {
+        let next_index = next_rotation_index(self.current_rotation_index, direction);
 
         self.shape = piece_type_to_shape(self.shape_type, next_index as usize);
         self.current_rotation_index = next_index;

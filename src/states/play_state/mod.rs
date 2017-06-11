@@ -1,4 +1,5 @@
 use std::time::Duration;
+use std::ops::AddAssign;
 use ggez::{Context, GameResult, graphics, event};
 
 mod well;
@@ -15,12 +16,30 @@ use self::util::DurationExt;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
-const INPUT_DELAY_TIME: f64 = 0.05;
+const INPUT_DELAY_TIME: f64 = 0.10;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
     x: i32,
     y: i32,
+}
+
+impl Position {
+    fn new(x: i32, y: i32) -> Self {
+        Self {
+            x: x,
+            y: y,
+        }
+    }
+}
+
+impl AddAssign for Position {
+    fn add_assign(&mut self, other: Position) {
+        *self = Position {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        };
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -113,24 +132,87 @@ impl PlayState {
         if self.input.left.is_active {
             self.input.left.delay_timer += dt.as_subsec_millis();
             if self.input.left.delay_timer >= INPUT_DELAY_TIME {
-                self.current_piece.potential_top_left.x -= 1;
+                self.move_piece(Position::new(-1, 0));
                 self.input.left.delay_timer = 0.0;
             }
         } else if self.input.right.is_active {
             self.input.right.delay_timer += dt.as_subsec_millis();
             if self.input.right.delay_timer >= INPUT_DELAY_TIME {
-                self.current_piece.potential_top_left.x += 1;
+                self.move_piece(Position::new(1, 0));
                 self.input.right.delay_timer = 0.0;
             }
         } else if self.input.soft_drop.is_active {
             self.input.soft_drop.delay_timer += dt.as_subsec_millis();
             if self.input.soft_drop.delay_timer >= INPUT_DELAY_TIME {
-                self.current_piece.potential_top_left.y += 1;
+                self.move_piece(Position::new(0, 1));
                 self.input.soft_drop.delay_timer = 0.0;
+            }
+        } else if self.input.rotate_clockwise.is_active {
+            if self.input.rotate_clockwise.is_active != self.prev_input.rotate_clockwise.is_active {
+                self.rotate_piece(1);
+            }
+        } else if self.input.rotate_counterclockwise.is_active {
+            if self.input.rotate_counterclockwise.is_active != self.prev_input.rotate_counterclockwise.is_active {
+                self.rotate_piece(-1);
+            }
+        } else if self.input.hard_drop.is_active {
+            if self.input.hard_drop.is_active != self.prev_input.hard_drop.is_active {
+                self.current_piece.top_left = self.current_piece.get_shadow_position();
+                self.well.land(&self.current_piece);
+                self.current_piece = self.bag.take_piece();
             }
         }
 
         Ok(())
+    }
+
+    fn move_piece(&mut self, potential_new_position: Position) {
+        self.current_piece.potential_top_left += potential_new_position;
+        let current_shape = self.current_piece.get_shape();
+        let collision_found = self.well
+            .check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
+
+        if collision_found {
+            self.current_piece.potential_top_left = self.current_piece.top_left;
+        }
+
+        self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
+    }
+
+    fn rotate_piece(&mut self, direction: i32) {
+        let next_shape = self.current_piece.get_next_shape(direction);
+        let collision_found = self.well
+            .check_for_collisions(&next_shape, &self.current_piece.top_left);
+
+        if !collision_found {
+            self.current_piece.change_shape(direction);
+        } else {
+            // wall kick attempt!
+            // need to do 2 checks:
+            // move one piece to the right & perform all above checks
+            let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
+            potential_position.x += 1;
+            let collision_found = self.well
+                .check_for_collisions(&next_shape, &potential_position);
+
+            if !collision_found {
+                self.current_piece.top_left = potential_position;
+                self.current_piece.potential_top_left = potential_position;
+                self.current_piece.change_shape(direction);
+            } else {
+                let mut potential_position = self.current_piece.top_left;
+                potential_position.x -= 1;
+                let collision_found = self.well
+                    .check_for_collisions(&next_shape, &potential_position);
+
+                if !collision_found {
+                    self.current_piece.top_left = potential_position;
+                    self.current_piece.potential_top_left = potential_position;
+                    self.current_piece.change_shape(direction);
+                }
+            }
+        }
+
     }
 
     /// Advance the fall time. If enough time has passed, allow gravity to
@@ -225,72 +307,13 @@ impl PlayState {
     fn increase_score(&mut self, base_score: u32, level: u32) {
         self.score += base_score * (level + 1);
     }
-
-    fn handle_collisions(&mut self) -> GameResult<()> {
-        if self.input.left.is_active || self.input.right.is_active ||
-           self.input.soft_drop.is_active {
-            let current_shape = self.current_piece.get_shape();
-            let collision_found = self.well
-                .check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
-
-            if collision_found {
-                self.current_piece.potential_top_left = self.current_piece.top_left;
-            }
-
-            self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
-            Ok(())
-        } else if self.input.rotate_clockwise.is_active ||
-                  self.input.rotate_counterclockwise.is_active {
-            let next_shape = self.current_piece.get_next_shape();
-            let collision_found = self.well
-                .check_for_collisions(&next_shape, &self.current_piece.top_left);
-
-            if !collision_found {
-                self.current_piece.change_shape();
-            } else {
-                // wall kick attempt!
-                // need to do 2 checks:
-                // move one piece to the right & perform all above checks
-                let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
-                potential_position.x += 1;
-                let collision_found = self.well
-                    .check_for_collisions(&next_shape, &potential_position);
-
-                if !collision_found {
-                    self.current_piece.top_left = potential_position;
-                    self.current_piece.potential_top_left = potential_position;
-                    self.current_piece.change_shape();
-                } else {
-                    let mut potential_position = self.current_piece.top_left;
-                    potential_position.x -= 1;
-                    let collision_found = self.well
-                        .check_for_collisions(&next_shape, &potential_position);
-
-                    if !collision_found {
-                        self.current_piece.top_left = potential_position;
-                        self.current_piece.potential_top_left = potential_position;
-                        self.current_piece.change_shape();
-                    }
-                }
-            }
-
-            Ok(())
-        } else if self.input.hard_drop.is_active {
-            self.current_piece.top_left = self.current_piece.get_shadow_position();
-            self.well.land(&self.current_piece);
-            self.current_piece = self.bag.take_piece();
-
-            Ok(())
-        } else {
-            Ok(())
-        }
-    }
 }
 
 impl event::EventHandler for PlayState {
     fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
         println!("[state.update] Start of update method");
         println!("[state.update] current score: {}", self.score);
+
         if self.game_over {
             // do game over stuff
             return Ok(());
@@ -302,8 +325,6 @@ impl event::EventHandler for PlayState {
         // handle shadow piece
         // TODO: put behind option
         self.handle_shadow_piece()?;
-
-        self.handle_collisions()?;
 
         // handle gravity - return from update if our current piece landed
         if let Ok(false) = self.handle_gravity(dt) {
