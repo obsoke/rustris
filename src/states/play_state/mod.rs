@@ -311,9 +311,6 @@ impl PlayState {
 
 impl event::EventHandler for PlayState {
     fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
-        println!("[state.update] Start of update method");
-        println!("[state.update] current score: {}", self.score);
-
         if self.game_over {
             // do game over stuff
             return Ok(());
