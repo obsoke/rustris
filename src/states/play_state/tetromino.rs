@@ -2,6 +2,7 @@ use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Color};
 use super::{BLOCK_SIZE, Position};
 use super::shapes::*;
+use super::well::Y_OFFSET;
 
 /// A `PieceShape` is a 4x4 array that represents the shape of a piece. A 0 is
 /// an empty space while a 1 is solid.
@@ -60,7 +61,7 @@ impl Piece {
                     graphics::set_color(ctx, colour)?;
 
                     let x = starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE);
-                    let y = ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32;
+                    let y = Y_OFFSET + ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32;
 
                     graphics::draw(
                         ctx,
@@ -89,7 +90,7 @@ impl Piece {
                     graphics::set_color(ctx, colour)?;
 
                     let x = starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE);
-                    let y = ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32;
+                    let y = Y_OFFSET + ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32;
 
                     graphics::draw(
                         ctx,

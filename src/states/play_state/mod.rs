@@ -16,7 +16,7 @@ use self::util::DurationExt;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
-const INPUT_DELAY_TIME: f64 = 0.05;
+const INPUT_DELAY_TIME: f64 = 0.09;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {

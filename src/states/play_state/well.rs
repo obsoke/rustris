@@ -3,6 +3,10 @@ use ggez::graphics::{Color, DrawMode, Rect};
 use super::{BLOCK_SIZE, Position};
 use super::tetromino::{Piece, PieceShape, block_to_colour};
 
+
+/// The y-offset to use as a starting point when drawing
+pub const Y_OFFSET: f32 = 10f32;
+
 /// The size (in pixels) of a single 'block' or 'cell' in the well or in a piece
 #[derive(Debug)]
 pub struct Well {
@@ -40,13 +44,14 @@ impl Well {
         let starting_pos = middle - ((BLOCK_SIZE as f32 * self.data[0].len() as f32) / 2.0);
 
         for (r, _) in self.data.iter().enumerate() {
+            if r < 2 { continue; } // don't drop top 2 rows
             for (c, _) in self.data[r].iter().enumerate() {
                 if self.data[r][c] != 0 {
                     let colour = block_to_colour(self.data[r][c], false);
                     graphics::set_color(ctx, colour)?;
 
                     let x = starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32;
-                    let y = (r as f32 * BLOCK_SIZE) as f32;
+                    let y = Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32;
 
                     graphics::draw(
                         ctx,
@@ -60,7 +65,7 @@ impl Well {
 
                     graphics::rectangle(ctx, DrawMode::Line, Rect {
                         x: starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32,
-                        y: (r as f32 * BLOCK_SIZE) as f32,
+                        y: Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32,
                         w: BLOCK_SIZE as f32,
                         h: BLOCK_SIZE as f32,
                     })?;
