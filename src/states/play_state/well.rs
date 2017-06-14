@@ -23,7 +23,6 @@ impl Well {
     /// Add's the current piece, `current_t`, to the well.
     pub fn land(&mut self, current_t: &Piece) {
         let current_shape = current_t.get_shape();
-        println!("pos of piece being landed {:?}", current_t.top_left);
 
         for (r, _) in current_shape.iter().enumerate() {
             for (c, _) in current_shape[r].iter().enumerate() {

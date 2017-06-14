@@ -6,6 +6,7 @@ mod well;
 mod tetromino;
 mod shapes;
 mod bag;
+mod game_over;
 mod util;
 
 use ggez::event::*;
@@ -13,6 +14,7 @@ use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
+//use self::game_over::GameOverState;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
@@ -99,12 +101,30 @@ pub struct PlayState {
 
     // temp
     image: graphics::Image,
+    font_big: graphics::Font,
+    font_small: graphics::Font,
+    game_over_text: graphics::Text,
+    game_over_end_text: graphics::Text,
+    game_over_final_score: graphics::Text,
+    game_over_final_lines: graphics::Text,
 }
 
 
 impl PlayState {
     pub fn new(ctx: &mut Context) -> GameResult<PlayState> {
         let image = graphics::Image::new(ctx, "/block.png")?;
+        let font_big = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?;
+        let font_small = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?;
+        let text = graphics::Text::new(ctx, "GAME OVER", &font_big)?;
+
+        let end_text_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
+        // let end_text_src = r#"Press 'K' to Restart
+        //                     Press 'M' to Return to Menu
+        //                     Press 'Escape' to Exit"#;
+        let end_text = graphics::Text::new(ctx, end_text_src, &font_small)?;
+        let final_score = graphics::Text::new(ctx, "Final Score", &font_small)?;
+        let final_lines = graphics::Text::new(ctx, "Final Lines", &font_small)?;
+
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
 
@@ -123,6 +143,12 @@ impl PlayState {
             game_over: false,
 
             image: image,
+            font_big: font_big,
+            font_small: font_small,
+            game_over_text: text,
+            game_over_end_text: end_text,
+            game_over_final_score: final_score,
+            game_over_final_lines: final_lines,
         };
 
         Ok(state)
@@ -310,9 +336,16 @@ impl PlayState {
 }
 
 impl event::EventHandler for PlayState {
-    fn update(&mut self, _: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
         if self.game_over {
-            // do game over stuff
+            // do game over stuff like check input for next action (restart,
+            // back to main menu)
+            let score_str = format!("Final Score: {}", self.score);
+            let lines_str = format!("Final Lines: {}", self.cleared_lines);
+            let final_score = graphics::Text::new(ctx, &score_str, &self.font_small)?;
+            let final_lines = graphics::Text::new(ctx, &lines_str, &self.font_small)?;
+            self.game_over_final_score = final_score;
+            self.game_over_final_lines = final_lines;
             return Ok(());
         }
 
@@ -343,6 +376,28 @@ impl event::EventHandler for PlayState {
         self.current_piece
             .draw_shadow(ctx, &self.image, &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx, &self.image)?;
+
+        if self.game_over {
+            let coords = graphics::get_screen_coordinates(&ctx);
+            println!("{:?}", coords);
+
+            let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
+            let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
+            let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
+            let game_over_end_dest = graphics::Point::new(coords.w / 2.0, 400.0);
+
+
+            graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
+            graphics::rectangle(ctx, graphics::DrawMode::Fill, graphics::Rect::new(0.0 + (coords.w / 2.0),
+                                                                                   0.0 + ((coords.h * -1.0) / 2.0),
+                                                                                   coords.w,
+                                                                                   coords.h * -1.0))?;
+            graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+            graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
+            graphics::draw(ctx, &self.game_over_final_score, game_over_score_dest, 0.0)?;
+            graphics::draw(ctx, &self.game_over_final_lines, game_over_lines_dest, 0.0)?;
+            graphics::draw(ctx, &self.game_over_end_text, game_over_end_dest, 0.0)?;
+        }
 
         graphics::present(ctx);
 
