@@ -40,14 +40,13 @@ pub fn run<S>(ctx: &mut Context, state: S) -> GameResult<()>
         let mut state_manager = StateManager::new(state);
         let mut event_pump = ctx.sdl_context.event_pump()?;
 
-        let mut continuing = true;
-        while continuing {
+        while state_manager.is_running() {
             ctx.timer_context.tick();
 
             for event in event_pump.poll_iter() {
                 match event {
                     Quit { .. } => {
-                        continuing = state_manager.quit_event();
+                        state_manager.quit();
                         // println!("Quit event: {:?}", t);
                     }
                     KeyDown {

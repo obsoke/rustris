@@ -2,6 +2,7 @@ use std::time::Duration;
 use std::ops::AddAssign;
 use ggez::{Context, GameResult, graphics, event};
 
+
 mod well;
 mod tetromino;
 mod shapes;
@@ -10,6 +11,7 @@ mod game_over;
 mod util;
 
 use ggez::event::*;
+use states::{Transition};
 use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
@@ -108,7 +110,6 @@ pub struct PlayState {
     game_over_final_score: graphics::Text,
     game_over_final_lines: graphics::Text,
 }
-
 
 impl PlayState {
     pub fn new(ctx: &mut Context) -> GameResult<PlayState> {
@@ -336,7 +337,7 @@ impl PlayState {
 }
 
 impl event::EventHandler for PlayState {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<Transition> {
         if self.game_over {
             // do game over stuff like check input for next action (restart,
             // back to main menu)
@@ -346,7 +347,7 @@ impl event::EventHandler for PlayState {
             let final_lines = graphics::Text::new(ctx, &lines_str, &self.font_small)?;
             self.game_over_final_score = final_score;
             self.game_over_final_lines = final_lines;
-            return Ok(());
+            return Ok(Transition::None);
         }
 
         // TODO: handle/respond user input
@@ -358,14 +359,14 @@ impl event::EventHandler for PlayState {
 
         // handle gravity - return from update if our current piece landed
         if let Ok(false) = self.handle_gravity(dt) {
-            return Ok(());
+            return Ok(Transition::None);
         }
 
         self.handle_line_clears()?;
 
         self.prev_input = self.input;
 
-        Ok(())
+        Ok(Transition::None)
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

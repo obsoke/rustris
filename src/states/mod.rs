@@ -5,7 +5,7 @@ use std::time::Duration;
 use sdl2::mouse;
 
 use ggez::{Context, GameResult};
-use ggez::event::{EventHandler, Keycode, Mod, Button, Axis};
+use ggez::event::{EventHandler, Transition, Keycode, Mod, Button, Axis};
 
 /// A state manager
 pub struct StateManager {
@@ -14,8 +14,10 @@ pub struct StateManager {
 }
 
 impl StateManager {
-    pub fn new<S>(state: S) -> Self where S: EventHandler + 'static {
-        Self {
+    pub fn new<T>(state: T) -> StateManager
+        where T: EventHandler + 'static
+    {
+        StateManager {
             running: true,
             states: vec![Box::new(state)], // create empty state stack
         }
@@ -24,14 +26,51 @@ impl StateManager {
     pub fn is_running(&self) -> bool {
         self.running
     }
+
+    pub fn quit(&mut self) {
+        // TODO: pop everything off the stack
+        self.running = false
+    }
+}
+
+impl StateManager {
+    fn handle_transition(&mut self, transition: Transition) {
+        match transition {
+            Transition::None => (),
+            Transition::Pop => self.pop(),
+            Transition::Swap(state) => self.swap(state),
+            Transition::Push(state) => self.push(state),
+        }
+    }
+
+    fn pop(&mut self) {
+        self.states.pop();
+
+        if self.states.is_empty() {
+            self.quit();
+        }
+    }
+
+    fn push(&mut self, boxed_state: Box<EventHandler>) {
+        self.states.push(boxed_state)
+    }
+
+    fn swap(&mut self, boxed_state: Box<EventHandler>) {
+        self.states.pop();
+        self.push(boxed_state);
+    }
 }
 
 impl EventHandler for StateManager {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
-        match self.states.last_mut() {
+    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<Transition> {
+        let transition = match self.states.last_mut() {
             Some(state) => state.update(ctx, dt),
-            None => Ok(()),
-        }
+            None => Ok(Transition::None),
+        };
+
+        self.handle_transition(Transition::None);
+
+        Ok(Transition::None)
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         match self.states.last_mut() {
