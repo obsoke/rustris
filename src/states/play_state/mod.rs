@@ -347,7 +347,8 @@ impl event::EventHandler for PlayState {
             let final_lines = graphics::Text::new(ctx, &lines_str, &self.font_small)?;
             self.game_over_final_score = final_score;
             self.game_over_final_lines = final_lines;
-            return Ok(Transition::None);
+            //return Ok(Transition::Push(Box::new(TestState)));
+            return Ok(Transition::Pop);
         }
 
         // TODO: handle/respond user input
@@ -380,13 +381,11 @@ impl event::EventHandler for PlayState {
 
         if self.game_over {
             let coords = graphics::get_screen_coordinates(&ctx);
-            println!("{:?}", coords);
 
             let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
             let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
             let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
             let game_over_end_dest = graphics::Point::new(coords.w / 2.0, 400.0);
-
 
             graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
             graphics::rectangle(ctx, graphics::DrawMode::Fill, graphics::Rect::new(0.0 + (coords.w / 2.0),
@@ -446,5 +445,23 @@ impl event::EventHandler for PlayState {
             },
             _ => (),
         }
+    }
+}
+
+struct TestState;
+
+impl EventHandler for TestState {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        graphics::set_background_color(ctx, graphics::Color::new(0.7, 0.7, 0.7, 255.0));
+        graphics::clear(ctx);
+
+
+        graphics::present(ctx);
+        Ok(())
+    }
+
+    fn update(&mut self, ctx: &mut Context, _: Duration) -> GameResult<Transition> {
+        println!("Welcome to test state!");
+        Ok(Transition::None)
     }
 }

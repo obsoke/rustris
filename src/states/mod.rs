@@ -68,7 +68,7 @@ impl EventHandler for StateManager {
             None => Ok(Transition::None),
         };
 
-        self.handle_transition(Transition::None);
+        self.handle_transition(transition?);
 
         Ok(Transition::None)
     }
