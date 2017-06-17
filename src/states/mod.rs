@@ -61,7 +61,7 @@ impl StateManager {
     }
 
     fn swap(&mut self, boxed_state: Box<EventHandler>) {
-        self.states.pop();
+        self.states.clear();
         self.push(boxed_state);
     }
 }
