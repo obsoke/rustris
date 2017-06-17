@@ -8,8 +8,7 @@ use ggez::event::EventHandler;
 use sdl2::{keyboard, event as SdlEvent};
 use sdl2::event::Event::*;
 
-use states::play_state::PlayState;
-use states::StateManager;
+use states::{StateManager};
 
 fn main() {
     let mut conf = conf::Conf::new();
@@ -20,24 +19,22 @@ fn main() {
 
     let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf).expect("Could not load configuartion");
 
-    let state = PlayState::new(ctx).expect("Could not initialize state");
-
-    if let Err(e) = run(ctx, state) {
+    if let Err(e) = run(ctx) {
         println!("Error encountered: {}", e);
     }
 }
 
-
 /// Runs the game's main loop, calling event callbacks on the given state
 /// object as events occur.
 ///
-/// It does not try to do any type of framerate limiting.  See the
-/// documentation for the `timer` module for more info.
-pub fn run<S>(ctx: &mut Context, state: S) -> GameResult<()>
-    where S: EventHandler + 'static
+/// This is a custom version of ggez's event method. Since I added both an
+/// `Asset` and `StateManager`, I needed to tweak the default game loop a
+/// bit to update managers rather than states directly.
+pub fn run(ctx: &mut Context) -> GameResult<()>
 {
     {
-        let mut state_manager = StateManager::new(state);
+        let mut state_manager = StateManager::new(ctx);
+
         let mut event_pump = ctx.sdl_context.event_pump()?;
 
         while state_manager.is_running() {

@@ -2,7 +2,6 @@ use std::time::Duration;
 use std::ops::AddAssign;
 use ggez::{Context, GameResult, graphics, event};
 
-
 mod well;
 mod tetromino;
 mod shapes;
@@ -16,7 +15,8 @@ use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
-//use self::game_over::GameOverState;
+use self::game_over::GameOverState;
+use ::states::{State, Assets};
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
@@ -101,10 +101,8 @@ pub struct PlayState {
     level: u32,
     game_over: bool,
 
-    // temp
-    image: graphics::Image,
-    font_big: graphics::Font,
-    font_small: graphics::Font,
+    assets: Assets,
+
     game_over_text: graphics::Text,
     game_over_end_text: graphics::Text,
     game_over_final_score: graphics::Text,
@@ -112,24 +110,19 @@ pub struct PlayState {
 }
 
 impl PlayState {
-    pub fn new(ctx: &mut Context) -> GameResult<PlayState> {
-        let image = graphics::Image::new(ctx, "/block.png")?;
-        let font_big = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?;
-        let font_small = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?;
-        let text = graphics::Text::new(ctx, "GAME OVER", &font_big)?;
+    pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
+        let text = graphics::Text::new(ctx, "GAME OVER", &assets.font_title)?;
 
         let end_text_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
-        // let end_text_src = r#"Press 'K' to Restart
-        //                     Press 'M' to Return to Menu
-        //                     Press 'Escape' to Exit"#;
-        let end_text = graphics::Text::new(ctx, end_text_src, &font_small)?;
-        let final_score = graphics::Text::new(ctx, "Final Score", &font_small)?;
-        let final_lines = graphics::Text::new(ctx, "Final Lines", &font_small)?;
+        let end_text = graphics::Text::new(ctx, end_text_src, &assets.font_normal)?;
+
+        let final_score = graphics::Text::new(ctx, "Final Score", &assets.font_normal)?;
+        let final_lines = graphics::Text::new(ctx, "Final Lines", &assets.font_normal)?;
 
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
 
-        let state = PlayState {
+        Ok(PlayState {
             input: InputState::default(),
             prev_input: InputState::default(),
 
@@ -143,16 +136,13 @@ impl PlayState {
             level: 0,
             game_over: false,
 
-            image: image,
-            font_big: font_big,
-            font_small: font_small,
+            assets: Assets::new(ctx)?,
+
             game_over_text: text,
             game_over_end_text: end_text,
             game_over_final_score: final_score,
             game_over_final_lines: final_lines,
-        };
-
-        Ok(state)
+        })
     }
 
     fn handle_user_input(&mut self, dt: Duration) -> GameResult<()> {
@@ -336,6 +326,7 @@ impl PlayState {
     }
 }
 
+
 impl event::EventHandler for PlayState {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<Transition> {
         if self.game_over {
@@ -343,8 +334,8 @@ impl event::EventHandler for PlayState {
             // back to main menu)
             let score_str = format!("Final Score: {}", self.score);
             let lines_str = format!("Final Lines: {}", self.cleared_lines);
-            let final_score = graphics::Text::new(ctx, &score_str, &self.font_small)?;
-            let final_lines = graphics::Text::new(ctx, &lines_str, &self.font_small)?;
+            let final_score = graphics::Text::new(ctx, &score_str, &self.assets.font_normal)?;
+            let final_lines = graphics::Text::new(ctx, &lines_str, &self.assets.font_normal)?;
             self.game_over_final_score = final_score;
             self.game_over_final_lines = final_lines;
             //return Ok(Transition::Push(Box::new(TestState)));
@@ -374,10 +365,10 @@ impl event::EventHandler for PlayState {
         graphics::set_background_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 255.0));
         graphics::clear(ctx);
 
-        self.well.draw(ctx, &self.image)?;
+        self.well.draw(ctx, &self.assets.block_img)?;
         self.current_piece
-            .draw_shadow(ctx, &self.image, &self.current_piece.get_shadow_position())?;
-        self.current_piece.draw(ctx, &self.image)?;
+            .draw_shadow(ctx, &self.assets.block_img, &self.current_piece.get_shadow_position())?;
+        self.current_piece.draw(ctx, &self.assets.block_img)?;
 
         if self.game_over {
             let coords = graphics::get_screen_coordinates(&ctx);

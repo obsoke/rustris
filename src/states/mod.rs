@@ -4,22 +4,60 @@ use std::time::Duration;
 
 use sdl2::mouse;
 
-use ggez::{Context, GameResult};
+use ggez::{Context, GameResult, graphics};
 use ggez::event::{EventHandler, Transition, Keycode, Mod, Button, Axis};
+use states::play_state::PlayState;
 
-/// A state manager
+pub struct Assets {
+    block_img: graphics::Image,
+    font_title: graphics::Font,
+    font_normal: graphics::Font,
+}
+
+impl Assets {
+    pub fn new (ctx: &mut Context) -> GameResult<Assets> {
+        let block_image = graphics::Image::new(ctx, "/block.png")?;
+        let font_title = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?;
+        let font_normal = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?;
+
+        let state = Self {
+            block_img: block_image,
+            font_title: font_title,
+            font_normal: font_normal,
+        };
+
+        Ok(state)
+    }
+}
+
+/// A trait that marks a struct as a `State` - hacky work around avoiding ggez's
+/// `EventHandler` for some methods.
+// Mainly, I needed a way to pass `Assets` owned by the `StateManager` down to
+// whatever states may need it.
+pub trait State {
+    fn update_extra(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition>;
+    fn draw_extra(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()>;
+}
+
+/// A `StateManager` will manage requests to push, pop or swap states on the
+/// state stack. It owns the `Assets` struct and dictates whether the game
+/// continues to run or not.
 pub struct StateManager {
     running: bool,
-    states: Vec<Box<EventHandler>>
+    assets: Assets,
+    states: Vec<Box<EventHandler>>,
 }
 
 impl StateManager {
-    pub fn new<T>(state: T) -> StateManager
-        where T: EventHandler + 'static
+    pub fn new(ctx: &mut Context) -> StateManager
     {
+        let assets = Assets::new(ctx).unwrap();
+        let state = Box::new(PlayState::new(ctx, &assets).unwrap());
+
         StateManager {
             running: true,
-            states: vec![Box::new(state)], // create empty state stack
+            assets: assets,
+            states: vec![state], // create empty state stack
         }
     }
 
@@ -73,10 +111,15 @@ impl EventHandler for StateManager {
         Ok(Transition::None)
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        match self.states.last_mut() {
-            Some(state) => state.draw(ctx),
-            None => Ok(()),
+        // draw everything in the stack
+        for (_, state) in self.states.iter_mut().enumerate() {
+            state.draw(ctx)?;
         }
+        Ok(())
+        // match self.states.last_mut() {
+        //     Some(state) => state.draw(ctx),
+        //     None => Ok(()),
+        // }
     }
     fn mouse_button_down_event(&mut self, _button: mouse::MouseButton, _x: i32, _y: i32) {
         match self.states.last_mut() {
