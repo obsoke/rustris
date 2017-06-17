@@ -34,9 +34,9 @@ pub fn run(ctx: &mut Context) -> GameResult<()>
 {
     {
         let mut assets = Assets::new();
-        assets.add_image("block", graphics::Image::new(ctx, "/block.png")?);
-        assets.add_font("title", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?);
-        assets.add_font("normal", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?);
+        assets.add_image("block", graphics::Image::new(ctx, "/block.png")?)?;
+        assets.add_font("title", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?)?;
+        assets.add_font("normal", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?)?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 

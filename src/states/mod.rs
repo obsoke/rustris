@@ -4,34 +4,10 @@ use std::time::Duration;
 
 use sdl2::mouse;
 
-use ggez::{Context, GameResult, graphics};
+use ggez::{Context, GameResult};
 use ggez::event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
 use states::play_state::PlayState;
 
-// impl Assets {
-//     pub fn new (ctx: &mut Context) -> GameResult<Assets> {
-//         let block_image = graphics::Image::new(ctx, "/block.png")?;
-//         let font_title = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?;
-//         let font_normal = graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?;
-
-//         let state = Self {
-//             block_img: block_image,
-//             font_title: font_title,
-//             font_normal: font_normal,
-//         };
-
-//         Ok(state)
-//     }
-// }
-
-/// A trait that marks a struct as a `State` - hacky work around avoiding ggez's
-/// `EventHandler` for some methods.
-// Mainly, I needed a way to pass `Assets` owned by the `StateManager` down to
-// whatever states may need it.
-pub trait State {
-    fn update_extra(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition>;
-    fn draw_extra(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()>;
-}
 
 /// A `StateManager` will manage requests to push, pop or swap states on the
 /// state stack. It owns the `Assets` struct and dictates whether the game
@@ -103,9 +79,16 @@ impl EventHandler for StateManager {
     }
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         // draw everything in the stack
+        use ggez::graphics;
+
+        graphics::set_background_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 255.0));
+        graphics::clear(ctx);
+
         for (_, state) in self.states.iter_mut().enumerate() {
             state.draw(ctx, assets)?;
         }
+
+        graphics::present(ctx);
         Ok(())
         // match self.states.last_mut() {
         //     Some(state) => state.draw(ctx),
