@@ -1,10 +1,14 @@
 use std::time::Duration;
-use super::util::DurationExt;
 use ggez::{Context, GameResult, graphics, event};
 use ggez::event::{Assets,  Transition};
 use ggez::event::*;
 
+use states::play_state::PlayState;
+
 pub struct GameOverState {
+    request_menu: bool,
+    request_replay: bool,
+
     game_over_text: graphics::Text,
     final_score_text: graphics::Text,
     final_line_text: graphics::Text,
@@ -12,15 +16,25 @@ pub struct GameOverState {
 }
 
 impl GameOverState {
-    pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<GameOverState> {
+    pub fn new(ctx: &mut Context,
+               assets: &Assets,
+               final_score_value: u32,
+               final_cleared: u32) -> GameResult<GameOverState>
+    {
         let game_over = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
 
         let instruction_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
         let instruction_text = graphics::Text::new(ctx, instruction_src, assets.get_font("normal")?)?;
-        let final_score = graphics::Text::new(ctx, "Final Score", assets.get_font("normal")?)?;
-        let final_lines = graphics::Text::new(ctx, "Final Lines", assets.get_font("normal")?)?;
+
+        let score_str = format!("Final Score: {}", final_score_value);
+        let lines_str = format!("Final Lines: {}", final_cleared);
+        let final_score = graphics::Text::new(ctx, &score_str, assets.get_font("normal")?)?;
+        let final_lines = graphics::Text::new(ctx, &lines_str, assets.get_font("normal")?)?;
 
         Ok(GameOverState {
+            request_menu: false,
+            request_replay: false,
+
             game_over_text: game_over,
             final_score_text: final_score,
             final_line_text: final_lines,
@@ -30,11 +44,19 @@ impl GameOverState {
 }
 
 impl event::EventHandler for GameOverState {
-    fn update(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition> {
+    fn update(&mut self, ctx: &mut Context, assets: &Assets, _: Duration) -> GameResult<Transition> {
+        if self.request_menu {
+            println!("We should request menu here");
+            //return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets)?)));
+        }
+        else if self.request_replay {
+            return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets)?)));
+        }
+
         Ok(Transition::None)
     }
 
-    fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+    fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(&ctx);
 
         let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
@@ -58,45 +80,10 @@ impl event::EventHandler for GameOverState {
     }
 
     fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
-        // match keycode {
-        //     Keycode::Left => self.input.left.is_active = true,
-        //     Keycode::Right => self.input.right.is_active = true,
-        //     Keycode::Up => self.input.hard_drop.is_active = true,
-        //     Keycode::Down => self.input.soft_drop.is_active = true,
-        //     Keycode::Z => self.input.rotate_counterclockwise.is_active = true,
-        //     Keycode::X => self.input.rotate_clockwise.is_active = true,
-        //     _ => (),
-        // }
-
-    }
-
-    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
-        // match keycode {
-        //     Keycode::Left => {
-        //         self.input.left.is_active = false;
-        //         self.input.left.delay_timer = INPUT_DELAY_TIME;
-        //     }
-        //     Keycode::Right => {
-        //         self.input.right.is_active = false;
-        //         self.input.right.delay_timer = INPUT_DELAY_TIME;
-        //     },
-        //     Keycode::Up => {
-        //         self.input.hard_drop.is_active = false;
-        //         self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
-        //     },
-        //     Keycode::Down => {
-        //         self.input.soft_drop.is_active = false;
-        //         self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
-        //     },
-        //     Keycode::Z => {
-        //         self.input.rotate_counterclockwise.is_active = false;
-        //         self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
-        //     },
-        //     Keycode::X => {
-        //         self.input.rotate_clockwise.is_active = false;
-        //         self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
-        //     },
-        //     _ => (),
-        // }
+        match keycode {
+            Keycode::R => self.request_replay = true,
+            Keycode::M => self.request_menu = true,
+            _ => (),
+        }
     }
 }

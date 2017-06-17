@@ -1,6 +1,6 @@
 use std::time::Duration;
 use std::ops::AddAssign;
-use ggez::{Context, GameResult, graphics, event};
+use ggez::{Context, GameResult, event};
 
 mod well;
 mod tetromino;
@@ -97,26 +97,13 @@ pub struct PlayState {
 
     fall_timer: f64,
     score: u32,
-    cleared_lines: u16,
+    cleared_lines: u32,
     level: u32,
     game_over: bool,
-
-    game_over_text: graphics::Text,
-    game_over_end_text: graphics::Text,
-    game_over_final_score: graphics::Text,
-    game_over_final_lines: graphics::Text,
 }
 
 impl PlayState {
-    pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
-        let text = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
-
-        let end_text_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
-        let end_text = graphics::Text::new(ctx, end_text_src, assets.get_font("normal")?)?;
-
-        let final_score = graphics::Text::new(ctx, "Final Score", assets.get_font("normal")?)?;
-        let final_lines = graphics::Text::new(ctx, "Final Lines", assets.get_font("normal")?)?;
-
+    pub fn new(_: &mut Context, _: &Assets) -> GameResult<PlayState> {
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
 
@@ -133,11 +120,6 @@ impl PlayState {
             cleared_lines: 0,
             level: 0,
             game_over: false,
-
-            game_over_text: text,
-            game_over_end_text: end_text,
-            game_over_final_score: final_score,
-            game_over_final_lines: final_lines,
         })
     }
 
@@ -326,7 +308,10 @@ impl PlayState {
 impl event::EventHandler for PlayState {
     fn update(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition> {
         if self.game_over {
-            return Ok(Transition::Push(Box::new(GameOverState::new(ctx, assets)?)));
+            return Ok(Transition::Push(Box::new(GameOverState::new(ctx,
+                                                                   assets,
+                                                                   self.score,
+                                                                   self.cleared_lines)?)));
         }
 
         // TODO: handle/respond user input
