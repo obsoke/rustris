@@ -3,8 +3,8 @@ extern crate sdl2;
 
 mod states;
 
-use ggez::{Context, GameResult, conf, timer};
-use ggez::event::EventHandler;
+use ggez::{Context, GameResult, conf, timer, graphics};
+use ggez::event::{EventHandler, Assets};
 use sdl2::{keyboard, event as SdlEvent};
 use sdl2::event::Event::*;
 
@@ -33,7 +33,12 @@ fn main() {
 pub fn run(ctx: &mut Context) -> GameResult<()>
 {
     {
-        let mut state_manager = StateManager::new(ctx);
+        let mut assets = Assets::new();
+        assets.add_image("block", graphics::Image::new(ctx, "/block.png")?);
+        assets.add_font("title", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?);
+        assets.add_font("normal", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?);
+
+        let mut state_manager = StateManager::new(ctx, &assets);
 
         let mut event_pump = ctx.sdl_context.event_pump()?;
 
@@ -104,8 +109,8 @@ pub fn run(ctx: &mut Context) -> GameResult<()>
             }
 
             let dt = timer::get_delta(ctx);
-            state_manager.update(ctx, dt)?;
-            state_manager.draw(ctx)?;
+            state_manager.update(ctx, &assets, dt)?;
+            state_manager.draw(ctx, &assets)?;
         }
     }
 

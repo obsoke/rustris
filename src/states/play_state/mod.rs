@@ -101,8 +101,6 @@ pub struct PlayState {
     level: u32,
     game_over: bool,
 
-    assets: Assets,
-
     game_over_text: graphics::Text,
     game_over_end_text: graphics::Text,
     game_over_final_score: graphics::Text,
@@ -111,13 +109,13 @@ pub struct PlayState {
 
 impl PlayState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
-        let text = graphics::Text::new(ctx, "GAME OVER", &assets.font_title)?;
+        let text = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
 
         let end_text_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
-        let end_text = graphics::Text::new(ctx, end_text_src, &assets.font_normal)?;
+        let end_text = graphics::Text::new(ctx, end_text_src, assets.get_font("normal")?)?;
 
-        let final_score = graphics::Text::new(ctx, "Final Score", &assets.font_normal)?;
-        let final_lines = graphics::Text::new(ctx, "Final Lines", &assets.font_normal)?;
+        let final_score = graphics::Text::new(ctx, "Final Score", assets.get_font("normal")?)?;
+        let final_lines = graphics::Text::new(ctx, "Final Lines", assets.get_font("normal")?)?;
 
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
@@ -135,8 +133,6 @@ impl PlayState {
             cleared_lines: 0,
             level: 0,
             game_over: false,
-
-            assets: Assets::new(ctx)?,
 
             game_over_text: text,
             game_over_end_text: end_text,
@@ -328,14 +324,14 @@ impl PlayState {
 
 
 impl event::EventHandler for PlayState {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<Transition> {
+    fn update(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition> {
         if self.game_over {
             // do game over stuff like check input for next action (restart,
             // back to main menu)
             let score_str = format!("Final Score: {}", self.score);
             let lines_str = format!("Final Lines: {}", self.cleared_lines);
-            let final_score = graphics::Text::new(ctx, &score_str, &self.assets.font_normal)?;
-            let final_lines = graphics::Text::new(ctx, &lines_str, &self.assets.font_normal)?;
+            let final_score = graphics::Text::new(ctx, &score_str, assets.get_font("font_normal")?)?;
+            let final_lines = graphics::Text::new(ctx, &lines_str, assets.get_font("font_normal")?)?;
             self.game_over_final_score = final_score;
             self.game_over_final_lines = final_lines;
             //return Ok(Transition::Push(Box::new(TestState)));
@@ -361,14 +357,14 @@ impl event::EventHandler for PlayState {
         Ok(Transition::None)
     }
 
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         graphics::set_background_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 255.0));
         graphics::clear(ctx);
 
-        self.well.draw(ctx, &self.assets.block_img)?;
+        self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece
-            .draw_shadow(ctx, &self.assets.block_img, &self.current_piece.get_shadow_position())?;
-        self.current_piece.draw(ctx, &self.assets.block_img)?;
+            .draw_shadow(ctx, assets.get_image("block")?, &self.current_piece.get_shadow_position())?;
+        self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
         if self.game_over {
             let coords = graphics::get_screen_coordinates(&ctx);
@@ -442,7 +438,7 @@ impl event::EventHandler for PlayState {
 struct TestState;
 
 impl EventHandler for TestState {
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         graphics::set_background_color(ctx, graphics::Color::new(0.7, 0.7, 0.7, 255.0));
         graphics::clear(ctx);
 
@@ -451,7 +447,7 @@ impl EventHandler for TestState {
         Ok(())
     }
 
-    fn update(&mut self, ctx: &mut Context, _: Duration) -> GameResult<Transition> {
+    fn update(&mut self, ctx: &mut Context, assets: &Assets, _: Duration) -> GameResult<Transition> {
         println!("Welcome to test state!");
         Ok(Transition::None)
     }
