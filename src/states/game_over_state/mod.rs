@@ -4,6 +4,7 @@ use ggez::event::{Assets,  Transition};
 use ggez::event::*;
 
 use states::play_state::PlayState;
+use states::menu_state::MenuState;
 
 pub struct GameOverState {
     request_menu: bool,
@@ -46,8 +47,7 @@ impl GameOverState {
 impl event::EventHandler for GameOverState {
     fn update(&mut self, ctx: &mut Context, assets: &Assets, _: Duration) -> GameResult<Transition> {
         if self.request_menu {
-            println!("We should request menu here");
-            //return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets)?)));
+            return Ok(Transition::Swap(Box::new(MenuState::new(ctx, assets)?)));
         }
         else if self.request_replay {
             return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets)?)));

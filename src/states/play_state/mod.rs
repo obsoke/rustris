@@ -6,7 +6,6 @@ mod well;
 mod tetromino;
 mod shapes;
 mod bag;
-mod game_over;
 mod util;
 
 use ggez::event::*;
@@ -15,8 +14,8 @@ use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
-use self::game_over::GameOverState;
-use ::states::{Assets};
+use states::{Assets};
+use states::game_over_state::GameOverState;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
