@@ -2,7 +2,7 @@
 name = "tetris-ggez"
 version = "0.1.0"
 dependencies = [
- "ggez 0.3.1 (git+https://github.com/obsoke/ggez?branch=tetris-ver)",
+ "ggez 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.29.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "ggez"
 version = "0.3.1"
-source = "git+https://github.com/obsoke/ggez?branch=tetris-ver#fd6ce6ac8c638435f6ce102ae8925104dea995c3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "app_dirs 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "gfx 0.15.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -891,7 +891,7 @@ dependencies = [
 "checksum gfx_device_gl 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d96af24822f5cae879203bf72a929883525edc7dce8db17b9eba931b9e41e7a8"
 "checksum gfx_gl 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f25c3866329ab91b92bfbc4d5e1d8172607e804564d90b8fbecb96cbc366845d"
 "checksum gfx_window_sdl 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fc9fd0a9b82c51cc1280be0abf25e657325998e4007650130426d1352c31545b"
-"checksum ggez 0.3.1 (git+https://github.com/obsoke/ggez?branch=tetris-ver)" = "<none>"
+"checksum ggez 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "69b713fabb40f495994d72ec6d8c01f41599a60041e7538601714ec19829a696"
 "checksum gif 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8a80d6fe9e52f637df9afd4779449a7be17c39cc9c35b01589bb833f956ba596"
 "checksum gl_generator 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "0940975a4ca12b088d32b5d5134826c47d2e73de4b0b459b05244c01503eccbb"
 "checksum heapsize 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "556cd479866cf85c3f671209c85e8a6990211c916d1002c2fcb2e9b7cf60bc36"

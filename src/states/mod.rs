@@ -7,7 +7,7 @@ use std::time::Duration;
 use sdl2::mouse;
 
 use ggez::{Context, GameResult};
-use ggez::event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
+use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
 use states::play_state::PlayState;
 
 
@@ -20,8 +20,7 @@ pub struct StateManager {
 }
 
 impl StateManager {
-    pub fn new(ctx: &mut Context, assets: &Assets) -> StateManager
-    {
+    pub fn new(ctx: &mut Context, assets: &Assets) -> StateManager {
         let state = Box::new(PlayState::new(ctx, &assets).unwrap());
 
         StateManager {
@@ -69,7 +68,11 @@ impl StateManager {
 }
 
 impl EventHandler for StateManager {
-    fn update(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition> {
+    fn update(&mut self,
+              ctx: &mut Context,
+              assets: &Assets,
+              dt: Duration)
+              -> GameResult<Transition> {
         let transition = match self.states.last_mut() {
             Some(state) => state.update(ctx, assets, dt),
             None => Ok(Transition::None),

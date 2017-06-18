@@ -2,13 +2,14 @@ extern crate ggez;
 extern crate sdl2;
 
 mod states;
+mod event;
 
 use ggez::{Context, GameResult, conf, timer, graphics};
-use ggez::event::{EventHandler, Assets};
+use event::{EventHandler, Assets};
 use sdl2::{keyboard, event as SdlEvent};
 use sdl2::event::Event::*;
 
-use states::{StateManager};
+use states::StateManager;
 
 fn main() {
     let mut conf = conf::Conf::new();
@@ -17,7 +18,8 @@ fn main() {
     conf.window_height = 720;
     conf.vsync = true;
 
-    let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf).expect("Could not load configuartion");
+    let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf)
+        .expect("Could not load configuartion");
 
     if let Err(e) = run(ctx) {
         println!("Error encountered: {}", e);
@@ -30,13 +32,14 @@ fn main() {
 /// This is a custom version of ggez's event method. Since I added both an
 /// `Asset` and `StateManager`, I needed to tweak the default game loop a
 /// bit to update managers rather than states directly.
-pub fn run(ctx: &mut Context) -> GameResult<()>
-{
+pub fn run(ctx: &mut Context) -> GameResult<()> {
     {
         let mut assets = Assets::new();
         assets.add_image("block", graphics::Image::new(ctx, "/block.png")?)?;
-        assets.add_font("title", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?)?;
-        assets.add_font("normal", graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?)?;
+        assets.add_font("title",
+                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?)?;
+        assets.add_font("normal",
+                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?)?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 
@@ -51,12 +54,7 @@ pub fn run(ctx: &mut Context) -> GameResult<()>
                         state_manager.quit();
                         // println!("Quit event: {:?}", t);
                     }
-                    KeyDown {
-                        keycode,
-                        keymod,
-                        repeat,
-                        ..
-                    } => {
+                    KeyDown { keycode, keymod, repeat, .. } => {
                         if let Some(key) = keycode {
                             if key == keyboard::Keycode::Escape {
                                 ctx.quit()?;
@@ -65,12 +63,7 @@ pub fn run(ctx: &mut Context) -> GameResult<()>
                             }
                         }
                     }
-                    KeyUp {
-                        keycode,
-                        keymod,
-                        repeat,
-                        ..
-                    } => {
+                    KeyUp { keycode, keymod, repeat, .. } => {
                         if let Some(key) = keycode {
                             state_manager.key_up_event(key, keymod, repeat)
                         }
@@ -81,20 +74,16 @@ pub fn run(ctx: &mut Context) -> GameResult<()>
                     MouseButtonUp { mouse_btn, x, y, .. } => {
                         state_manager.mouse_button_up_event(mouse_btn, x, y)
                     }
-                    MouseMotion {
-                        mousestate,
-                        x,
-                        y,
-                        xrel,
-                        yrel,
-                        ..
-                    } => state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel),
+                    MouseMotion { mousestate, x, y, xrel, yrel, .. } => {
+                        state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel)
+                    }
                     MouseWheel { x, y, .. } => state_manager.mouse_wheel_event(x, y),
                     ControllerButtonDown { button, which, .. } => {
                         state_manager.controller_button_down_event(button, which)
                     }
-                    ControllerButtonUp { button, which, .. } =>
-                        state_manager.controller_button_up_event(button, which),
+                    ControllerButtonUp { button, which, .. } => {
+                        state_manager.controller_button_up_event(button, which)
+                    }
                     ControllerAxisMotion { axis, value, which, .. } => {
                         state_manager.controller_axis_event(axis, value, which)
                     }

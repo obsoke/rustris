@@ -1,8 +1,7 @@
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics, event};
-use ggez::event::{Assets,  Transition};
-use ggez::event::*;
-
+use ggez::event::{Keycode, Mod};
+use event::{Assets, Transition, EventHandler};
 use states::play_state::PlayState;
 
 pub struct MenuState {}
@@ -13,8 +12,12 @@ impl MenuState {
     }
 }
 
-impl event::EventHandler for MenuState {
-    fn update(&mut self, ctx: &mut Context, assets: &Assets, _: Duration) -> GameResult<Transition> {
+impl EventHandler for MenuState {
+    fn update(&mut self,
+              ctx: &mut Context,
+              assets: &Assets,
+              _: Duration)
+              -> GameResult<Transition> {
         println!("MENU STATE STUB!");
         Ok(Transition::None)
     }

@@ -8,14 +8,13 @@ mod shapes;
 mod bag;
 mod util;
 
-use ggez::event::*;
-use states::{Transition};
 use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
-use states::{Assets};
+use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
+use event::*;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
@@ -29,10 +28,7 @@ pub struct Position {
 
 impl Position {
     fn new(x: i32, y: i32) -> Self {
-        Self {
-            x: x,
-            y: y,
-        }
+        Self { x: x, y: y }
     }
 }
 
@@ -146,7 +142,8 @@ impl PlayState {
                 self.rotate_piece(1);
             }
         } else if self.input.rotate_counterclockwise.is_active {
-            if self.input.rotate_counterclockwise.is_active != self.prev_input.rotate_counterclockwise.is_active {
+            if self.input.rotate_counterclockwise.is_active !=
+               self.prev_input.rotate_counterclockwise.is_active {
                 self.rotate_piece(-1);
             }
         } else if self.input.hard_drop.is_active {
@@ -304,8 +301,12 @@ impl PlayState {
 }
 
 
-impl event::EventHandler for PlayState {
-    fn update(&mut self, ctx: &mut Context, assets: &Assets, dt: Duration) -> GameResult<Transition> {
+impl EventHandler for PlayState {
+    fn update(&mut self,
+              ctx: &mut Context,
+              assets: &Assets,
+              dt: Duration)
+              -> GameResult<Transition> {
         if self.game_over {
             return Ok(Transition::Push(Box::new(GameOverState::new(ctx,
                                                                    assets,
@@ -338,7 +339,9 @@ impl event::EventHandler for PlayState {
 
         self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece
-            .draw_shadow(ctx, assets.get_image("block")?, &self.current_piece.get_shadow_position())?;
+            .draw_shadow(ctx,
+                         assets.get_image("block")?,
+                         &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
         // if self.game_over {
@@ -388,23 +391,23 @@ impl event::EventHandler for PlayState {
             Keycode::Right => {
                 self.input.right.is_active = false;
                 self.input.right.delay_timer = INPUT_DELAY_TIME;
-            },
+            }
             Keycode::Up => {
                 self.input.hard_drop.is_active = false;
                 self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
-            },
+            }
             Keycode::Down => {
                 self.input.soft_drop.is_active = false;
                 self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
-            },
+            }
             Keycode::Z => {
                 self.input.rotate_counterclockwise.is_active = false;
                 self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
-            },
+            }
             Keycode::X => {
                 self.input.rotate_clockwise.is_active = false;
                 self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
-            },
+            }
             _ => (),
         }
     }

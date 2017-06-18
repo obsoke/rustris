@@ -1,7 +1,7 @@
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics, event};
-use ggez::event::{Assets,  Transition};
-use ggez::event::*;
+use ggez::event::{Mod, Keycode};
+use event::{Assets, Transition, EventHandler};
 
 use states::play_state::PlayState;
 use states::menu_state::MenuState;
@@ -20,12 +20,13 @@ impl GameOverState {
     pub fn new(ctx: &mut Context,
                assets: &Assets,
                final_score_value: u32,
-               final_cleared: u32) -> GameResult<GameOverState>
-    {
+               final_cleared: u32)
+               -> GameResult<GameOverState> {
         let game_over = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
 
         let instruction_src = "'R' to restart / 'M' for menu / 'Esc' to quit";
-        let instruction_text = graphics::Text::new(ctx, instruction_src, assets.get_font("normal")?)?;
+        let instruction_text =
+            graphics::Text::new(ctx, instruction_src, assets.get_font("normal")?)?;
 
         let score_str = format!("Final Score: {}", final_score_value);
         let lines_str = format!("Final Lines: {}", final_cleared);
@@ -44,12 +45,15 @@ impl GameOverState {
     }
 }
 
-impl event::EventHandler for GameOverState {
-    fn update(&mut self, ctx: &mut Context, assets: &Assets, _: Duration) -> GameResult<Transition> {
+impl EventHandler for GameOverState {
+    fn update(&mut self,
+              ctx: &mut Context,
+              assets: &Assets,
+              _: Duration)
+              -> GameResult<Transition> {
         if self.request_menu {
             return Ok(Transition::Swap(Box::new(MenuState::new(ctx, assets)?)));
-        }
-        else if self.request_replay {
+        } else if self.request_replay {
             return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets)?)));
         }
 
@@ -65,10 +69,12 @@ impl event::EventHandler for GameOverState {
         let game_over_end_dest = graphics::Point::new(coords.w / 2.0, 400.0);
 
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
-        graphics::rectangle(ctx, graphics::DrawMode::Fill, graphics::Rect::new(0.0 + (coords.w / 2.0),
-                                                                               0.0 + ((coords.h * -1.0) / 2.0),
-                                                                               coords.w,
-                                                                               coords.h * -1.0))?;
+        graphics::rectangle(ctx,
+                            graphics::DrawMode::Fill,
+                            graphics::Rect::new(0.0 + (coords.w / 2.0),
+                                                0.0 + ((coords.h * -1.0) / 2.0),
+                                                coords.w,
+                                                coords.h * -1.0))?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
