@@ -7,18 +7,20 @@ mod tetromino;
 mod shapes;
 mod bag;
 mod util;
+mod ui_element;
 
 use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
+use self::ui_element::UIElement;
 use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
 use event::*;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
-const INPUT_DELAY_TIME: f64 = 0.09;
+const INPUT_DELAY_TIME: f64 = 0.06;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
@@ -95,10 +97,13 @@ pub struct PlayState {
     cleared_lines: u32,
     level: u32,
     game_over: bool,
+
+    // ui elements
+    ui_lines: UIElement,
 }
 
 impl PlayState {
-    pub fn new(_: &mut Context, _: &Assets) -> GameResult<PlayState> {
+    pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
 
@@ -115,6 +120,8 @@ impl PlayState {
             cleared_lines: 0,
             level: 0,
             game_over: false,
+
+            ui_lines: UIElement::new(ctx, assets, Position::new(780, 300), "Lines", "0")
         })
     }
 
@@ -314,7 +321,6 @@ impl EventHandler for PlayState {
                                                                    self.cleared_lines)?)));
         }
 
-        // TODO: handle/respond user input
         self.handle_user_input(dt)?;
 
         // handle shadow piece
@@ -327,16 +333,16 @@ impl EventHandler for PlayState {
         }
 
         self.handle_line_clears()?;
+        self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
 
         self.prev_input = self.input;
+
+        // update ui
 
         Ok(Transition::None)
     }
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        // graphics::set_background_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 255.0));
-        // graphics::clear(ctx);
-
         self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece
             .draw_shadow(ctx,
@@ -344,27 +350,7 @@ impl EventHandler for PlayState {
                          &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
-        // if self.game_over {
-        //     let coords = graphics::get_screen_coordinates(&ctx);
-
-        //     let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        //     let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
-        //     let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
-        //     let game_over_end_dest = graphics::Point::new(coords.w / 2.0, 400.0);
-
-        //     graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
-        //     graphics::rectangle(ctx, graphics::DrawMode::Fill, graphics::Rect::new(0.0 + (coords.w / 2.0),
-        //                                                                            0.0 + ((coords.h * -1.0) / 2.0),
-        //                                                                            coords.w,
-        //                                                                            coords.h * -1.0))?;
-        //     graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
-        //     graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
-        //     graphics::draw(ctx, &self.game_over_final_score, game_over_score_dest, 0.0)?;
-        //     graphics::draw(ctx, &self.game_over_final_lines, game_over_lines_dest, 0.0)?;
-        //     graphics::draw(ctx, &self.game_over_end_text, game_over_end_dest, 0.0)?;
-        // }
-
-        // graphics::present(ctx);
+        self.ui_lines.draw(ctx)?;
 
         Ok(())
     }
