@@ -122,8 +122,8 @@ impl PlayState {
             level: 0,
             game_over: false,
 
-            ui_lines: UIElement::new(ctx, assets, Position::new(775, 200), "Lines", "0"),
-            ui_score: UIElement::new(ctx, assets, Position::new(775, 400), "Score", "0"),
+            ui_lines: UIElement::new(ctx, assets, Position::new(775, 300), "Lines", "0"),
+            ui_score: UIElement::new(ctx, assets, Position::new(775, 450), "Score", "0"),
         })
     }
 

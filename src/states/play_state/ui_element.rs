@@ -5,7 +5,7 @@ use states::play_state::Position;
 
 const WIDTH: i32 = 200;
 const HEIGHT: i32 = 50;
-const CIRCLE_RADIUS: f32 = 35.0;
+const CIRCLE_RADIUS: f32 = 25.0;
 
 pub struct UIElement {
     top_left: Position,

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use sdl2::mouse;
 
-use ggez::{Context, GameResult};
+use ggez::{Context, GameResult, timer};
 use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
 use states::play_state::PlayState;
 
@@ -94,11 +94,8 @@ impl EventHandler for StateManager {
         }
 
         graphics::present(ctx);
+        timer::sleep(Duration::from_secs(0));
         Ok(())
-        // match self.states.last_mut() {
-        //     Some(state) => state.draw(ctx),
-        //     None => Ok(()),
-        // }
     }
     fn mouse_button_down_event(&mut self, _button: mouse::MouseButton, _x: i32, _y: i32) {
         match self.states.last_mut() {
