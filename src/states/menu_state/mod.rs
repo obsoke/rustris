@@ -1,5 +1,5 @@
 use std::time::Duration;
-use ggez::{Context, GameResult, graphics, event};
+use ggez::{Context, GameResult, graphics};
 use ggez::event::{Keycode, Mod};
 use event::{Assets, Transition, EventHandler};
 use states::play_state::PlayState;

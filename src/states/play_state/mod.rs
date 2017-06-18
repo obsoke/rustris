@@ -1,6 +1,6 @@
 use std::time::Duration;
 use std::ops::AddAssign;
-use ggez::{Context, GameResult, event};
+use ggez::{Context, GameResult};
 
 mod well;
 mod tetromino;

@@ -1,8 +1,9 @@
 use std::time::Duration;
-use ggez::{Context, GameResult, graphics, event};
-use ggez::event::{Mod, Keycode};
-use event::{Assets, Transition, EventHandler};
 
+use ggez::{Context, GameResult, graphics};
+use ggez::event::{Mod, Keycode};
+
+use event::{Assets, Transition, EventHandler};
 use states::play_state::PlayState;
 use states::menu_state::MenuState;
 

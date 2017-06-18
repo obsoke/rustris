@@ -1,9 +1,42 @@
-//! This is a custom version of the ggez `event.rs` module.
+// The MIT License (MIT)
+// Copyright (c) 2016-2017 ggez-dev
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+// This is a custom version of the ggez `event.rs` module. Why a custom
+// version?
+//
+// 1) I needed a way to have `update()` and `draw()` to return
+// `GameResult<Transition>` for my state management system.
+//
+// 2) I needed to add said `Transition` enum to `event.rs`. My attempts at
+// making `EventHandler` into a generic so the return type can be generic have
+// failed when I ran into lifetime issues when puting `EventHandler<T>` into a
+// `Box`.` The easiest solution around this was to add `Transition` to this
+// module directly.
+//
+// 3) Additionally, I wanted my state manager to own an `Assets` struct so I
+// could load my game assets once and pass it to whatever state needed it. To do
+// this, I had to alter the signatures of both `update()` and `draw()` to take a
+// reference to the `Assets` struct.
+
+
 //! The `event` module contains traits and structs to actually run your game mainloop
 //! and handle top-level state, as well as handle input events such as keyboard
 //! and mouse.
-
-use std::collections::HashMap;
 
 /// A key code.
 pub use sdl2::keyboard::Keycode;
@@ -20,17 +53,19 @@ pub use sdl2::controller::Button;
 /// A controller axis.
 pub use sdl2::controller::Axis;
 
+use std::collections::HashMap;
+use std::time::Duration;
+
 use sdl2::event::Event::*;
-use sdl2::event;
+use sdl2::event as SdlEvent;
 use sdl2::mouse;
 use sdl2::keyboard;
 
-
 use ggez::graphics;
-use ggez::{GameResult, GameError, Context};
+use ggez::{GameResult, Context};
 use ggez::timer;
 
-use std::time::Duration;
+use states::StateManager;
 
 pub struct Assets {
     images: HashMap<String, graphics::Image>,
@@ -127,4 +162,84 @@ pub trait EventHandler {
         println!("Quitting game");
         false
     }
+}
+
+/// Runs the game's main loop, calling event callbacks on the given state
+/// object as events occur.
+///
+/// This is a custom version of ggez's event method. Since I added both an
+/// `Asset` and `StateManager`, I needed to tweak the default game loop a
+/// bit to update managers rather than states directly.
+pub fn run(ctx: &mut Context) -> GameResult<()> {
+    {
+        let mut assets = Assets::new();
+        assets.add_image("block", graphics::Image::new(ctx, "/block.png")?)?;
+        assets.add_font("title",
+                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?)?;
+        assets.add_font("normal",
+                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?)?;
+
+        let mut state_manager = StateManager::new(ctx, &assets);
+
+        let mut event_pump = ctx.sdl_context.event_pump()?;
+
+        while state_manager.is_running() {
+            ctx.timer_context.tick();
+
+            for event in event_pump.poll_iter() {
+                match event {
+                    Quit { .. } => {
+                        state_manager.quit();
+                        // println!("Quit event: {:?}", t);
+                    }
+                    KeyDown { keycode, keymod, repeat, .. } => {
+                        if let Some(key) = keycode {
+                            if key == keyboard::Keycode::Escape {
+                                ctx.quit()?;
+                            } else {
+                                state_manager.key_down_event(key, keymod, repeat)
+                            }
+                        }
+                    }
+                    KeyUp { keycode, keymod, repeat, .. } => {
+                        if let Some(key) = keycode {
+                            state_manager.key_up_event(key, keymod, repeat)
+                        }
+                    }
+                    MouseButtonDown { mouse_btn, x, y, .. } => {
+                        state_manager.mouse_button_down_event(mouse_btn, x, y)
+                    }
+                    MouseButtonUp { mouse_btn, x, y, .. } => {
+                        state_manager.mouse_button_up_event(mouse_btn, x, y)
+                    }
+                    MouseMotion { mousestate, x, y, xrel, yrel, .. } => {
+                        state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel)
+                    }
+                    MouseWheel { x, y, .. } => state_manager.mouse_wheel_event(x, y),
+                    ControllerButtonDown { button, which, .. } => {
+                        state_manager.controller_button_down_event(button, which)
+                    }
+                    ControllerButtonUp { button, which, .. } => {
+                        state_manager.controller_button_up_event(button, which)
+                    }
+                    ControllerAxisMotion { axis, value, which, .. } => {
+                        state_manager.controller_axis_event(axis, value, which)
+                    }
+                    Window { win_event: SdlEvent::WindowEvent::FocusGained, .. } => {
+                        state_manager.focus_event(true)
+                    }
+                    Window { win_event: SdlEvent::WindowEvent::FocusLost, .. } => {
+                        state_manager.focus_event(false)
+                    }
+                    _ => {}
+                }
+            }
+
+            let dt = timer::get_delta(ctx);
+            state_manager.update(ctx, &assets, dt)?;
+            state_manager.draw(ctx, &assets)?;
+        }
+    }
+
+    Ok(())
 }
