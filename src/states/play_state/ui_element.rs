@@ -48,7 +48,6 @@ impl UIElement {
                          Point::new(self.centre.x as f32 + WIDTH as f32, self.top_left.y as f32),
                          CIRCLE_RADIUS,
                          32)?;
-
         graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_point, 0.0)?;
 

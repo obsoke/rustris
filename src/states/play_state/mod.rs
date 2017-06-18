@@ -100,6 +100,7 @@ pub struct PlayState {
 
     // ui elements
     ui_lines: UIElement,
+    ui_score: UIElement,
 }
 
 impl PlayState {
@@ -121,7 +122,8 @@ impl PlayState {
             level: 0,
             game_over: false,
 
-            ui_lines: UIElement::new(ctx, assets, Position::new(780, 300), "Lines", "0")
+            ui_lines: UIElement::new(ctx, assets, Position::new(775, 200), "Lines", "0"),
+            ui_score: UIElement::new(ctx, assets, Position::new(775, 400), "Score", "0"),
         })
     }
 
@@ -334,6 +336,7 @@ impl EventHandler for PlayState {
 
         self.handle_line_clears()?;
         self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
+        self.ui_score.update(ctx, assets, &self.score.to_string());
 
         self.prev_input = self.input;
 
@@ -351,6 +354,7 @@ impl EventHandler for PlayState {
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
         self.ui_lines.draw(ctx)?;
+        self.ui_score.draw(ctx)?;
 
         Ok(())
     }
