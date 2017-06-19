@@ -18,10 +18,6 @@ use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
 use event::*;
 
-const BLOCK_SIZE: f32 = 30.0;
-const FALL_SPEED: f64 = 0.5;
-const INPUT_DELAY_TIME: f64 = 0.075;
-
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
     x: i32,
@@ -42,6 +38,8 @@ impl AddAssign for Position {
         };
     }
 }
+
+const INPUT_DELAY_TIME: f64 = 0.075;
 
 #[derive(Debug, Copy, Clone)]
 pub struct InputStateField {
@@ -86,6 +84,10 @@ impl Default for InputState {
     }
 }
 
+const BLOCK_SIZE: f32 = 30.0;
+const BASE_FALL_SPEED: f64 = 0.5;
+const LINES_PER_LEVEL: i32 = 10;
+
 pub struct PlayState {
     input: InputState,
     prev_input: InputState,
@@ -98,6 +100,7 @@ pub struct PlayState {
     fall_timer: f64,
     score: u32,
     cleared_lines: u32,
+    lines_until_next_level: i32,
     level: u32,
     can_hold: bool,
     game_over: bool,
@@ -127,6 +130,7 @@ impl PlayState {
             fall_timer: 0.0,
             score: 0,
             cleared_lines: 0,
+            lines_until_next_level: LINES_PER_LEVEL,
             level: 0,
             can_hold: true,
             game_over: false,
@@ -238,7 +242,7 @@ impl PlayState {
     fn handle_gravity(&mut self, dt: Duration) -> GameResult<bool> {
         self.fall_timer += dt.as_subsec_millis();
 
-        if self.fall_timer >= FALL_SPEED {
+        if self.fall_timer >= BASE_FALL_SPEED {
             let current_shape = self.current_piece.get_shape();
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1;
@@ -309,7 +313,7 @@ impl PlayState {
 
     fn handle_line_clears(&mut self) -> GameResult<()> {
         // check for line clears
-        let mut lines_cleared = 0;
+        let mut lines_cleared: u32 = 0;
         for r in (0..self.well.data.len()).rev() {
             let mut is_row_filled = true;
             for (c, _) in self.well.data[r].iter().enumerate() {
@@ -337,6 +341,11 @@ impl PlayState {
             _ => (),
         }
 
+        self.lines_until_next_level -= lines_cleared as i32;
+        if self.lines_until_next_level <= 0 {
+            self.level += 1;
+            self.lines_until_next_level = LINES_PER_LEVEL;
+        }
         self.cleared_lines += lines_cleared;
 
         Ok(())
