@@ -4,8 +4,9 @@ use event::Assets;
 use states::play_state::Position;
 use states::play_state::tetromino::{Piece, PieceType};
 
-const WIDTH: i32 = 200;
+const WIDTH: i32 = 170;
 const HEIGHT: i32 = 50;
+const UITEXTVIEW_HEIGHT: i32 = 35;
 const CIRCLE_RADIUS: f32 = 25.0;
 
 // Ideally, there would be a general `View` trait or type or whatnot that I
@@ -27,7 +28,7 @@ impl UITextView {
         let value_txt = graphics::Text::new(ctx, value, assets.get_font("normal").unwrap()).unwrap();
         Self {
             // ggez draws coords at center; we want to use top left as reference
-            top_left: Position::new(top_left.x + (WIDTH / 2), top_left.y + (HEIGHT / 2)),
+            top_left: Position::new(top_left.x + (WIDTH / 2), top_left.y + (UITEXTVIEW_HEIGHT / 2)),
             centre: top_left,
             title_text: title_txt,
             value: value.to_string(),
@@ -45,7 +46,7 @@ impl UITextView {
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         // title portion
-        let title_rect = Rect::new_i32(self.top_left.x, self.top_left.y, WIDTH, HEIGHT);
+        let title_rect = Rect::new_i32(self.top_left.x, self.top_left.y, WIDTH, UITEXTVIEW_HEIGHT);
         let title_point = Point::new(self.top_left.x as f32, self.top_left.y as f32);
         graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
         graphics::rectangle(ctx, DrawMode::Fill, title_rect)?;
@@ -58,8 +59,8 @@ impl UITextView {
         graphics::draw(ctx, &self.title_text, title_point, 0.0)?;
 
         // value portion
-        let value_rect = Rect::new_i32(self.top_left.x - 20, self.top_left.y + HEIGHT, WIDTH - 40, HEIGHT);
-        let value_point = Point::new(self.top_left.x as f32, self.top_left.y as f32 + HEIGHT as f32);
+        let value_rect = Rect::new_i32(self.top_left.x - 20, self.top_left.y + UITEXTVIEW_HEIGHT, WIDTH - 40, UITEXTVIEW_HEIGHT);
+        let value_point = Point::new(self.top_left.x as f32, self.top_left.y as f32 + UITEXTVIEW_HEIGHT as f32);
         graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
         graphics::rectangle(ctx, DrawMode::Fill, value_rect)?;
         graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;

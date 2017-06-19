@@ -70,7 +70,6 @@ pub struct InputState {
 
 impl Default for InputState {
     fn default() -> Self {
-
         InputState {
             left: InputStateField::default(),
             right: InputStateField::default(),
@@ -87,7 +86,8 @@ impl Default for InputState {
 const BLOCK_SIZE: f32 = 30.0;
 const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
-const LINES_PER_LEVEL: i32 = 1;
+const LINES_PER_LEVEL: i32 = 10;
+const MAX_LEVEL: u32 = 20;
 
 pub struct PlayState {
     input: InputState,
@@ -108,6 +108,7 @@ pub struct PlayState {
     game_over: bool,
 
     // ui elements
+    ui_level: UITextView,
     ui_lines: UITextView,
     ui_score: UITextView,
     ui_next: UIBlockView,
@@ -140,8 +141,9 @@ impl PlayState {
 
             ui_next: UIBlockView::new(ctx, assets, Position::new(775, 70), "Next", Some(first_type)),
             ui_hold: UIBlockView::new(ctx, assets, Position::new(775, 250), "Hold", None),
-            ui_lines: UITextView::new(ctx, assets, Position::new(775, 420), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Position::new(775, 550), "Score", "0"),
+            ui_level: UITextView::new(ctx, assets, Position::new(775, 420), "Level", "1"),
+            ui_lines: UITextView::new(ctx, assets, Position::new(775, 500), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Position::new(775, 580), "Score", "0"),
         })
     }
 
@@ -359,12 +361,14 @@ impl PlayState {
     }
 
     fn increase_level(&mut self) {
-        self.level += 1;
+        if self.level < MAX_LEVEL {
+            self.level += 1;
 
-        // increase gravity
-        let change = self.time_until_gravity / FALL_SPEED_DIVISOR;
-        self.time_until_gravity -= change;
-        println!("New gravity value: {}", self.time_until_gravity);
+            // increase gravity
+            let change = self.time_until_gravity / FALL_SPEED_DIVISOR;
+            self.time_until_gravity -= change;
+            println!("New gravity value: {}", self.time_until_gravity);
+        }
     }
 }
 
@@ -399,6 +403,7 @@ impl EventHandler for PlayState {
         // update ui
         self.ui_hold.update(ctx, assets, self.hold_piece_type);
         self.ui_next.update(ctx, assets, Some(self.bag.peek_at_next_piece().get_type()));
+        self.ui_level.update(ctx, assets, &(&self.level + 1).to_string());
         self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
         self.ui_score.update(ctx, assets, &self.score.to_string());
 
@@ -416,6 +421,7 @@ impl EventHandler for PlayState {
 
         self.ui_next.draw(ctx, assets)?;
         self.ui_hold.draw(ctx, assets)?;
+        self.ui_level.draw(ctx)?;
         self.ui_lines.draw(ctx)?;
         self.ui_score.draw(ctx)?;
 
