@@ -44,6 +44,19 @@ impl Piece {
         }
     }
 
+    pub fn new_from_ref(shape_type: &PieceType) -> Self {
+        let shape = piece_type_to_shape(*shape_type, 0);
+
+        Piece {
+            shape: shape,
+            shape_type: *shape_type,
+            top_left: Position { x: 4, y: 0 },
+            potential_top_left: Position { x: 4, y: 0 },
+            shadow_position: Position { x: 4, y: 0 },
+            current_rotation_index: 0,
+        }
+    }
+
     pub fn draw(&self, ctx: &mut Context, image: &graphics::Image) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
@@ -105,6 +118,31 @@ impl Piece {
         Ok(())
     }
 
+    /// Draw the `Piece` outside of the grid at a given point.
+    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Position) -> GameResult<()> {
+        let starting_pos = top_left;
+
+        for (r, _) in self.shape.iter().enumerate() {
+            for (c, _) in self.shape[r].iter().enumerate() {
+                if self.shape[r][c] != 0 {
+                    let colour = block_to_colour(self.shape[r][c], false);
+                    graphics::set_color(ctx, colour)?;
+
+                    let x = starting_pos.x as f32 + ((c as f32 + 1.0) * BLOCK_SIZE);
+                    let y = starting_pos.y as f32 + (r as f32 * BLOCK_SIZE);
+
+                    graphics::draw(
+                        ctx,
+                        image,
+                        graphics::Point::new(x, y),
+                        0.0
+                    )?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     // this only returns the next shape, it doesn't change the current shape
     pub fn get_next_shape(&self, direction: i32) -> PieceShape {
         let next_index = next_rotation_index(self.current_rotation_index, direction);
@@ -114,6 +152,10 @@ impl Piece {
 
     pub fn get_shape(&self) -> PieceShape {
         self.shape
+    }
+
+    pub fn get_type(&self) -> PieceType {
+        self.shape_type
     }
 
     pub fn change_shape(&mut self, direction: i32) {

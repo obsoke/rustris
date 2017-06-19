@@ -29,6 +29,12 @@ impl PieceBag {
         Piece::new(next_piece_shape)
     }
 
+    pub fn peek_at_next_piece(&self) -> Piece {
+        let next_piece_shape = self.queue.first().expect("Could not peek into PieceBag");
+
+        Piece::new_from_ref(next_piece_shape)
+    }
+
     fn generate_full_bag() -> Vec<PieceType> {
         let mut pieces: Vec<PieceType> = Vec::new();
         for _ in 0 .. 7 {

@@ -13,7 +13,7 @@ use self::well::Well;
 use self::tetromino::Piece;
 use self::bag::PieceBag;
 use self::util::DurationExt;
-use self::ui_element::UIElement;
+use self::ui_element::{UIBlockView, UITextView};
 use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
 use event::*;
@@ -99,14 +99,16 @@ pub struct PlayState {
     game_over: bool,
 
     // ui elements
-    ui_lines: UIElement,
-    ui_score: UIElement,
+    ui_lines: UITextView,
+    ui_score: UITextView,
+    ui_next: UIBlockView,
 }
 
 impl PlayState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
+        let first_type = first_piece.get_type();
 
         Ok(PlayState {
             input: InputState::default(),
@@ -122,8 +124,9 @@ impl PlayState {
             level: 0,
             game_over: false,
 
-            ui_lines: UIElement::new(ctx, assets, Position::new(775, 300), "Lines", "0"),
-            ui_score: UIElement::new(ctx, assets, Position::new(775, 450), "Score", "0"),
+            ui_lines: UITextView::new(ctx, assets, Position::new(775, 300), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Position::new(775, 450), "Score", "0"),
+            ui_next: UIBlockView::new(ctx, assets, Position::new(775, 100), "Next", first_type),
         })
     }
 
@@ -335,12 +338,13 @@ impl EventHandler for PlayState {
         }
 
         self.handle_line_clears()?;
+
+        // update ui
+        self.ui_next.update(ctx, assets, self.current_piece.get_type());
         self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
         self.ui_score.update(ctx, assets, &self.score.to_string());
 
         self.prev_input = self.input;
-
-        // update ui
 
         Ok(Transition::None)
     }
@@ -353,6 +357,7 @@ impl EventHandler for PlayState {
                          &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
+        self.ui_next.draw(ctx, assets, &self.bag)?;
         self.ui_lines.draw(ctx)?;
         self.ui_score.draw(ctx)?;
 
