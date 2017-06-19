@@ -10,7 +10,7 @@ mod util;
 mod ui_element;
 
 use self::well::Well;
-use self::tetromino::Piece;
+use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
 use self::util::DurationExt;
 use self::ui_element::{UIBlockView, UITextView};
@@ -67,6 +67,7 @@ pub struct InputState {
     rotate_clockwise: InputStateField,
     rotate_counterclockwise: InputStateField,
     drop: InputStateField,
+    hold: InputStateField,
 }
 
 impl Default for InputState {
@@ -80,6 +81,7 @@ impl Default for InputState {
             rotate_clockwise: InputStateField::default(),
             rotate_counterclockwise: InputStateField::default(),
             drop: InputStateField::default(),
+            hold: InputStateField::default(),
         }
     }
 }
@@ -91,17 +93,20 @@ pub struct PlayState {
     well: Well,
     bag: PieceBag,
     current_piece: Piece,
+    hold_piece_type: Option<PieceType>,
 
     fall_timer: f64,
     score: u32,
     cleared_lines: u32,
     level: u32,
+    can_hold: bool,
     game_over: bool,
 
     // ui elements
     ui_lines: UITextView,
     ui_score: UITextView,
     ui_next: UIBlockView,
+    ui_hold: UIBlockView,
 }
 
 impl PlayState {
@@ -117,16 +122,19 @@ impl PlayState {
             well: Well::new(),
             bag: bag,
             current_piece: first_piece,
+            hold_piece_type: None,
 
             fall_timer: 0.0,
             score: 0,
             cleared_lines: 0,
             level: 0,
+            can_hold: true,
             game_over: false,
 
-            ui_lines: UITextView::new(ctx, assets, Position::new(775, 300), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Position::new(775, 450), "Score", "0"),
-            ui_next: UIBlockView::new(ctx, assets, Position::new(775, 100), "Next", first_type),
+            ui_next: UIBlockView::new(ctx, assets, Position::new(775, 70), "Next", Some(first_type)),
+            ui_hold: UIBlockView::new(ctx, assets, Position::new(775, 250), "Hold", None),
+            ui_lines: UITextView::new(ctx, assets, Position::new(775, 420), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Position::new(775, 550), "Score", "0"),
         })
     }
 
@@ -163,8 +171,13 @@ impl PlayState {
                 self.current_piece.top_left = self.current_piece.get_shadow_position();
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
+                self.can_hold = true;
             }
-        }
+        } else if self.input.hold.is_active {
+            if self.input.hold.is_active != self.prev_input.hold.is_active {
+                self.handle_hold()?;
+            }
+    }
 
         Ok(())
     }
@@ -243,6 +256,7 @@ impl PlayState {
                 // game isn't over - take another piece and move to next frame
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
+                self.can_hold = true;
                 return Ok(false);
             }
 
@@ -269,6 +283,27 @@ impl PlayState {
             self.current_piece.set_shadow_position(shadow_position);
         }
 
+        Ok(())
+    }
+
+    fn handle_hold(&mut self) -> GameResult<()> {
+        // can only perform a hold once per piece turn
+        // a piece turn ends when the current piece lands
+        if self.can_hold {
+            let current_type = self.current_piece.get_type();
+            if let Some(piece_type) = self.hold_piece_type {
+                if piece_type != self.current_piece.get_type() {
+                    self.current_piece = Piece::new(piece_type);
+                    self.hold_piece_type = Some(current_type);
+                    self.can_hold = false;
+                }
+            } else {
+                self.current_piece = self.bag.take_piece();
+                self.hold_piece_type = Some(current_type);
+                self.can_hold = false;
+            }
+
+        }
         Ok(())
     }
 
@@ -327,6 +362,7 @@ impl EventHandler for PlayState {
         }
 
         self.handle_user_input(dt)?;
+        self.prev_input = self.input;
 
         // handle shadow piece
         // TODO: put behind option
@@ -340,11 +376,11 @@ impl EventHandler for PlayState {
         self.handle_line_clears()?;
 
         // update ui
-        self.ui_next.update(ctx, assets, self.current_piece.get_type());
+        self.ui_hold.update(ctx, assets, self.hold_piece_type);
+        self.ui_next.update(ctx, assets, Some(self.bag.peek_at_next_piece().get_type()));
         self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
         self.ui_score.update(ctx, assets, &self.score.to_string());
 
-        self.prev_input = self.input;
 
         Ok(Transition::None)
     }
@@ -357,7 +393,8 @@ impl EventHandler for PlayState {
                          &self.current_piece.get_shadow_position())?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
-        self.ui_next.draw(ctx, assets, &self.bag)?;
+        self.ui_next.draw(ctx, assets)?;
+        self.ui_hold.draw(ctx, assets)?;
         self.ui_lines.draw(ctx)?;
         self.ui_score.draw(ctx)?;
 
@@ -372,6 +409,7 @@ impl EventHandler for PlayState {
             Keycode::Down => self.input.soft_drop.is_active = true,
             Keycode::Z => self.input.rotate_counterclockwise.is_active = true,
             Keycode::X => self.input.rotate_clockwise.is_active = true,
+            Keycode::Space => self.input.hold.is_active = true,
             _ => (),
         }
 
@@ -402,6 +440,10 @@ impl EventHandler for PlayState {
             Keycode::X => {
                 self.input.rotate_clockwise.is_active = false;
                 self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
+            }
+            Keycode::Space => {
+                self.input.hold.is_active = false;
+                self.input.hold.delay_timer = INPUT_DELAY_TIME;
             }
             _ => (),
         }

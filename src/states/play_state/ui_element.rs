@@ -73,11 +73,11 @@ pub struct UIBlockView {
     top_left: Position,
     centre: Position,
     title_text: graphics::Text,
-    shape: PieceType,
+    shape: Option<PieceType>,
 }
 
 impl UIBlockView {
-    pub fn new(ctx: &mut Context, assets: &Assets, top_left: Position, title: &str, shape: PieceType) -> Self {
+    pub fn new(ctx: &mut Context, assets: &Assets, top_left: Position, title: &str, shape: Option<PieceType>) -> Self {
         let title_txt = graphics::Text::new(ctx, title, assets.get_font("normal").unwrap()).unwrap();
         Self {
             // ggez draws coords at center; we want to use top left as reference
@@ -88,13 +88,13 @@ impl UIBlockView {
         }
     }
 
-    pub fn update(&mut self, ctx: &mut Context, assets: &Assets, new_value: PieceType) {
-        if new_value != self.shape {
+    pub fn update(&mut self, ctx: &mut Context, assets: &Assets, new_value: Option<PieceType>) {
+        if self.shape != new_value {
             self.shape = new_value;
         }
     }
 
-    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets, bag: &PieceBag) -> GameResult<()> {
+    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         // title portion
         let title_rect = Rect::new_i32(self.top_left.x, self.top_left.y, WIDTH, HEIGHT);
         let title_point = Point::new(self.top_left.x as f32, self.top_left.y as f32);
@@ -112,9 +112,11 @@ impl UIBlockView {
         let value_rect = Rect::new_i32(self.top_left.x - 20, self.top_left.y + HEIGHT + (HEIGHT / 2), WIDTH - 40, HEIGHT * 2);
         graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
         graphics::rectangle(ctx, DrawMode::Line, value_rect)?;
-        let next_piece = bag.peek_at_next_piece();
-        let next_piece_pos = Position::new(self.top_left.x - 90, self.top_left.y + 45);
-        next_piece.draw_at_point(ctx, assets.get_image("block")?, next_piece_pos)?;
+        if let Some(shape) = self.shape {
+            let piece = Piece::new(shape);
+            let next_piece_pos = Position::new(self.top_left.x - 90, self.top_left.y + 45);
+            piece.draw_at_point(ctx, assets.get_image("block")?, next_piece_pos)?;
+        }
         Ok(())
     }
 }
