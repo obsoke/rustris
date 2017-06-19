@@ -20,7 +20,7 @@ use event::*;
 
 const BLOCK_SIZE: f32 = 30.0;
 const FALL_SPEED: f64 = 0.5;
-const INPUT_DELAY_TIME: f64 = 0.06;
+const INPUT_DELAY_TIME: f64 = 0.075;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {
