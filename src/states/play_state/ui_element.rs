@@ -1,9 +1,8 @@
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{DrawMode, Image, Color, Rect, Point};
+use ggez::graphics::{DrawMode, Color, Rect, Point};
 use event::Assets;
 use states::play_state::Position;
 use states::play_state::tetromino::{Piece, PieceType};
-use states::play_state::bag::PieceBag;
 
 const WIDTH: i32 = 200;
 const HEIGHT: i32 = 50;
@@ -88,7 +87,7 @@ impl UIBlockView {
         }
     }
 
-    pub fn update(&mut self, ctx: &mut Context, assets: &Assets, new_value: Option<PieceType>) {
+    pub fn update(&mut self, _: &mut Context, _: &Assets, new_value: Option<PieceType>) {
         if self.shape != new_value {
             self.shape = new_value;
         }

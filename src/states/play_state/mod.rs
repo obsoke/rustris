@@ -85,8 +85,9 @@ impl Default for InputState {
 }
 
 const BLOCK_SIZE: f32 = 30.0;
-const BASE_FALL_SPEED: f64 = 0.5;
-const LINES_PER_LEVEL: i32 = 10;
+const BASE_FALL_SPEED: f64 = 1.0;
+const FALL_SPEED_DIVISOR: f64 = 4.0;
+const LINES_PER_LEVEL: i32 = 1;
 
 pub struct PlayState {
     input: InputState,
@@ -98,6 +99,7 @@ pub struct PlayState {
     hold_piece_type: Option<PieceType>,
 
     fall_timer: f64,
+    time_until_gravity: f64,
     score: u32,
     cleared_lines: u32,
     lines_until_next_level: i32,
@@ -128,6 +130,7 @@ impl PlayState {
             hold_piece_type: None,
 
             fall_timer: 0.0,
+            time_until_gravity: BASE_FALL_SPEED,
             score: 0,
             cleared_lines: 0,
             lines_until_next_level: LINES_PER_LEVEL,
@@ -242,7 +245,7 @@ impl PlayState {
     fn handle_gravity(&mut self, dt: Duration) -> GameResult<bool> {
         self.fall_timer += dt.as_subsec_millis();
 
-        if self.fall_timer >= BASE_FALL_SPEED {
+        if self.fall_timer >= self.time_until_gravity {
             let current_shape = self.current_piece.get_shape();
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1;
@@ -343,7 +346,7 @@ impl PlayState {
 
         self.lines_until_next_level -= lines_cleared as i32;
         if self.lines_until_next_level <= 0 {
-            self.level += 1;
+            self.increase_level();
             self.lines_until_next_level = LINES_PER_LEVEL;
         }
         self.cleared_lines += lines_cleared;
@@ -353,6 +356,15 @@ impl PlayState {
 
     fn increase_score(&mut self, base_score: u32, level: u32) {
         self.score += base_score * (level + 1);
+    }
+
+    fn increase_level(&mut self) {
+        self.level += 1;
+
+        // increase gravity
+        let change = self.time_until_gravity / FALL_SPEED_DIVISOR;
+        self.time_until_gravity -= change;
+        println!("New gravity value: {}", self.time_until_gravity);
     }
 }
 
