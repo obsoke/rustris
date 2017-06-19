@@ -383,7 +383,8 @@ impl EventHandler for PlayState {
             return Ok(Transition::Push(Box::new(GameOverState::new(ctx,
                                                                    assets,
                                                                    self.score,
-                                                                   self.cleared_lines)?)));
+                                                                   self.cleared_lines,
+                                                                   self.level + 1)?)));
         }
 
         self.handle_user_input(dt)?;

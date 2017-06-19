@@ -14,6 +14,7 @@ pub struct GameOverState {
     game_over_text: graphics::Text,
     final_score_text: graphics::Text,
     final_line_text: graphics::Text,
+    final_level_text: graphics::Text,
     instruction_text: graphics::Text,
 }
 
@@ -21,7 +22,8 @@ impl GameOverState {
     pub fn new(ctx: &mut Context,
                assets: &Assets,
                final_score_value: u32,
-               final_cleared: u32)
+               final_cleared: u32,
+               final_level: u32,)
                -> GameResult<GameOverState> {
         let game_over = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
 
@@ -31,8 +33,10 @@ impl GameOverState {
 
         let score_str = format!("Final Score: {}", final_score_value);
         let lines_str = format!("Final Lines: {}", final_cleared);
+        let level_str = format!("Final Level: {}", final_level);
         let final_score = graphics::Text::new(ctx, &score_str, assets.get_font("normal")?)?;
         let final_lines = graphics::Text::new(ctx, &lines_str, assets.get_font("normal")?)?;
+        let final_level = graphics::Text::new(ctx, &level_str, assets.get_font("normal")?)?;
 
         Ok(GameOverState {
             request_menu: false,
@@ -41,6 +45,7 @@ impl GameOverState {
             game_over_text: game_over,
             final_score_text: final_score,
             final_line_text: final_lines,
+            final_level_text: final_level,
             instruction_text: instruction_text,
         })
     }
@@ -67,6 +72,7 @@ impl EventHandler for GameOverState {
         let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
         let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
         let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
+        let game_over_level_dest = graphics::Point::new(coords.w / 2.0, 300.0);
         let game_over_end_dest = graphics::Point::new(coords.w / 2.0, 400.0);
 
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
@@ -80,6 +86,7 @@ impl EventHandler for GameOverState {
         graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
         graphics::draw(ctx, &self.final_line_text, game_over_lines_dest, 0.0)?;
+        graphics::draw(ctx, &self.final_level_text, game_over_level_dest, 0.0)?;
         graphics::draw(ctx, &self.instruction_text, game_over_end_dest, 0.0)?;
 
 
