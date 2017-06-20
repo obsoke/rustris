@@ -476,4 +476,51 @@ impl EventHandler for PlayState {
             _ => (),
         }
     }
+
+    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32) {
+        match btn {
+            Button::DPadLeft => self.input.left.is_active = true,
+            Button::DPadRight => self.input.right.is_active = true,
+            Button::DPadUp => self.input.hard_drop.is_active = true,
+            Button::DPadDown => self.input.soft_drop.is_active = true,
+            Button::A => self.input.rotate_counterclockwise.is_active = true,
+            Button::X => self.input.rotate_clockwise.is_active = true,
+            Button::LeftShoulder => self.input.hold.is_active = true,
+            _ => (),
+        }
+    }
+
+    fn controller_button_up_event(&mut self, btn: Button, _instance_id: i32) {
+        match btn {
+            Button::DPadLeft => {
+                self.input.left.is_active = false;
+                self.input.left.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::DPadRight => {
+                self.input.right.is_active = false;
+                self.input.right.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::DPadUp => {
+                self.input.hard_drop.is_active = false;
+                self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::DPadDown => {
+                self.input.soft_drop.is_active = false;
+                self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::A => {
+                self.input.rotate_counterclockwise.is_active = false;
+                self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::X => {
+                self.input.rotate_clockwise.is_active = false;
+                self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
+            }
+            Button::LeftShoulder => {
+                self.input.hold.is_active = false;
+                self.input.hold.delay_timer = INPUT_DELAY_TIME;
+            }
+            _ => (),
+        }
+    }
 }
