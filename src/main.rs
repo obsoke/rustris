@@ -3,6 +3,7 @@ extern crate sdl2;
 
 mod states;
 mod event;
+mod util;
 
 use ggez::{Context, conf};
 use event::run;

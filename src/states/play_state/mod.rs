@@ -6,17 +6,16 @@ mod well;
 mod tetromino;
 mod shapes;
 mod bag;
-mod util;
 mod ui_element;
 
 use self::well::Well;
 use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
-use self::util::DurationExt;
 use self::ui_element::{UIBlockView, UITextView};
 use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
 use event::*;
+use util::DurationExt;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Position {

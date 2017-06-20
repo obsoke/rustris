@@ -8,6 +8,7 @@ use sdl2::mouse;
 
 use ggez::{Context, GameResult, timer};
 use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
+use states::menu_state::MenuState;
 use states::play_state::PlayState;
 
 
@@ -21,7 +22,8 @@ pub struct StateManager {
 
 impl StateManager {
     pub fn new(ctx: &mut Context, assets: &Assets) -> StateManager {
-        let state = Box::new(PlayState::new(ctx, &assets).unwrap());
+        // let state = Box::new(PlayState::new(ctx, &assets).unwrap());
+        let state = Box::new(MenuState::new(ctx, &assets).unwrap());
 
         StateManager {
             running: true,
