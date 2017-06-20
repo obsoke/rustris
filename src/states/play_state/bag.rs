@@ -3,10 +3,8 @@ use self::rand::Rng;
 
 use super::tetromino::{PieceType, Piece, u8_to_piece_type};
 
-// piece bag needs to create a full bag (7 pieces in a queue)
-// it dispenses pieces when asked for them
-// if there are no pieces left after dispensing one, fill itself up
-// it can peek ahead to see what the next piece is
+/// A bag of `Pieces`. Takes care of dispensing, refilling and giving a peek at
+/// the next piece.
 pub struct PieceBag {
     queue: Vec<PieceType>,
 }
@@ -18,6 +16,8 @@ impl PieceBag {
         }
     }
 
+    /// Takes the next piece from the bag. If the bag is empty after removing a
+    /// piece, refill it.
     pub fn take_piece(&mut self) -> Piece {
         let next_piece_shape = self.queue.remove(0);
 
@@ -29,12 +29,16 @@ impl PieceBag {
         Piece::new(next_piece_shape)
     }
 
+    /// Returns the next piece in the bag without actually removing it from the
+    /// bag.
     pub fn peek_at_next_piece(&self) -> Piece {
         let next_piece_shape = self.queue.first().expect("Could not peek into PieceBag");
 
         Piece::new_from_ref(next_piece_shape)
     }
 
+    /// Generates a a full bag of 7 pieces. This is a static function rather
+    /// than a method so we can fill the bag in the `new()` function.
     fn generate_full_bag() -> Vec<PieceType> {
         let mut pieces: Vec<PieceType> = Vec::new();
         for _ in 0 .. 7 {
