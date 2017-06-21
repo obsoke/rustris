@@ -47,6 +47,7 @@ impl StateManager {
             Transition::Pop => self.pop(),
             Transition::Swap(state) => self.swap(state),
             Transition::Push(state) => self.push(state),
+            Transition::Drain => self.drain(),
         }
     }
 
@@ -65,6 +66,11 @@ impl StateManager {
     fn swap(&mut self, boxed_state: Box<EventHandler>) {
         self.states.clear();
         self.push(boxed_state);
+    }
+
+    fn drain(&mut self) {
+        self.states.clear();
+        self.quit();
     }
 }
 

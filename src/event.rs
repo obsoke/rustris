@@ -106,6 +106,7 @@ pub enum Transition {
     Push(Box<EventHandler>), // Pushes another state on the stack
     Swap(Box<EventHandler>), // Removes current state from stack before adding the new one
     Pop, // Remove state on top of stack
+    Drain, // Clear the stack, quitting the game
 }
 
 
