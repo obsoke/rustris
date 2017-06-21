@@ -254,7 +254,6 @@ impl PlayState {
 
             if did_land {
                 if self.current_piece.top_left.y < 2 {
-                    println!("game over!");
                     self.game_over = true;
                     return Ok(false);
                 }
