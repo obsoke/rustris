@@ -5,7 +5,7 @@ mod states;
 mod event;
 mod util;
 
-use ggez::{Context, conf};
+use ggez::{Context, conf, graphics};
 use event::run;
 
 fn main() {
@@ -18,7 +18,11 @@ fn main() {
     let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf)
         .expect("Could not load configuartion");
 
+    // Our logical render target is 1280x720
+    graphics::set_screen_coordinates(ctx, 0.0, 1280.0, 0.0, 720.0)
+        .expect("Could not set logical screen coordinates before running initial state.");
+
     if let Err(e) = run(ctx) {
-        println!("Error encountered: {}", e);
+        println!("Error encountered in run: {}", e);
     }
 }
