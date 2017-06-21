@@ -66,7 +66,6 @@ impl MenuState {
                 }
             },
             MenuInputCommand::Select => {
-                println!("HI!");
                 if self.current_selection == 0 {
                     self.request_play = true;
                 }
