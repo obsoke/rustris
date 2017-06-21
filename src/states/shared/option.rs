@@ -1,6 +1,16 @@
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Point, Color};
 use event::Assets;
+
+
+/// Different representations of possible commands that could be received from
+/// the user in the menu state.
+pub enum OptionInputCommand {
+    Up,
+    Down,
+    Select,
+}
+
 /// A menu option.
 pub struct Option {
     text: graphics::Text,

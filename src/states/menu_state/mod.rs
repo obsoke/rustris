@@ -3,18 +3,10 @@ use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 
-use states::shared::option::Option;
+use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::{PlayState, Position};
 use states::play_state::tetromino::{Piece, PieceType};
 use util::DurationExt;
-
-/// Different representations of possible commands that could be received from
-/// the user in the menu state.
-enum MenuInputCommand {
-    Up,
-    Down,
-    Select,
-}
 
 pub struct MenuState {
     title_text: graphics::Text,
@@ -30,9 +22,9 @@ pub struct MenuState {
 impl MenuState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<MenuState> {
         let title = graphics::Text::new(ctx, "Rustris", assets.get_font("title")?)?;
-        let mut options_vec: Vec<Option> = Vec::new();
-        let coords = graphics::get_screen_coordinates(&ctx);
 
+        let coords = graphics::get_screen_coordinates(&ctx);
+        let mut options_vec: Vec<Option> = Vec::new();
         options_vec.push(Option::new(ctx, assets, "Play!", Point::new(coords.w / 2.0, 250.0)));
         options_vec.push(Option::new(ctx, assets, "Exit", Point::new(coords.w / 2.0, 325.0)));
 
@@ -48,9 +40,9 @@ impl MenuState {
         })
     }
 
-    fn handle_input(&mut self, command: MenuInputCommand) {
+    fn handle_input(&mut self, command: OptionInputCommand) {
         match command {
-            MenuInputCommand::Up => {
+            OptionInputCommand::Up => {
                 if self.current_selection <= 0 {
                     self.current_selection = self.options.len() - 1;
                 }
@@ -58,7 +50,7 @@ impl MenuState {
                     self.current_selection -= 1;
                 }
             },
-            MenuInputCommand::Down => {
+            OptionInputCommand::Down => {
                 if self.current_selection >= self.options.len() - 1{
                     self.current_selection = 0;
                 }
@@ -66,7 +58,7 @@ impl MenuState {
                     self.current_selection += 1;
                 }
             },
-            MenuInputCommand::Select => {
+            OptionInputCommand::Select => {
                 if self.current_selection == 0 {
                     self.request_play = true;
                 }
@@ -88,8 +80,7 @@ impl EventHandler for MenuState {
 
         if self.request_play {
             return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets).unwrap())));
-        }
-        if self.request_exit {
+        } else if self.request_exit {
             return Ok(Transition::Pop);
         }
 
@@ -128,18 +119,18 @@ impl EventHandler for MenuState {
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(MenuInputCommand::Up),
-            Keycode::Down => self.handle_input(MenuInputCommand::Down),
-            Keycode::Return => self.handle_input(MenuInputCommand::Select),
+            Keycode::Up => self.handle_input(OptionInputCommand::Up),
+            Keycode::Down => self.handle_input(OptionInputCommand::Down),
+            Keycode::Return => self.handle_input(OptionInputCommand::Select),
             _ => (),
         }
     }
 
     fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32) {
         match btn {
-            Button::DPadUp => self.handle_input(MenuInputCommand::Up),
-            Button::DPadDown => self.handle_input(MenuInputCommand::Down),
-            Button::A => self.handle_input(MenuInputCommand::Select),
+            Button::DPadUp => self.handle_input(OptionInputCommand::Up),
+            Button::DPadDown => self.handle_input(OptionInputCommand::Down),
+            Button::A => self.handle_input(OptionInputCommand::Select),
             _ => (),
         }
     }
