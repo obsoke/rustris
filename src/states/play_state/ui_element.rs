@@ -115,7 +115,7 @@ impl UIBlockView {
         if let Some(shape) = self.shape {
             let piece = Piece::new(shape);
             let next_piece_pos = Position::new(self.top_left.x - 90, self.top_left.y + 45);
-            piece.draw_at_point(ctx, assets.get_image("block")?, next_piece_pos)?;
+            piece.draw_at_point(ctx, assets.get_image("block")?, next_piece_pos, 0.0)?;
         }
         Ok(())
     }

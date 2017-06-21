@@ -1,13 +1,12 @@
-use std::time::Duration;
-use std::ops::AddAssign;
-use ggez::{Context, GameResult};
-
+pub mod tetromino;
 mod well;
-mod tetromino;
 mod shapes;
 mod bag;
 mod ui_element;
 
+use std::time::Duration;
+use std::ops::AddAssign;
+use ggez::{Context, GameResult};
 use self::well::Well;
 use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
@@ -24,7 +23,7 @@ pub struct Position {
 }
 
 impl Position {
-    fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Self { x: x, y: y }
     }
 }

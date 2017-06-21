@@ -119,7 +119,7 @@ impl Piece {
     }
 
     /// Draw the `Piece` outside of the grid at a given point.
-    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Position) -> GameResult<()> {
+    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Position, rotation: f64) -> GameResult<()> {
         let starting_pos = top_left;
 
         for (r, _) in self.shape.iter().enumerate() {
@@ -135,7 +135,7 @@ impl Piece {
                         ctx,
                         image,
                         graphics::Point::new(x, y),
-                        0.0
+                        rotation as f32,
                     )?;
                 }
             }
