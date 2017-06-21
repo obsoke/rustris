@@ -9,6 +9,8 @@ use states::play_state::{PlayState, Position};
 use states::play_state::tetromino::{Piece, PieceType};
 use util::DurationExt;
 
+/// Different representations of possible commands that could be received from
+/// the user in the menu state.
 enum MenuInputCommand {
     Up,
     Down,

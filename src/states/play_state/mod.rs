@@ -94,6 +94,7 @@ pub struct PlayState {
     bag: PieceBag,
     current_piece: Piece,
     hold_piece_type: Option<PieceType>,
+    can_hold: bool,
 
     fall_timer: f64,
     time_until_gravity: f64,
@@ -101,7 +102,6 @@ pub struct PlayState {
     cleared_lines: u32,
     lines_until_next_level: i32,
     level: u32,
-    can_hold: bool,
     game_over: bool,
 
     // ui elements
