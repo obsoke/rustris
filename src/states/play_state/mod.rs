@@ -11,9 +11,8 @@ use self::well::Well;
 use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
 use self::ui_element::{UIBlockView, UITextView};
-use states::{Assets, Transition};
 use states::game_over_state::GameOverState;
-use event::*;
+use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use util::DurationExt;
 
 #[derive(Copy, Clone, Debug)]

@@ -1,10 +1,8 @@
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Point, Color};
 use event::Assets;
-use states::play_state::Position;
 /// A menu option.
 pub struct Option {
-    name: String,
     text: graphics::Text,
     centre: Point,
     is_selected: bool,
@@ -14,15 +12,10 @@ impl Option {
     pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point) -> Self {
         let text = graphics::Text::new(ctx, name, assets.get_font("normal").unwrap()).unwrap();
         Self {
-            name: String::from(name),
             text: text,
             centre: top_left,
             is_selected: false,
         }
-    }
-
-    pub fn get_name(&self) -> &String {
-        &self.name
     }
 
     pub fn update(&mut self, is_selected: bool) -> GameResult<()> {
