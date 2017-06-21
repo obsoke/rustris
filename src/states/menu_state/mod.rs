@@ -1,13 +1,19 @@
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
-use event::{Assets, Transition, EventHandler, Keycode, Mod};
+use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 mod option;
 
 use self::option::Option;
 use states::play_state::{PlayState, Position};
 use states::play_state::tetromino::{Piece, PieceType};
 use util::DurationExt;
+
+enum MenuInputCommand {
+    Up,
+    Down,
+    Select,
+}
 
 pub struct MenuState {
     title_text: graphics::Text,
@@ -39,6 +45,36 @@ impl MenuState {
             request_play: false,
             request_exit: false,
         })
+    }
+
+    fn handle_input(&mut self, command: MenuInputCommand) {
+        match command {
+            MenuInputCommand::Up => {
+                if self.current_selection <= 0 {
+                    self.current_selection = self.options.len() - 1;
+                }
+                else {
+                    self.current_selection -= 1;
+                }
+            },
+            MenuInputCommand::Down => {
+                if self.current_selection >= self.options.len() - 1{
+                    self.current_selection = 0;
+                }
+                else {
+                    self.current_selection += 1;
+                }
+            },
+            MenuInputCommand::Select => {
+                println!("HI!");
+                if self.current_selection == 0 {
+                    self.request_play = true;
+                }
+                else if self.current_selection == 1 {
+                    self.request_exit = true;
+                }
+            },
+        }
     }
 }
 
@@ -92,31 +128,18 @@ impl EventHandler for MenuState {
         }
 
         match keycode {
-            Keycode::Up => {
-                if self.current_selection <= 0 {
-                    self.current_selection = self.options.len() - 1;
-                }
-                else {
-                    self.current_selection -= 1;
-                }
-            },
-            Keycode::Down => {
-                if self.current_selection >= self.options.len() - 1{
-                    self.current_selection = 0;
-                }
-                else {
-                    self.current_selection += 1;
-                }
-            },
-            Keycode::Return => {
-                println!("HI!");
-                if self.current_selection == 0 {
-                    self.request_play = true;
-                }
-                else if self.current_selection == 1 {
-                    self.request_exit = true;
-                }
-            },
+            Keycode::Up => self.handle_input(MenuInputCommand::Up),
+            Keycode::Down => self.handle_input(MenuInputCommand::Down),
+            Keycode::Return => self.handle_input(MenuInputCommand::Select),
+            _ => (),
+        }
+    }
+
+    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32) {
+        match btn {
+            Button::DPadUp => self.handle_input(MenuInputCommand::Up),
+            Button::DPadDown => self.handle_input(MenuInputCommand::Down),
+            Button::A => self.handle_input(MenuInputCommand::Select),
             _ => (),
         }
     }
