@@ -2,9 +2,8 @@ use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-mod option;
 
-use self::option::Option;
+use states::shared::option::Option;
 use states::play_state::{PlayState, Position};
 use states::play_state::tetromino::{Piece, PieceType};
 use util::DurationExt;
