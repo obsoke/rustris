@@ -36,25 +36,36 @@ impl AddAssign for Position {
     }
 }
 
-const INPUT_DELAY_TIME: f64 = 0.075;
+const INITIAL_DELAY_TIME: f64 = 0.25;
+const SECONDARY_DELAY_TIME: f64 = 0.05;
 
 #[derive(Debug, Copy, Clone)]
-pub struct InputStateField {
+struct InputStateField {
     is_active: bool,
-    delay_timer: f64,
+    initial_delay_timer: f64,
+    secondary_delay_timer: f64,
+}
+
+impl InputStateField {
+    fn reset(&mut self) {
+        self.is_active = false;
+        self.initial_delay_timer = 0.0;
+        self.secondary_delay_timer = 0.0;
+    }
 }
 
 impl Default for InputStateField {
     fn default() -> Self {
         InputStateField {
             is_active: false,
-            delay_timer: INPUT_DELAY_TIME,
+            initial_delay_timer: 0.0,
+            secondary_delay_timer: 0.0,
         }
     }
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct InputState {
+struct InputState {
     left: InputStateField,
     right: InputStateField,
     soft_drop: InputStateField,
@@ -64,6 +75,7 @@ pub struct InputState {
     drop: InputStateField,
     hold: InputStateField,
 }
+
 
 impl Default for InputState {
     fn default() -> Self {
@@ -146,22 +158,70 @@ impl PlayState {
 
     fn handle_user_input(&mut self, dt: Duration) -> GameResult<()> {
         if self.input.left.is_active {
-            self.input.left.delay_timer += dt.as_subsec_millis();
-            if self.input.left.delay_timer >= INPUT_DELAY_TIME {
+            // initial piece movement
+            if self.input.left.initial_delay_timer == 0.0 {
+                self.input.left.initial_delay_timer += dt.as_subsec_millis();
                 self.move_piece(Position::new(-1, 0));
-                self.input.left.delay_timer = 0.0;
+            }
+            // initial movement delay
+            else if self.input.left.initial_delay_timer <= INITIAL_DELAY_TIME {
+                self.input.left.initial_delay_timer += dt.as_subsec_millis();
+            }
+            // secondary piece movement
+            else if self.input.left.secondary_delay_timer == 0.0 {
+                self.input.left.secondary_delay_timer += dt.as_subsec_millis();
+                self.move_piece(Position::new(-1, 0));
+            }
+            // secondary movement delay
+            else {
+                self.input.left.secondary_delay_timer += dt.as_subsec_millis();
+                if self.input.left.secondary_delay_timer >= SECONDARY_DELAY_TIME {
+                    self.input.left.secondary_delay_timer = 0.0;
+                }
             }
         } else if self.input.right.is_active {
-            self.input.right.delay_timer += dt.as_subsec_millis();
-            if self.input.right.delay_timer >= INPUT_DELAY_TIME {
+            // initial piece movement
+            if self.input.right.initial_delay_timer == 0.0 {
+                self.input.right.initial_delay_timer += dt.as_subsec_millis();
                 self.move_piece(Position::new(1, 0));
-                self.input.right.delay_timer = 0.0;
+            }
+            // initial movement delay
+            else if self.input.right.initial_delay_timer <= INITIAL_DELAY_TIME {
+                self.input.right.initial_delay_timer += dt.as_subsec_millis();
+            }
+            // secondary piece movement
+            else if self.input.right.secondary_delay_timer == 0.0 {
+                self.input.right.secondary_delay_timer += dt.as_subsec_millis();
+                self.move_piece(Position::new(1, 0));
+            }
+            // secondary movement delay
+            else {
+                self.input.right.secondary_delay_timer += dt.as_subsec_millis();
+                if self.input.right.secondary_delay_timer >= SECONDARY_DELAY_TIME {
+                    self.input.right.secondary_delay_timer = 0.0;
+                }
             }
         } else if self.input.soft_drop.is_active {
-            self.input.soft_drop.delay_timer += dt.as_subsec_millis();
-            if self.input.soft_drop.delay_timer >= INPUT_DELAY_TIME {
+            // initial piece movement
+            if self.input.soft_drop.initial_delay_timer == 0.0 {
+                self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
                 self.move_piece(Position::new(0, 1));
-                self.input.soft_drop.delay_timer = 0.0;
+            }
+            // initial movement delay
+            else if self.input.soft_drop.initial_delay_timer <= INITIAL_DELAY_TIME {
+                self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
+            }
+            // secondary piece movement
+            else if self.input.soft_drop.secondary_delay_timer == 0.0 {
+                self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
+                self.move_piece(Position::new(0, 1));
+            }
+            // secondary movement delay
+            else {
+                self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
+                if self.input.soft_drop.secondary_delay_timer >= SECONDARY_DELAY_TIME {
+                    self.input.soft_drop.secondary_delay_timer = 0.0;
+                }
             }
         } else if self.input.rotate_clockwise.is_active {
             if self.input.rotate_clockwise.is_active != self.prev_input.rotate_clockwise.is_active {
@@ -441,34 +501,13 @@ impl EventHandler for PlayState {
 
     fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
         match keycode {
-            Keycode::Left => {
-                self.input.left.is_active = false;
-                self.input.left.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::Right => {
-                self.input.right.is_active = false;
-                self.input.right.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::Up => {
-                self.input.hard_drop.is_active = false;
-                self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::Down => {
-                self.input.soft_drop.is_active = false;
-                self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::Z => {
-                self.input.rotate_counterclockwise.is_active = false;
-                self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::X => {
-                self.input.rotate_clockwise.is_active = false;
-                self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
-            }
-            Keycode::Space => {
-                self.input.hold.is_active = false;
-                self.input.hold.delay_timer = INPUT_DELAY_TIME;
-            }
+            Keycode::Left => self.input.left.reset(),
+            Keycode::Right => self.input.right.reset(),
+            Keycode::Up => self.input.hard_drop.reset(),
+            Keycode::Down => self.input.soft_drop.reset(),
+            Keycode::Z => self.input.rotate_counterclockwise.reset(),
+            Keycode::X => self.input.rotate_clockwise.reset(),
+            Keycode::Space => self.input.hold.reset(),
             _ => (),
         }
     }
@@ -488,34 +527,13 @@ impl EventHandler for PlayState {
 
     fn controller_button_up_event(&mut self, btn: Button, _instance_id: i32) {
         match btn {
-            Button::DPadLeft => {
-                self.input.left.is_active = false;
-                self.input.left.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::DPadRight => {
-                self.input.right.is_active = false;
-                self.input.right.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::DPadUp => {
-                self.input.hard_drop.is_active = false;
-                self.input.hard_drop.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::DPadDown => {
-                self.input.soft_drop.is_active = false;
-                self.input.soft_drop.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::A => {
-                self.input.rotate_counterclockwise.is_active = false;
-                self.input.rotate_counterclockwise.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::X => {
-                self.input.rotate_clockwise.is_active = false;
-                self.input.rotate_clockwise.delay_timer = INPUT_DELAY_TIME;
-            }
-            Button::LeftShoulder => {
-                self.input.hold.is_active = false;
-                self.input.hold.delay_timer = INPUT_DELAY_TIME;
-            }
+            Button::DPadLeft => self.input.left.reset(),
+            Button::DPadRight => self.input.right.reset(),
+            Button::DPadUp => self.input.hard_drop.reset(),
+            Button::DPadDown => self.input.soft_drop.reset(),
+            Button::A => self.input.rotate_counterclockwise.reset(),
+            Button::X => self.input.rotate_clockwise.reset(),
+            Button::LeftShoulder => self.input.hold.reset(),
             _ => (),
         }
     }
