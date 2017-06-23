@@ -62,6 +62,7 @@ use sdl2::mouse;
 use sdl2::keyboard;
 
 use ggez::graphics;
+use ggez::audio;
 use ggez::{GameResult, Context};
 use ggez::timer;
 
@@ -70,6 +71,7 @@ use states::StateManager;
 pub struct Assets {
     images: HashMap<String, graphics::Image>,
     font: HashMap<String, graphics::Font>,
+    audio: HashMap<String, audio::Source>,
 }
 
 impl Assets {
@@ -77,6 +79,7 @@ impl Assets {
         Self {
             images: HashMap::new(),
             font: HashMap::new(),
+            audio: HashMap::new(),
         }
     }
 
@@ -98,6 +101,16 @@ impl Assets {
     pub fn get_font(&self, name: &str) -> GameResult<&graphics::Font> {
         let font = self.font.get(name);
         Ok(font.unwrap())
+    }
+
+    pub fn add_audio(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
+        self.audio.insert(name.to_string(), audio);
+        Ok(())
+    }
+
+    pub fn get_audio(&self, name: &str) -> GameResult<&audio::Source> {
+        let audio = self.audio.get(name);
+        Ok(audio.unwrap())
     }
 }
 
@@ -121,11 +134,12 @@ pub enum Transition {
 pub trait EventHandler {
     /// Called upon each physics update to the game.
     /// This should be where the game's logic takes place.
-    fn update(&mut self,
-              ctx: &mut Context,
-              assets: &Assets,
-              dt: Duration)
-              -> GameResult<Transition>;
+    fn update(
+        &mut self,
+        ctx: &mut Context,
+        assets: &Assets,
+        dt: Duration,
+    ) -> GameResult<Transition>;
 
     /// Called to do the drawing of your game.
     /// You probably want to start this with
@@ -137,12 +151,14 @@ pub trait EventHandler {
 
     fn mouse_button_up_event(&mut self, _button: mouse::MouseButton, _x: i32, _y: i32) {}
 
-    fn mouse_motion_event(&mut self,
-                          _state: mouse::MouseState,
-                          _x: i32,
-                          _y: i32,
-                          _xrel: i32,
-                          _yrel: i32) {
+    fn mouse_motion_event(
+        &mut self,
+        _state: mouse::MouseState,
+        _x: i32,
+        _y: i32,
+        _xrel: i32,
+        _yrel: i32,
+    ) {
     }
 
     fn mouse_wheel_event(&mut self, _x: i32, _y: i32) {}
@@ -174,11 +190,22 @@ pub trait EventHandler {
 pub fn run(ctx: &mut Context) -> GameResult<()> {
     {
         let mut assets = Assets::new();
-        assets.add_image("block", graphics::Image::new(ctx, "/block.png")?)?;
-        assets.add_font("title",
-                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?)?;
-        assets.add_font("normal",
-                      graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?)?;
+        assets.add_image(
+            "block",
+            graphics::Image::new(ctx, "/block.png")?,
+        )?;
+        assets.add_font(
+            "title",
+            graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?,
+        )?;
+        assets.add_font(
+            "normal",
+            graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?,
+        )?;
+        assets.add_audio(
+            "play_0",
+            audio::Source::new(ctx, "/music/Track2.ogg")?,
+        )?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 
@@ -193,7 +220,12 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                         state_manager.quit();
                         // println!("Quit event: {:?}", t);
                     }
-                    KeyDown { keycode, keymod, repeat, .. } => {
+                    KeyDown {
+                        keycode,
+                        keymod,
+                        repeat,
+                        ..
+                    } => {
                         if let Some(key) = keycode {
                             if key == keyboard::Keycode::Escape {
                                 ctx.quit()?;
@@ -202,7 +234,12 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                             }
                         }
                     }
-                    KeyUp { keycode, keymod, repeat, .. } => {
+                    KeyUp {
+                        keycode,
+                        keymod,
+                        repeat,
+                        ..
+                    } => {
                         if let Some(key) = keycode {
                             state_manager.key_up_event(key, keymod, repeat)
                         }
@@ -213,9 +250,14 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                     MouseButtonUp { mouse_btn, x, y, .. } => {
                         state_manager.mouse_button_up_event(mouse_btn, x, y)
                     }
-                    MouseMotion { mousestate, x, y, xrel, yrel, .. } => {
-                        state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel)
-                    }
+                    MouseMotion {
+                        mousestate,
+                        x,
+                        y,
+                        xrel,
+                        yrel,
+                        ..
+                    } => state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel),
                     MouseWheel { x, y, .. } => state_manager.mouse_wheel_event(x, y),
                     ControllerButtonDown { button, which, .. } => {
                         state_manager.controller_button_down_event(button, which)
