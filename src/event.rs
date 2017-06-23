@@ -71,7 +71,7 @@ use states::StateManager;
 pub struct Assets {
     images: HashMap<String, graphics::Image>,
     font: HashMap<String, graphics::Font>,
-    audio: HashMap<String, audio::Source>,
+    music: HashMap<String, audio::Source>,
 }
 
 impl Assets {
@@ -79,7 +79,7 @@ impl Assets {
         Self {
             images: HashMap::new(),
             font: HashMap::new(),
-            audio: HashMap::new(),
+            music: HashMap::new(),
         }
     }
 
@@ -103,14 +103,18 @@ impl Assets {
         Ok(font.unwrap())
     }
 
-    pub fn add_audio(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
-        self.audio.insert(name.to_string(), audio);
+    pub fn add_music(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
+        self.music.insert(name.to_string(), audio);
         Ok(())
     }
 
-    pub fn get_audio(&self, name: &str) -> GameResult<&audio::Source> {
-        let audio = self.audio.get(name);
+    pub fn get_music(&self, name: &str) -> GameResult<&audio::Source> {
+        let audio = self.music.get(name);
         Ok(audio.unwrap())
+    }
+
+    pub fn get_music_count(&self) -> u32 {
+        self.music.len() as u32
     }
 }
 
@@ -202,9 +206,13 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "normal",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?,
         )?;
-        assets.add_audio(
+        assets.add_music(
             "play_0",
             audio::Source::new(ctx, "/music/Track2.ogg")?,
+        )?;
+        assets.add_music(
+            "play_1",
+            audio::Source::new(ctx, "/music/Track4.ogg")?,
         )?;
 
         let mut state_manager = StateManager::new(ctx, &assets);

@@ -44,6 +44,8 @@ pub struct PlayState {
     level: u32,
     game_over: bool,
 
+    current_track_name: String,
+
     // ui elements
     ui_level: UITextView,
     ui_lines: UITextView,
@@ -54,12 +56,19 @@ pub struct PlayState {
 
 impl PlayState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<PlayState> {
+        use rand;
+        use rand::Rng;
+
         let mut bag = PieceBag::new();
         let first_piece = bag.take_piece();
         let first_type = first_piece.get_type();
 
-        // start audio
-        assets.get_audio("play_0")?.play()?;
+        // this is a little hacky... each song is being added as play_0, play_1
+        // and so on... if there happens 5 songs that aren't properly named,
+        // eventually this will cause a panic
+        let song_count = assets.get_music_count();
+        let song_no = rand::thread_rng().gen_range(0, song_count);
+        let song_name = format!("play_{}", song_no);
 
         Ok(PlayState {
             input: InputState::default(),
@@ -78,6 +87,8 @@ impl PlayState {
             level: 0,
             can_hold: true,
             game_over: false,
+
+            current_track_name: song_name,
 
             ui_next: UIBlockView::new(
                 ctx,
@@ -388,6 +399,9 @@ impl EventHandler for PlayState {
         assets: &Assets,
         dt: Duration,
     ) -> GameResult<Transition> {
+        // currently necessary to keep audio looping
+        assets.get_music(&self.current_track_name)?.play()?;
+
         if self.game_over {
             return Ok(Transition::Push(Box::new(GameOverState::new(
                 ctx,
