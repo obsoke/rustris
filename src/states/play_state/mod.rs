@@ -3,6 +3,7 @@ mod well;
 mod shapes;
 mod bag;
 mod ui_element;
+mod input_state;
 
 use std::time::Duration;
 use ggez::{Context, GameResult};
@@ -11,65 +12,13 @@ use self::well::Well;
 use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
 use self::ui_element::{UIBlockView, UITextView};
+use self::input_state::InputState;
 use states::game_over_state::GameOverState;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use util::DurationExt;
 
-const INITIAL_DELAY_TIME: f64 = 0.25;
+const INITIAL_DELAY_TIME: f64 = 0.15;
 const SECONDARY_DELAY_TIME: f64 = 0.05;
-
-#[derive(Debug, Copy, Clone)]
-struct InputStateField {
-    is_active: bool,
-    initial_delay_timer: f64,
-    secondary_delay_timer: f64,
-}
-
-impl InputStateField {
-    fn reset(&mut self) {
-        self.is_active = false;
-        self.initial_delay_timer = 0.0;
-        self.secondary_delay_timer = 0.0;
-    }
-}
-
-impl Default for InputStateField {
-    fn default() -> Self {
-        InputStateField {
-            is_active: false,
-            initial_delay_timer: 0.0,
-            secondary_delay_timer: 0.0,
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-struct InputState {
-    left: InputStateField,
-    right: InputStateField,
-    soft_drop: InputStateField,
-    hard_drop: InputStateField,
-    rotate_clockwise: InputStateField,
-    rotate_counterclockwise: InputStateField,
-    drop: InputStateField,
-    hold: InputStateField,
-}
-
-
-impl Default for InputState {
-    fn default() -> Self {
-        InputState {
-            left: InputStateField::default(),
-            right: InputStateField::default(),
-            soft_drop: InputStateField::default(),
-            hard_drop: InputStateField::default(),
-            rotate_clockwise: InputStateField::default(),
-            rotate_counterclockwise: InputStateField::default(),
-            drop: InputStateField::default(),
-            hold: InputStateField::default(),
-        }
-    }
-}
 
 const BLOCK_SIZE: f32 = 30.0;
 const BASE_FALL_SPEED: f64 = 1.0;
