@@ -44,13 +44,13 @@ impl Well {
         let starting_pos = middle - ((BLOCK_SIZE as f32 * self.data[0].len() as f32) / 2.0);
 
         // draw the "backside" of the well
-        graphics::set_color(ctx, Color::from(((100, 100, 100, 20))))?;
+        graphics::set_color(ctx, Color::from(((15, 15, 15, 20))))?;
         graphics::rectangle(
             ctx,
             DrawMode::Fill,
             Rect {
-                x: middle,
-                y: Y_OFFSET + (BLOCK_SIZE * 2.0),
+                x: middle - (BLOCK_SIZE / 2.0),
+                y: Y_OFFSET + ((BLOCK_SIZE / 2.0) * 20.0) + ((BLOCK_SIZE / 2.0)) * 3.0,
                 w: BLOCK_SIZE * 10.0,
                 h: BLOCK_SIZE * 20.0,
             },

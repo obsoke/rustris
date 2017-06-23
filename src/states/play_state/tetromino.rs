@@ -67,7 +67,8 @@ impl Piece {
         for (r, _) in self.shape.iter().enumerate() {
             for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
-                    if r + (self.top_left.y as usize) < 2 { // don't draw in vanish zone
+                    if r + (self.top_left.y as usize) < 2 {
+                        // don't draw in vanish zone
                         continue;
                     }
                     let colour = block_to_colour(self.shape[r][c], false);
@@ -76,12 +77,7 @@ impl Piece {
                     let x = starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE);
                     let y = Y_OFFSET + ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32;
 
-                    graphics::draw(
-                        ctx,
-                        image,
-                        graphics::Point::new(x, y),
-                        0.0
-                    )?;
+                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
                 }
             }
         }
@@ -89,7 +85,12 @@ impl Piece {
         Ok(())
     }
 
-    pub fn draw_shadow(&self, ctx: &mut Context, image: &graphics::Image, shadow_position: &Point) -> GameResult<()> {
+    pub fn draw_shadow(
+        &self,
+        ctx: &mut Context,
+        image: &graphics::Image,
+        shadow_position: &Point,
+    ) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
         let width = graphics::get_screen_coordinates(&ctx).w;
@@ -105,12 +106,7 @@ impl Piece {
                     let x = starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE);
                     let y = Y_OFFSET + ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32;
 
-                    graphics::draw(
-                        ctx,
-                        image,
-                        graphics::Point::new(x, y),
-                        0.0
-                    )?;
+                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
                 }
             }
         }
@@ -119,7 +115,13 @@ impl Piece {
     }
 
     /// Draw the `Piece` outside of the grid at a given point.
-    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Point, rotation: f64) -> GameResult<()> {
+    pub fn draw_at_point(
+        &self,
+        ctx: &mut Context,
+        image: &graphics::Image,
+        top_left: Point,
+        rotation: f64,
+    ) -> GameResult<()> {
         let starting_pos = top_left;
 
         for (r, _) in self.shape.iter().enumerate() {
@@ -131,12 +133,7 @@ impl Piece {
                     let x = starting_pos.x as f32 + ((c as f32 + 1.0) * BLOCK_SIZE);
                     let y = starting_pos.y as f32 + (r as f32 * BLOCK_SIZE);
 
-                    graphics::draw(
-                        ctx,
-                        image,
-                        graphics::Point::new(x, y),
-                        rotation as f32,
-                    )?;
+                    graphics::draw(ctx, image, graphics::Point::new(x, y), rotation as f32)?;
                 }
             }
         }
@@ -206,25 +203,24 @@ pub fn u8_to_piece_type(num: u8) -> Option<PieceType> {
 pub fn block_to_colour(num: u32, shadow: bool) -> Color {
     if shadow {
         match num {
-            1 => Color::from(( 0, 255, 255, 45 )),
-            2 => Color::from(( 0, 0, 255, 45 )),
-            3 => Color::from(( 255, 165, 0, 45 )),
-            4 => Color::from(( 255, 255, 0, 45 )),
-            5 => Color::from(( 128, 255, 0, 45 )),
-            6 => Color::from(( 128, 0, 128, 45 )),
-            7 => Color::from(( 255, 0, 0, 45 )),
+            1 => Color::from((0, 255, 255, 75)),
+            2 => Color::from((0, 0, 255, 75)),
+            3 => Color::from((255, 165, 0, 75)),
+            4 => Color::from((255, 255, 0, 75)),
+            5 => Color::from((128, 255, 0, 75)),
+            6 => Color::from((128, 0, 128, 75)),
+            7 => Color::from((255, 0, 0, 75)),
             _ => unreachable!(),
         }
-    }
-    else {
+    } else {
         match num {
-            1 => Color::from(( 0, 255, 255, 255 )),
-            2 => Color::from(( 0, 0, 255, 255 )),
-            3 => Color::from(( 255, 165, 0, 255 )),
-            4 => Color::from(( 255, 255, 0, 255 )),
-            5 => Color::from(( 128, 255, 0, 255 )),
-            6 => Color::from(( 128, 0, 128, 255 )),
-            7 => Color::from(( 255, 0, 0, 255 )),
+            1 => Color::from((0, 255, 255, 255)),
+            2 => Color::from((0, 0, 255, 255)),
+            3 => Color::from((255, 165, 0, 255)),
+            4 => Color::from((255, 255, 0, 255)),
+            5 => Color::from((128, 255, 0, 255)),
+            6 => Color::from((128, 0, 128, 255)),
+            7 => Color::from((255, 0, 0, 255)),
             _ => unreachable!(),
         }
     }
@@ -239,8 +235,7 @@ pub fn next_rotation_index(current_index: u32, direction: i32) -> u32 {
             3 => 0,
             _ => unreachable!(),
         }
-    }
-    else {
+    } else {
         match current_index {
             0 => 3,
             1 => 0,
