@@ -58,6 +58,9 @@ impl PlayState {
         let first_piece = bag.take_piece();
         let first_type = first_piece.get_type();
 
+        // start audio
+        assets.get_audio("play_0")?.play()?;
+
         Ok(PlayState {
             input: InputState::default(),
             prev_input: InputState::default(),
@@ -76,7 +79,13 @@ impl PlayState {
             can_hold: true,
             game_over: false,
 
-            ui_next: UIBlockView::new(ctx, assets, Point::new(775.0, 70.0), "Next", Some(first_type)),
+            ui_next: UIBlockView::new(
+                ctx,
+                assets,
+                Point::new(775.0, 70.0),
+                "Next",
+                Some(first_type),
+            ),
             ui_hold: UIBlockView::new(ctx, assets, Point::new(775.0, 250.0), "Hold", None),
             ui_level: UITextView::new(ctx, assets, Point::new(775.0, 420.0), "Level", "1"),
             ui_lines: UITextView::new(ctx, assets, Point::new(775.0, 500.0), "Lines", "0"),
@@ -157,7 +166,8 @@ impl PlayState {
             }
         } else if self.input.rotate_counterclockwise.is_active {
             if self.input.rotate_counterclockwise.is_active !=
-               self.prev_input.rotate_counterclockwise.is_active {
+                self.prev_input.rotate_counterclockwise.is_active
+            {
                 self.rotate_piece(-1);
             }
         } else if self.input.hard_drop.is_active {
@@ -171,7 +181,7 @@ impl PlayState {
             if self.input.hold.is_active != self.prev_input.hold.is_active {
                 self.handle_hold()?;
             }
-    }
+        }
 
         Ok(())
     }
@@ -181,8 +191,10 @@ impl PlayState {
         self.current_piece.potential_top_left.y += potential_new_position.y;
 
         let current_shape = self.current_piece.get_shape();
-        let collision_found = self.well
-            .check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
+        let collision_found = self.well.check_for_collisions(
+            &current_shape,
+            &self.current_piece.potential_top_left,
+        );
 
         if collision_found {
             self.current_piece.potential_top_left = self.current_piece.top_left;
@@ -193,8 +205,10 @@ impl PlayState {
 
     fn rotate_piece(&mut self, direction: i32) {
         let next_shape = self.current_piece.get_next_shape(direction);
-        let collision_found = self.well
-            .check_for_collisions(&next_shape, &self.current_piece.top_left);
+        let collision_found = self.well.check_for_collisions(
+            &next_shape,
+            &self.current_piece.top_left,
+        );
 
         if !collision_found {
             self.current_piece.change_shape(direction);
@@ -204,8 +218,10 @@ impl PlayState {
             // move one piece to the right & perform all above checks
             let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
             potential_position.x += 1.0;
-            let collision_found = self.well
-                .check_for_collisions(&next_shape, &potential_position);
+            let collision_found = self.well.check_for_collisions(
+                &next_shape,
+                &potential_position,
+            );
 
             if !collision_found {
                 self.current_piece.top_left = potential_position;
@@ -214,8 +230,10 @@ impl PlayState {
             } else {
                 let mut potential_position = self.current_piece.top_left;
                 potential_position.x -= 1.0;
-                let collision_found = self.well
-                    .check_for_collisions(&next_shape, &potential_position);
+                let collision_found = self.well.check_for_collisions(
+                    &next_shape,
+                    &potential_position,
+                );
 
                 if !collision_found {
                     self.current_piece.top_left = potential_position;
@@ -239,8 +257,10 @@ impl PlayState {
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1.0;
 
-            let did_land = self.well
-                .check_for_landing(&current_shape, &self.current_piece.potential_top_left);
+            let did_land = self.well.check_for_landing(
+                &current_shape,
+                &self.current_piece.potential_top_left,
+            );
 
             if did_land {
                 if self.current_piece.top_left.y < 2.0 {
@@ -267,8 +287,10 @@ impl PlayState {
         let mut potential_shadow_position = shadow_position;
         loop {
             potential_shadow_position.y += 1.0;
-            let collision_found = self.well
-                .check_for_landing(&self.current_piece.get_shape(), &potential_shadow_position);
+            let collision_found = self.well.check_for_landing(
+                &self.current_piece.get_shape(),
+                &potential_shadow_position,
+            );
 
             if collision_found {
                 break;
@@ -360,17 +382,20 @@ impl PlayState {
 
 
 impl EventHandler for PlayState {
-    fn update(&mut self,
-              ctx: &mut Context,
-              assets: &Assets,
-              dt: Duration)
-              -> GameResult<Transition> {
+    fn update(
+        &mut self,
+        ctx: &mut Context,
+        assets: &Assets,
+        dt: Duration,
+    ) -> GameResult<Transition> {
         if self.game_over {
-            return Ok(Transition::Push(Box::new(GameOverState::new(ctx,
-                                                                   assets,
-                                                                   self.score,
-                                                                   self.cleared_lines,
-                                                                   self.level + 1)?)));
+            return Ok(Transition::Push(Box::new(GameOverState::new(
+                ctx,
+                assets,
+                self.score,
+                self.cleared_lines,
+                self.level + 1,
+            )?)));
         }
 
         self.handle_user_input(dt)?;
@@ -389,9 +414,21 @@ impl EventHandler for PlayState {
 
         // update ui
         self.ui_hold.update(ctx, assets, self.hold_piece_type);
-        self.ui_next.update(ctx, assets, Some(self.bag.peek_at_next_piece().get_type()));
-        self.ui_level.update(ctx, assets, &(&self.level + 1).to_string());
-        self.ui_lines.update(ctx, assets, &self.cleared_lines.to_string());
+        self.ui_next.update(
+            ctx,
+            assets,
+            Some(self.bag.peek_at_next_piece().get_type()),
+        );
+        self.ui_level.update(
+            ctx,
+            assets,
+            &(&self.level + 1).to_string(),
+        );
+        self.ui_lines.update(
+            ctx,
+            assets,
+            &self.cleared_lines.to_string(),
+        );
         self.ui_score.update(ctx, assets, &self.score.to_string());
 
 
@@ -400,10 +437,11 @@ impl EventHandler for PlayState {
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         self.well.draw(ctx, assets.get_image("block")?)?;
-        self.current_piece
-            .draw_shadow(ctx,
-                         assets.get_image("block")?,
-                         &self.current_piece.get_shadow_position())?;
+        self.current_piece.draw_shadow(
+            ctx,
+            assets.get_image("block")?,
+            &self.current_piece.get_shadow_position(),
+        )?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
         self.ui_next.draw(ctx, assets)?;
