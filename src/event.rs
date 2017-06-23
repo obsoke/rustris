@@ -214,6 +214,10 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "play_1",
             audio::Source::new(ctx, "/music/Track4.ogg")?,
         )?;
+        assets.add_music(
+            "menu",
+            audio::Source::new(ctx, "/music/Track3.ogg")?,
+        )?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 

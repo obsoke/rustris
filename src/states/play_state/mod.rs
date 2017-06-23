@@ -25,6 +25,7 @@ const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
 const LINES_PER_LEVEL: i32 = 10;
 const MAX_LEVEL: u32 = 20;
+const NON_PLAY_SONGS: u32 = 1; // ....
 
 pub struct PlayState {
     input: InputState,
@@ -65,9 +66,11 @@ impl PlayState {
 
         // this is a little hacky... each song is being added as play_0, play_1
         // and so on... if there happens 5 songs that aren't properly named,
-        // eventually this will cause a panic
+        // eventually this will cause a panic. also, the last song is always the
+        // menu song, we will not include that in our potential songs to play in
+        // the hackiest way possible
         let song_count = assets.get_music_count();
-        let song_no = rand::thread_rng().gen_range(0, song_count);
+        let song_no = rand::thread_rng().gen_range(0, song_count - NON_PLAY_SONGS);
         let song_name = format!("play_{}", song_no);
 
         Ok(PlayState {
@@ -400,9 +403,15 @@ impl EventHandler for PlayState {
         dt: Duration,
     ) -> GameResult<Transition> {
         // currently necessary to keep audio looping
-        assets.get_music(&self.current_track_name)?.play()?;
+        let current_song = assets.get_music(&self.current_track_name)?;
+        if current_song.paused() {
+            current_song.resume();
+        } else {
+            current_song.play()?;
+        }
 
         if self.game_over {
+            assets.get_music(&self.current_track_name)?.pause();
             return Ok(Transition::Push(Box::new(GameOverState::new(
                 ctx,
                 assets,

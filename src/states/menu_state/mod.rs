@@ -25,8 +25,18 @@ impl MenuState {
 
         let coords = graphics::get_screen_coordinates(&ctx);
         let mut options_vec: Vec<Option> = Vec::new();
-        options_vec.push(Option::new(ctx, assets, "Play!", Point::new(coords.w / 2.0, 250.0)));
-        options_vec.push(Option::new(ctx, assets, "Exit", Point::new(coords.w / 2.0, 325.0)));
+        options_vec.push(Option::new(
+            ctx,
+            assets,
+            "Play!",
+            Point::new(coords.w / 2.0, 250.0),
+        ));
+        options_vec.push(Option::new(
+            ctx,
+            assets,
+            "Exit",
+            Point::new(coords.w / 2.0, 325.0),
+        ));
 
         Ok(MenuState {
             title_text: title,
@@ -45,42 +55,52 @@ impl MenuState {
             OptionInputCommand::Up => {
                 if self.current_selection <= 0 {
                     self.current_selection = self.options.len() - 1;
-                }
-                else {
+                } else {
                     self.current_selection -= 1;
                 }
-            },
+            }
             OptionInputCommand::Down => {
-                if self.current_selection >= self.options.len() - 1{
+                if self.current_selection >= self.options.len() - 1 {
                     self.current_selection = 0;
-                }
-                else {
+                } else {
                     self.current_selection += 1;
                 }
-            },
+            }
             OptionInputCommand::Select => {
                 if self.current_selection == 0 {
                     self.request_play = true;
-                }
-                else if self.current_selection == 1 {
+                } else if self.current_selection == 1 {
                     self.request_exit = true;
                 }
-            },
+            }
         }
     }
 }
 
 impl EventHandler for MenuState {
-    fn update(&mut self,
-              ctx: &mut Context,
-              assets: &Assets,
-              dt: Duration)
-              -> GameResult<Transition> {
+    fn update(
+        &mut self,
+        ctx: &mut Context,
+        assets: &Assets,
+        dt: Duration,
+    ) -> GameResult<Transition> {
+        // play & loop menu theme
+        let current_song = assets.get_music("menu")?;
+        if current_song.paused() {
+            current_song.resume();
+        } else {
+            current_song.play()?;
+        }
+
         self.title_rotation += dt.as_subsec_millis();
 
         if self.request_play {
-            return Ok(Transition::Swap(Box::new(PlayState::new(ctx, assets).unwrap())));
+            assets.get_music("menu")?.pause();
+            return Ok(Transition::Swap(
+                Box::new(PlayState::new(ctx, assets).unwrap()),
+            ));
         } else if self.request_exit {
+            assets.get_music("menu")?.pause();
             return Ok(Transition::Pop);
         }
 
@@ -104,7 +124,12 @@ impl EventHandler for MenuState {
 
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
-        self.piece.draw_at_point(ctx, assets.get_image("block")?, pos, self.title_rotation)?;
+        self.piece.draw_at_point(
+            ctx,
+            assets.get_image("block")?,
+            pos,
+            self.title_rotation,
+        )?;
 
         for option in &self.options {
             option.draw(ctx)?;
