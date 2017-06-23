@@ -1,5 +1,5 @@
-extern crate rand;
-use self::rand::Rng;
+use rand;
+use rand::Rng;
 
 use super::tetromino::{PieceType, Piece, u8_to_piece_type};
 
@@ -11,9 +11,7 @@ pub struct PieceBag {
 
 impl PieceBag {
     pub fn new() -> Self {
-        PieceBag {
-            queue: PieceBag::generate_full_bag()
-        }
+        PieceBag { queue: PieceBag::generate_full_bag() }
     }
 
     /// Takes the next piece from the bag. If the bag is empty after removing a
@@ -41,7 +39,7 @@ impl PieceBag {
     /// than a method so we can fill the bag in the `new()` function.
     fn generate_full_bag() -> Vec<PieceType> {
         let mut pieces: Vec<PieceType> = Vec::new();
-        for _ in 0 .. 7 {
+        for _ in 0..7 {
             let num = rand::thread_rng().gen_range(0, 7);
             let mut shape = u8_to_piece_type(num).unwrap();
 
