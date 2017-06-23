@@ -1,6 +1,6 @@
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color};
-use super::{BLOCK_SIZE, Position};
+use ggez::graphics::{Color, Point};
+use super::BLOCK_SIZE;
 use super::shapes::*;
 use super::well::Y_OFFSET;
 
@@ -25,9 +25,9 @@ pub struct Piece {
     shape: PieceShape,
     shape_type: PieceType,
     current_rotation_index: u32,
-    pub top_left: Position,
-    pub potential_top_left: Position,
-    shadow_position: Position,
+    pub top_left: Point,
+    pub potential_top_left: Point,
+    shadow_position: Point,
 }
 
 impl Piece {
@@ -37,9 +37,9 @@ impl Piece {
         Piece {
             shape: shape,
             shape_type: shape_type,
-            top_left: Position { x: 4, y: 0 },
-            potential_top_left: Position { x: 4, y: 0 },
-            shadow_position: Position { x: 4, y: 0 },
+            top_left: Point::new(3.0, 0.0),
+            potential_top_left: Point::new(3.0, 0.0),
+            shadow_position: Point::new(3.0, 0.0),
             current_rotation_index: 0,
         }
     }
@@ -50,9 +50,9 @@ impl Piece {
         Piece {
             shape: shape,
             shape_type: *shape_type,
-            top_left: Position { x: 4, y: 0 },
-            potential_top_left: Position { x: 4, y: 0 },
-            shadow_position: Position { x: 4, y: 0 },
+            top_left: Point::new(3.0, 0.0),
+            potential_top_left: Point::new(3.0, 0.0),
+            shadow_position: Point::new(3.0, 0.0),
             current_rotation_index: 0,
         }
     }
@@ -89,7 +89,7 @@ impl Piece {
         Ok(())
     }
 
-    pub fn draw_shadow(&self, ctx: &mut Context, image: &graphics::Image, shadow_position: &Position) -> GameResult<()> {
+    pub fn draw_shadow(&self, ctx: &mut Context, image: &graphics::Image, shadow_position: &Point) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
         let width = graphics::get_screen_coordinates(&ctx).w;
@@ -119,7 +119,7 @@ impl Piece {
     }
 
     /// Draw the `Piece` outside of the grid at a given point.
-    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Position, rotation: f64) -> GameResult<()> {
+    pub fn draw_at_point(&self, ctx: &mut Context, image: &graphics::Image, top_left: Point, rotation: f64) -> GameResult<()> {
         let starting_pos = top_left;
 
         for (r, _) in self.shape.iter().enumerate() {
@@ -165,11 +165,11 @@ impl Piece {
         self.current_rotation_index = next_index;
     }
 
-    pub fn set_shadow_position(&mut self, shadow_pos: Position) {
+    pub fn set_shadow_position(&mut self, shadow_pos: Point) {
         self.shadow_position = shadow_pos;
     }
 
-    pub fn get_shadow_position(&self) -> Position {
+    pub fn get_shadow_position(&self) -> Point {
         self.shadow_position
     }
 }

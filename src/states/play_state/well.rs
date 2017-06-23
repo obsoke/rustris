@@ -1,6 +1,6 @@
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color, DrawMode, Rect};
-use super::{BLOCK_SIZE, Position};
+use ggez::graphics::{Color, DrawMode, Rect, Point};
+use super::{BLOCK_SIZE};
 use super::tetromino::{Piece, PieceShape, block_to_colour};
 
 
@@ -95,22 +95,22 @@ impl Well {
 
     /// Check if a collision would occur in the well given the shape and shape's
     /// position.
-    pub fn check_for_collisions(&self, shape: &PieceShape, position: &Position) -> bool {
+    pub fn check_for_collisions(&self, shape: &PieceShape, position: &Point) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
                 if shape[r][c] != 0 {
-                    if c as i32 + position.x < 0 {
+                    if c as f32 + position.x < 0.0 {
                         collision_found = true;
                     }
-                    else if c as i32 + position.x >= self.data[r].len() as i32 {
+                    else if c as f32 + position.x >= self.data[r].len() as f32 {
                         collision_found = true;
                     }
-                    else  if r as i32 + position.y >= self.data.len()  as i32 {
+                    else  if r as f32 + position.y >= self.data.len()  as f32 {
                         collision_found = true;
                     }
-                    else if self.data[(r as i32 + position.y) as usize][(c as i32 + position.x) as usize] != 0{
+                    else if self.data[(r as f32 + position.y) as usize][(c as f32 + position.x) as usize] != 0{
                         collision_found = true;
                     }
                 }
@@ -121,19 +121,19 @@ impl Well {
     }
 
     /// Check if a landing would occur given the shape and the shape's position.
-    pub fn check_for_landing(&self, shape: &PieceShape, position: &Position) -> bool {
+    pub fn check_for_landing(&self, shape: &PieceShape, position: &Point) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
                 if shape[r][c] != 0 {
-                    if r as i32 + position.y >= self.data.len() as i32 {
+                    if r as f32 + position.y >= self.data.len() as f32 {
                         collision_found = true;
                     }
-                    else if (c as i32 + position.x) >= self.data[r].len() as i32 {
+                    else if (c as f32 + position.x) >= self.data[r].len() as f32 {
                         // do nothing
                     }
-                    else if (c as i32 + position.x) < 0 {
+                    else if (c as f32 + position.x) < 0.0 {
                         // do nothing
                     }
                     else if self.data[(r.wrapping_add(position.y as usize))][(c.wrapping_add(position.x as usize))] != 0{

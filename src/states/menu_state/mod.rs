@@ -4,7 +4,7 @@ use ggez::graphics::Point;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 
 use states::shared::option::{Option, OptionInputCommand};
-use states::play_state::{PlayState, Position};
+use states::play_state::PlayState;
 use states::play_state::tetromino::{Piece, PieceType};
 use util::DurationExt;
 
@@ -100,7 +100,7 @@ impl EventHandler for MenuState {
         let coords = graphics::get_screen_coordinates(&ctx);
 
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        let pos = Position::new(5, 50);
+        let pos = Point::new(5.0, 50.0);
 
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;

@@ -5,8 +5,8 @@ mod bag;
 mod ui_element;
 
 use std::time::Duration;
-use std::ops::AddAssign;
 use ggez::{Context, GameResult};
+use ggez::graphics::Point;
 use self::well::Well;
 use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
@@ -14,27 +14,6 @@ use self::ui_element::{UIBlockView, UITextView};
 use states::game_over_state::GameOverState;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use util::DurationExt;
-
-#[derive(Copy, Clone, Debug)]
-pub struct Position {
-    x: i32,
-    y: i32,
-}
-
-impl Position {
-    pub fn new(x: i32, y: i32) -> Self {
-        Self { x: x, y: y }
-    }
-}
-
-impl AddAssign for Position {
-    fn add_assign(&mut self, other: Position) {
-        *self = Position {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        };
-    }
-}
 
 const INITIAL_DELAY_TIME: f64 = 0.25;
 const SECONDARY_DELAY_TIME: f64 = 0.05;
@@ -148,11 +127,11 @@ impl PlayState {
             can_hold: true,
             game_over: false,
 
-            ui_next: UIBlockView::new(ctx, assets, Position::new(775, 70), "Next", Some(first_type)),
-            ui_hold: UIBlockView::new(ctx, assets, Position::new(775, 250), "Hold", None),
-            ui_level: UITextView::new(ctx, assets, Position::new(775, 420), "Level", "1"),
-            ui_lines: UITextView::new(ctx, assets, Position::new(775, 500), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Position::new(775, 580), "Score", "0"),
+            ui_next: UIBlockView::new(ctx, assets, Point::new(775.0, 70.0), "Next", Some(first_type)),
+            ui_hold: UIBlockView::new(ctx, assets, Point::new(775.0, 250.0), "Hold", None),
+            ui_level: UITextView::new(ctx, assets, Point::new(775.0, 420.0), "Level", "1"),
+            ui_lines: UITextView::new(ctx, assets, Point::new(775.0, 500.0), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Point::new(775.0, 580.0), "Score", "0"),
         })
     }
 
@@ -161,7 +140,7 @@ impl PlayState {
             // initial piece movement
             if self.input.left.initial_delay_timer == 0.0 {
                 self.input.left.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(-1, 0));
+                self.move_piece(Point::new(-1.0, 0.0));
             }
             // initial movement delay
             else if self.input.left.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -170,7 +149,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.left.secondary_delay_timer == 0.0 {
                 self.input.left.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(-1, 0));
+                self.move_piece(Point::new(-1.0, 0.0));
             }
             // secondary movement delay
             else {
@@ -183,7 +162,7 @@ impl PlayState {
             // initial piece movement
             if self.input.right.initial_delay_timer == 0.0 {
                 self.input.right.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(1, 0));
+                self.move_piece(Point::new(1.0, 0.0));
             }
             // initial movement delay
             else if self.input.right.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -192,7 +171,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.right.secondary_delay_timer == 0.0 {
                 self.input.right.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(1, 0));
+                self.move_piece(Point::new(1.0, 0.0));
             }
             // secondary movement delay
             else {
@@ -205,7 +184,7 @@ impl PlayState {
             // initial piece movement
             if self.input.soft_drop.initial_delay_timer == 0.0 {
                 self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(0, 1));
+                self.move_piece(Point::new(0.0, 1.0));
             }
             // initial movement delay
             else if self.input.soft_drop.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -214,7 +193,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.soft_drop.secondary_delay_timer == 0.0 {
                 self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Position::new(0, 1));
+                self.move_piece(Point::new(0.0, 1.0));
             }
             // secondary movement delay
             else {
@@ -248,8 +227,10 @@ impl PlayState {
         Ok(())
     }
 
-    fn move_piece(&mut self, potential_new_position: Position) {
-        self.current_piece.potential_top_left += potential_new_position;
+    fn move_piece(&mut self, potential_new_position: Point) {
+        self.current_piece.potential_top_left.x += potential_new_position.x;
+        self.current_piece.potential_top_left.y += potential_new_position.y;
+
         let current_shape = self.current_piece.get_shape();
         let collision_found = self.well
             .check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
@@ -273,7 +254,7 @@ impl PlayState {
             // need to do 2 checks:
             // move one piece to the right & perform all above checks
             let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
-            potential_position.x += 1;
+            potential_position.x += 1.0;
             let collision_found = self.well
                 .check_for_collisions(&next_shape, &potential_position);
 
@@ -283,7 +264,7 @@ impl PlayState {
                 self.current_piece.change_shape(direction);
             } else {
                 let mut potential_position = self.current_piece.top_left;
-                potential_position.x -= 1;
+                potential_position.x -= 1.0;
                 let collision_found = self.well
                     .check_for_collisions(&next_shape, &potential_position);
 
@@ -307,13 +288,13 @@ impl PlayState {
         if self.fall_timer >= self.time_until_gravity {
             let current_shape = self.current_piece.get_shape();
             self.fall_timer = 0.0;
-            self.current_piece.potential_top_left.y += 1;
+            self.current_piece.potential_top_left.y += 1.0;
 
             let did_land = self.well
                 .check_for_landing(&current_shape, &self.current_piece.potential_top_left);
 
             if did_land {
-                if self.current_piece.top_left.y < 2 {
+                if self.current_piece.top_left.y < 2.0 {
                     self.game_over = true;
                     return Ok(false);
                 }
@@ -336,7 +317,7 @@ impl PlayState {
         let mut shadow_position = self.current_piece.top_left;
         let mut potential_shadow_position = shadow_position;
         loop {
-            potential_shadow_position.y += 1;
+            potential_shadow_position.y += 1.0;
             let collision_found = self.well
                 .check_for_landing(&self.current_piece.get_shape(), &potential_shadow_position);
 
