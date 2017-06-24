@@ -15,4 +15,4 @@ Add the `--release` flag to create an optimized build.
 ## Attributions
 
 [Music by Abstraction Music](http://abstractionmusic.com/)
-[Click SFX](https://freesound.org/people/EdgardEdition/sounds/113634/)
+[Click SFX](https://freesound.org/people/kwahmah_02/sounds/256116/)

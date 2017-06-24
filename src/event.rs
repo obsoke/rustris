@@ -72,6 +72,7 @@ pub struct Assets {
     images: HashMap<String, graphics::Image>,
     font: HashMap<String, graphics::Font>,
     music: HashMap<String, audio::Source>,
+    sfx: HashMap<String, audio::Source>,
 }
 
 impl Assets {
@@ -80,6 +81,7 @@ impl Assets {
             images: HashMap::new(),
             font: HashMap::new(),
             music: HashMap::new(),
+            sfx: HashMap::new(),
         }
     }
 
@@ -115,6 +117,16 @@ impl Assets {
 
     pub fn get_music_count(&self) -> u32 {
         self.music.len() as u32
+    }
+
+    pub fn add_sfx(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
+        self.sfx.insert(name.to_string(), audio);
+        Ok(())
+    }
+
+    pub fn get_sfx(&self, name: &str) -> GameResult<&audio::Source> {
+        let audio = self.sfx.get(name);
+        Ok(audio.unwrap())
     }
 }
 
@@ -206,18 +218,20 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "normal",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?,
         )?;
-        assets.add_music(
-            "play_0",
-            audio::Source::new(ctx, "/music/Track2.ogg")?,
-        )?;
-        assets.add_music(
-            "play_1",
-            audio::Source::new(ctx, "/music/Track4.ogg")?,
-        )?;
-        assets.add_music(
-            "menu",
-            audio::Source::new(ctx, "/music/Track3.ogg")?,
-        )?;
+
+        let mut play_0 = audio::Source::new(ctx, "/music/Track2.ogg")?;
+        let mut play_1 = audio::Source::new(ctx, "/music/Track4.ogg")?;
+        let mut menu = audio::Source::new(ctx, "/music/Track3.ogg")?;
+        play_0.set_volume(0.4);
+        play_1.set_volume(0.4);
+        menu.set_volume(0.4);
+        assets.add_music("play_0", play_0)?;
+        assets.add_music("play_1", play_1)?;
+        assets.add_music("menu", menu)?;
+
+        let mut click = audio::Source::new(ctx, "/sfx/click.ogg")?;
+        click.set_volume(0.5);
+        assets.add_sfx("click", click)?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 

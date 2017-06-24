@@ -107,12 +107,12 @@ impl PlayState {
         })
     }
 
-    fn handle_user_input(&mut self, dt: Duration) -> GameResult<()> {
+    fn handle_user_input(&mut self, dt: Duration, assets: &Assets) -> GameResult<()> {
         if self.input.left.is_active {
             // initial piece movement
             if self.input.left.initial_delay_timer == 0.0 {
                 self.input.left.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0));
+                self.move_piece(Point::new(-1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.left.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -121,7 +121,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.left.secondary_delay_timer == 0.0 {
                 self.input.left.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0));
+                self.move_piece(Point::new(-1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -134,7 +134,7 @@ impl PlayState {
             // initial piece movement
             if self.input.right.initial_delay_timer == 0.0 {
                 self.input.right.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0));
+                self.move_piece(Point::new(1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.right.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -143,7 +143,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.right.secondary_delay_timer == 0.0 {
                 self.input.right.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0));
+                self.move_piece(Point::new(1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -156,7 +156,7 @@ impl PlayState {
             // initial piece movement
             if self.input.soft_drop.initial_delay_timer == 0.0 {
                 self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0));
+                self.move_piece(Point::new(0.0, 1.0), assets);
             }
             // initial movement delay
             else if self.input.soft_drop.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -165,7 +165,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.soft_drop.secondary_delay_timer == 0.0 {
                 self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0));
+                self.move_piece(Point::new(0.0, 1.0), assets);
             }
             // secondary movement delay
             else {
@@ -186,6 +186,11 @@ impl PlayState {
             }
         } else if self.input.hard_drop.is_active {
             if self.input.hard_drop.is_active != self.prev_input.hard_drop.is_active {
+                assets
+                    .get_sfx("click")
+                    .expect("Could not find click sfx")
+                    .play()
+                    .expect("Could not play click sfx");
                 self.current_piece.top_left = self.current_piece.get_shadow_position();
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
@@ -200,7 +205,7 @@ impl PlayState {
         Ok(())
     }
 
-    fn move_piece(&mut self, potential_new_position: Point) {
+    fn move_piece(&mut self, potential_new_position: Point, assets: &Assets) {
         self.current_piece.potential_top_left.x += potential_new_position.x;
         self.current_piece.potential_top_left.y += potential_new_position.y;
 
@@ -212,6 +217,14 @@ impl PlayState {
 
         if collision_found {
             self.current_piece.potential_top_left = self.current_piece.top_left;
+        } else {
+            // if we can move, play our movement audio!
+            assets
+                .get_sfx("click")
+                .expect("Could not find click sfx")
+                .play()
+                .expect("Could not play click sfx");
+
         }
 
         self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
@@ -421,7 +434,9 @@ impl EventHandler for PlayState {
             )?)));
         }
 
-        self.handle_user_input(dt)?;
+        // we pass Assets along so we can play sounds - not the greatest pattern
+        // (ideally, maybe a messaging system?)
+        self.handle_user_input(dt, assets)?;
         self.prev_input = self.input;
 
         // handle shadow piece
