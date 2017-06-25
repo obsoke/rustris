@@ -23,7 +23,7 @@ impl MenuState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<MenuState> {
         let title = graphics::Text::new(ctx, "Rustris", assets.get_font("title")?)?;
 
-        let coords = graphics::get_screen_coordinates(&ctx);
+        let coords = graphics::get_screen_coordinates(ctx);
         let mut options_vec: Vec<Option> = Vec::new();
         options_vec.push(Option::new(
             ctx,
@@ -53,7 +53,7 @@ impl MenuState {
     fn handle_input(&mut self, command: OptionInputCommand) {
         match command {
             OptionInputCommand::Up => {
-                if self.current_selection <= 0 {
+                if self.current_selection == 0 {
                     self.current_selection = self.options.len() - 1;
                 } else {
                     self.current_selection -= 1;
@@ -117,7 +117,7 @@ impl EventHandler for MenuState {
     }
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        let coords = graphics::get_screen_coordinates(&ctx);
+        let coords = graphics::get_screen_coordinates(ctx);
 
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
         let pos = Point::new(5.0, 50.0);

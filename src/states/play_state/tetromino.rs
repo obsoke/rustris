@@ -60,7 +60,7 @@ impl Piece {
     pub fn draw(&self, ctx: &mut Context, image: &graphics::Image) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
-        let width = graphics::get_screen_coordinates(&ctx).w;
+        let width = graphics::get_screen_coordinates(ctx).w;
         let middle = width / 2.0;
         let starting_pos = middle - ((BLOCK_SIZE as f32 * 10.0) / 2.0);
 
@@ -93,7 +93,7 @@ impl Piece {
     ) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
-        let width = graphics::get_screen_coordinates(&ctx).w;
+        let width = graphics::get_screen_coordinates(ctx).w;
         let middle = width / 2.0;
         let starting_pos = middle - ((BLOCK_SIZE as f32 * 10.0) / 2.0);
 

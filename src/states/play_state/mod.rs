@@ -196,10 +196,10 @@ impl PlayState {
                 self.current_piece = self.bag.take_piece();
                 self.can_hold = true;
             }
-        } else if self.input.hold.is_active {
-            if self.input.hold.is_active != self.prev_input.hold.is_active {
-                self.handle_hold()?;
-            }
+        } else if self.input.hold.is_active &&
+                   self.input.hold.is_active != self.prev_input.hold.is_active
+        {
+            self.handle_hold()?;
         }
 
         Ok(())
