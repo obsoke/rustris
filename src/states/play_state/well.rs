@@ -114,20 +114,18 @@ impl Well {
 
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
-                if shape[r][c] != 0 {
-                    if c as f32 + position.x < 0.0 {
-                        collision_found = true;
-                    } else if c as f32 + position.x >= self.data[r].len() as f32 {
-                        collision_found = true;
-                    } else if r as f32 + position.y >= self.data.len() as f32 {
-                        collision_found = true;
-                    } else if self.data[(r as f32 + position.y) as usize][(c as f32 + position.x) as
-                                                                              usize] !=
-                               0
-                    {
-                        collision_found = true;
-                    }
+                if shape[r][c] != 0 && // if the space isn't empty AND one of the following:
+                    (c as f32 + position.x < 0.0 || // outside left side
+                         c as f32 + position.x >= self.data[r].len() as f32 || // outside right side
+                         r as f32 + position.y >= self.data.len() as f32 || // outside bottom
+                         self.data[(r as f32 + position.y) as usize][(c as f32 + position.x) as
+                                                                         usize] !=
+                             0)
+                // space is not empty
+                {
+                    collision_found = true;
                 }
+
             }
         }
 
@@ -141,19 +139,18 @@ impl Well {
         for (r, _) in shape.iter().enumerate() {
             for (c, _) in shape[r].iter().enumerate() {
                 if shape[r][c] != 0 {
-                    if r as f32 + position.y >= self.data.len() as f32 {
-                        collision_found = true;
-                    } else if (c as f32 + position.x) >= self.data[r].len() as f32 {
-                        // do nothing
-                    } else if (c as f32 + position.x) < 0.0 {
-                        // do nothing
-                    } else if self.data[(r.wrapping_add(position.y as usize))][(c.wrapping_add(
-                        position.x as
-                            usize,
-                    ))] !=
-                               0
+                    if r as f32 + position.y >= self.data.len() as f32 || // outside bottom
+                        self.data[(r.wrapping_add(position.y as usize))][(c.wrapping_add(
+                            position.x as
+                                usize,
+                        ))] != 0
+                    // space is not empty
                     {
                         collision_found = true;
+                    } else if (c as f32 + position.x) >= self.data[r].len() as f32 ||
+                               (c as f32 + position.x) < 0.0
+                    {
+                        // do nothing
                     }
                 }
             }

@@ -23,12 +23,13 @@ pub struct GameOverState {
 }
 
 impl GameOverState {
-    pub fn new(ctx: &mut Context,
-               assets: &Assets,
-               final_score_value: u32,
-               final_cleared: u32,
-               final_level: u32,)
-               -> GameResult<GameOverState> {
+    pub fn new(
+        ctx: &mut Context,
+        assets: &Assets,
+        final_score_value: u32,
+        final_cleared: u32,
+        final_level: u32,
+    ) -> GameResult<GameOverState> {
         let game_over = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
 
         let score_str = format!("Final Score: {}", final_score_value);
@@ -38,11 +39,26 @@ impl GameOverState {
         let final_lines = graphics::Text::new(ctx, &lines_str, assets.get_font("normal")?)?;
         let final_level = graphics::Text::new(ctx, &level_str, assets.get_font("normal")?)?;
 
-        let coords = graphics::get_screen_coordinates(&ctx);
+        let coords = graphics::get_screen_coordinates(ctx);
         let mut options_vec: Vec<Option> = Vec::new();
-        options_vec.push(Option::new(ctx, assets, "Play again", Point::new(coords.w / 2.0, 450.0)));
-        options_vec.push(Option::new(ctx, assets, "Return to Menu", Point::new(coords.w / 2.0, 525.0)));
-        options_vec.push(Option::new(ctx, assets, "Quit", Point::new(coords.w / 2.0, 600.0)));
+        options_vec.push(Option::new(
+            ctx,
+            assets,
+            "Play again",
+            Point::new(coords.w / 2.0, 450.0),
+        ));
+        options_vec.push(Option::new(
+            ctx,
+            assets,
+            "Return to Menu",
+            Point::new(coords.w / 2.0, 525.0),
+        ));
+        options_vec.push(Option::new(
+            ctx,
+            assets,
+            "Quit",
+            Point::new(coords.w / 2.0, 600.0),
+        ));
 
         Ok(GameOverState {
             request_replay: false,
@@ -61,42 +77,39 @@ impl GameOverState {
     fn handle_input(&mut self, command: OptionInputCommand) {
         match command {
             OptionInputCommand::Up => {
-                if self.current_selection <= 0 {
+                if self.current_selection == 0 {
                     self.current_selection = self.options.len() - 1;
-                }
-                else {
+                } else {
                     self.current_selection -= 1;
                 }
-            },
+            }
             OptionInputCommand::Down => {
-                if self.current_selection >= self.options.len() - 1{
+                if self.current_selection >= self.options.len() - 1 {
                     self.current_selection = 0;
-                }
-                else {
+                } else {
                     self.current_selection += 1;
                 }
-            },
+            }
             OptionInputCommand::Select => {
                 if self.current_selection == 0 {
                     self.request_replay = true;
-                }
-                else if self.current_selection == 1 {
+                } else if self.current_selection == 1 {
                     self.request_menu = true;
-                }
-                else if self.current_selection == 2 {
+                } else if self.current_selection == 2 {
                     self.request_quit = true;
                 }
-            },
+            }
         }
     }
 }
 
 impl EventHandler for GameOverState {
-    fn update(&mut self,
-              ctx: &mut Context,
-              assets: &Assets,
-              _: Duration)
-              -> GameResult<Transition> {
+    fn update(
+        &mut self,
+        ctx: &mut Context,
+        assets: &Assets,
+        _: Duration,
+    ) -> GameResult<Transition> {
         if self.request_menu {
             return Ok(Transition::Swap(Box::new(MenuState::new(ctx, assets)?)));
         } else if self.request_replay {
@@ -117,7 +130,7 @@ impl EventHandler for GameOverState {
     }
 
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
-        let coords = graphics::get_screen_coordinates(&ctx);
+        let coords = graphics::get_screen_coordinates(ctx);
 
         let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
         let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
@@ -125,12 +138,16 @@ impl EventHandler for GameOverState {
         let game_over_level_dest = graphics::Point::new(coords.w / 2.0, 300.0);
 
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
-        graphics::rectangle(ctx,
-                            graphics::DrawMode::Fill,
-                            graphics::Rect::new(0.0 + (coords.w / 2.0),
-                                                0.0 + ((coords.h * -1.0) / 2.0),
-                                                coords.w,
-                                                coords.h * -1.0))?;
+        graphics::rectangle(
+            ctx,
+            graphics::DrawMode::Fill,
+            graphics::Rect::new(
+                0.0 + (coords.w / 2.0),
+                0.0 + ((coords.h * -1.0) / 2.0),
+                coords.w,
+                coords.h * -1.0,
+            ),
+        )?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
