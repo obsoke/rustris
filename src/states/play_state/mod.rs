@@ -15,7 +15,7 @@ use self::ui_element::{UIBlockView, UITextView};
 use self::input_state::InputState;
 use states::game_over_state::{GameEndState, GameEndMode};
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-use util::DurationExt;
+use util::{DurationExt, play_click_sfx};
 
 const INITIAL_DELAY_TIME: f64 = 0.15;
 const SECONDARY_DELAY_TIME: f64 = 0.05;
@@ -176,25 +176,21 @@ impl PlayState {
             }
         } else if self.input.rotate_clockwise.is_active {
             if self.input.rotate_clockwise.is_active != self.prev_input.rotate_clockwise.is_active {
-                self.rotate_piece(1);
+                self.rotate_piece(assets, 1);
             }
         } else if self.input.rotate_counterclockwise.is_active {
             if self.input.rotate_counterclockwise.is_active !=
                 self.prev_input.rotate_counterclockwise.is_active
             {
-                self.rotate_piece(-1);
+                self.rotate_piece(assets, -1);
             }
         } else if self.input.hard_drop.is_active {
             if self.input.hard_drop.is_active != self.prev_input.hard_drop.is_active {
-                assets
-                    .get_sfx("click")
-                    .expect("Could not find click sfx")
-                    .play()
-                    .expect("Could not play click sfx");
                 self.current_piece.top_left = self.current_piece.get_shadow_position();
                 self.well.land(&self.current_piece);
                 self.current_piece = self.bag.take_piece();
                 self.can_hold = true;
+                play_click_sfx(assets).expect("Could not play click after hard drop");
             }
         } else if self.input.hold.is_active &&
                    self.input.hold.is_active != self.prev_input.hold.is_active
@@ -219,18 +215,13 @@ impl PlayState {
             self.current_piece.potential_top_left = self.current_piece.top_left;
         } else {
             // if we can move, play our movement audio!
-            assets
-                .get_sfx("click")
-                .expect("Could not find click sfx")
-                .play()
-                .expect("Could not play click sfx");
-
+            play_click_sfx(assets).expect("Could not play audio after movement.");
         }
 
         self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
     }
 
-    fn rotate_piece(&mut self, direction: i32) {
+    fn rotate_piece(&mut self, assets: &Assets, direction: i32) {
         let next_shape = self.current_piece.get_next_shape(direction);
         let collision_found = self.well.check_for_collisions(
             &next_shape,
@@ -239,6 +230,7 @@ impl PlayState {
 
         if !collision_found {
             self.current_piece.change_shape(direction);
+            play_click_sfx(assets).expect("Could not play click after rotating");
         } else {
             // wall kick attempt!
             // need to do 2 checks:
@@ -254,6 +246,7 @@ impl PlayState {
                 self.current_piece.top_left = potential_position;
                 self.current_piece.potential_top_left = potential_position;
                 self.current_piece.change_shape(direction);
+                play_click_sfx(assets).expect("Could not play click after rotating");
             } else {
                 let mut potential_position = self.current_piece.top_left;
                 potential_position.x -= 1.0;
@@ -266,6 +259,7 @@ impl PlayState {
                     self.current_piece.top_left = potential_position;
                     self.current_piece.potential_top_left = potential_position;
                     self.current_piece.change_shape(direction);
+                    play_click_sfx(assets).expect("Could not play click after rotating");
                 }
             }
         }

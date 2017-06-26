@@ -26,3 +26,14 @@ mod tests {
         assert_eq!(0.000000003, as_subsec_millis);
     }
 }
+
+
+/////////////
+// play the click sfx - used in different states all over the game
+/////////////
+use ggez::GameResult;
+use event::Assets;
+
+pub fn play_click_sfx(assets: &Assets) -> GameResult<()> {
+    Ok(assets.get_sfx("click")?.play()?)
+}
