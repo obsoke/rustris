@@ -137,9 +137,9 @@ impl EventHandler for StateManager {
         }
     }
 
-    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool, assets: &Assets) {
         if let Some(state) = self.states.last_mut() {
-            state.key_down_event(_keycode, _keymod, _repeat);
+            state.key_down_event(_keycode, _keymod, _repeat, assets);
         }
     }
 
@@ -149,9 +149,9 @@ impl EventHandler for StateManager {
         }
     }
 
-    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32) {
+    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32, assets: &Assets) {
         if let Some(state) = self.states.last_mut() {
-            state.controller_button_down_event(_btn, _instance_id);
+            state.controller_button_down_event(_btn, _instance_id, assets);
         }
     }
     fn controller_button_up_event(&mut self, _btn: Button, _instance_id: i32) {

@@ -179,11 +179,11 @@ pub trait EventHandler {
 
     fn mouse_wheel_event(&mut self, _x: i32, _y: i32) {}
 
-    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {}
+    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool, assets: &Assets) {}
 
     fn key_up_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {}
 
-    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32) {}
+    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32, assets: &Assets) {}
     fn controller_button_up_event(&mut self, _btn: Button, _instance_id: i32) {}
     fn controller_axis_event(&mut self, _axis: Axis, _value: i16, _instance_id: i32) {}
 
@@ -262,7 +262,7 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                             if key == keyboard::Keycode::Escape {
                                 ctx.quit()?;
                             } else {
-                                state_manager.key_down_event(key, keymod, repeat)
+                                state_manager.key_down_event(key, keymod, repeat, &assets)
                             }
                         }
                     }
@@ -292,7 +292,7 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                     } => state_manager.mouse_motion_event(mousestate, x, y, xrel, yrel),
                     MouseWheel { x, y, .. } => state_manager.mouse_wheel_event(x, y),
                     ControllerButtonDown { button, which, .. } => {
-                        state_manager.controller_button_down_event(button, which)
+                        state_manager.controller_button_down_event(button, which, &assets)
                     }
                     ControllerButtonUp { button, which, .. } => {
                         state_manager.controller_button_up_event(button, which)

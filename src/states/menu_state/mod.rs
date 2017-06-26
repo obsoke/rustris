@@ -138,7 +138,7 @@ impl EventHandler for MenuState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool) {
+    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, assets: &Assets) {
         if repeat {
             return;
         }
@@ -151,7 +151,7 @@ impl EventHandler for MenuState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32) {
+    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
             Button::DPadUp => self.handle_input(OptionInputCommand::Up),
             Button::DPadDown => self.handle_input(OptionInputCommand::Down),

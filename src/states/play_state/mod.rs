@@ -494,7 +494,7 @@ impl EventHandler for PlayState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool, assets: &Assets) {
         match keycode {
             Keycode::Left => self.input.left.is_active = true,
             Keycode::Right => self.input.right.is_active = true,
@@ -521,7 +521,7 @@ impl EventHandler for PlayState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32) {
+    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
             Button::DPadLeft => self.input.left.is_active = true,
             Button::DPadRight => self.input.right.is_active = true,
