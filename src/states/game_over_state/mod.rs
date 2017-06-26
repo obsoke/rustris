@@ -73,6 +73,11 @@ impl GameEndState {
             Point::new(coords.w / 2.0, 600.0),
         ));
 
+        match mode {
+            GameEndMode::Win => assets.get_sfx("gameover_win")?.play()?,
+            GameEndMode::Lose => assets.get_sfx("gameover_lose")?.play()?,
+        }
+
         Ok(GameEndState {
             request_replay: false,
             request_menu: false,

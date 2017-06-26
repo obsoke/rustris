@@ -25,7 +25,7 @@ const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
 const LINES_PER_LEVEL: i32 = 10;
 const MAX_LEVEL: u32 = 15;
-const NON_PLAY_SONGS: u32 = 1; // ....
+const NON_PLAY_SONGS: u32 = 3; // .... this sucks
 
 pub struct PlayState {
     input: InputState,

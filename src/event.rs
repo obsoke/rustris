@@ -230,8 +230,14 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
         assets.add_music("menu", menu)?;
 
         let mut click = audio::Source::new(ctx, "/sfx/click.ogg")?;
+        let mut gameover_win = audio::Source::new(ctx, "/sfx/gameover_win.ogg")?;
+        let mut gameover_lose = audio::Source::new(ctx, "/sfx/gameover_lose.ogg")?;
         click.set_volume(0.5);
+        gameover_win.set_volume(0.5);
+        gameover_lose.set_volume(0.5);
         assets.add_sfx("click", click)?;
+        assets.add_sfx("gameover_win", gameover_win)?;
+        assets.add_sfx("gameover_lose", gameover_lose)?;
 
         let mut state_manager = StateManager::new(ctx, &assets);
 
