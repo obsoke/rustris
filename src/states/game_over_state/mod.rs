@@ -8,6 +8,7 @@ use event::{Assets, Transition, EventHandler, Button};
 use states::play_state::PlayState;
 use states::menu_state::MenuState;
 use states::shared::option::{Option, OptionInputCommand};
+use util::play_click_sfx;
 
 /// Describes whether to render `GameEndState` under either "Player Wins" or
 /// "Player Loses" conditions.
@@ -92,9 +93,10 @@ impl GameEndState {
         })
     }
 
-    fn handle_input(&mut self, command: OptionInputCommand) {
+    fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {
+                play_click_sfx(assets).expect("Could not play click sfx in game end state -> up");
                 if self.current_selection == 0 {
                     self.current_selection = self.options.len() - 1;
                 } else {
@@ -102,6 +104,7 @@ impl GameEndState {
                 }
             }
             OptionInputCommand::Down => {
+                play_click_sfx(assets).expect("Could not play click sfx in game end state -> down");
                 if self.current_selection >= self.options.len() - 1 {
                     self.current_selection = 0;
                 } else {
@@ -185,18 +188,18 @@ impl EventHandler for GameEndState {
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(OptionInputCommand::Up),
-            Keycode::Down => self.handle_input(OptionInputCommand::Down),
-            Keycode::Return => self.handle_input(OptionInputCommand::Select),
+            Keycode::Up => self.handle_input(OptionInputCommand::Up, assets),
+            Keycode::Down => self.handle_input(OptionInputCommand::Down, assets),
+            Keycode::Return => self.handle_input(OptionInputCommand::Select, assets),
             _ => (),
         }
     }
 
     fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
-            Button::DPadUp => self.handle_input(OptionInputCommand::Up),
-            Button::DPadDown => self.handle_input(OptionInputCommand::Down),
-            Button::A => self.handle_input(OptionInputCommand::Select),
+            Button::DPadUp => self.handle_input(OptionInputCommand::Up, assets),
+            Button::DPadDown => self.handle_input(OptionInputCommand::Down, assets),
+            Button::A => self.handle_input(OptionInputCommand::Select, assets),
             _ => (),
         }
     }

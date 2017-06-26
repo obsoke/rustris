@@ -25,7 +25,7 @@ const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
 const LINES_PER_LEVEL: i32 = 10;
 const MAX_LEVEL: u32 = 15;
-const NON_PLAY_SONGS: u32 = 3; // .... this sucks
+const NON_PLAY_SONGS: u32 = 1; // .... this sucks
 
 pub struct PlayState {
     input: InputState,
@@ -494,7 +494,7 @@ impl EventHandler for PlayState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool, assets: &Assets) {
+    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool, _assets: &Assets) {
         match keycode {
             Keycode::Left => self.input.left.is_active = true,
             Keycode::Right => self.input.right.is_active = true,
@@ -521,7 +521,7 @@ impl EventHandler for PlayState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
+    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, _assets: &Assets) {
         match btn {
             Button::DPadLeft => self.input.left.is_active = true,
             Button::DPadRight => self.input.right.is_active = true,

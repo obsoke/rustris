@@ -6,7 +6,7 @@ use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::PlayState;
 use states::play_state::tetromino::{Piece, PieceType};
-use util::DurationExt;
+use util::{DurationExt, play_click_sfx};
 
 pub struct MenuState {
     title_text: graphics::Text,
@@ -50,9 +50,10 @@ impl MenuState {
         })
     }
 
-    fn handle_input(&mut self, command: OptionInputCommand) {
+    fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {
+                play_click_sfx(assets).expect("Could not play click sfx in menu state -> up");
                 if self.current_selection == 0 {
                     self.current_selection = self.options.len() - 1;
                 } else {
@@ -60,6 +61,7 @@ impl MenuState {
                 }
             }
             OptionInputCommand::Down => {
+                play_click_sfx(assets).expect("Could not play click sfx in menu state -> down");
                 if self.current_selection >= self.options.len() - 1 {
                     self.current_selection = 0;
                 } else {
@@ -144,18 +146,18 @@ impl EventHandler for MenuState {
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(OptionInputCommand::Up),
-            Keycode::Down => self.handle_input(OptionInputCommand::Down),
-            Keycode::Return => self.handle_input(OptionInputCommand::Select),
+            Keycode::Up => self.handle_input(OptionInputCommand::Up, assets),
+            Keycode::Down => self.handle_input(OptionInputCommand::Down, assets),
+            Keycode::Return => self.handle_input(OptionInputCommand::Select, assets),
             _ => (),
         }
     }
 
     fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
-            Button::DPadUp => self.handle_input(OptionInputCommand::Up),
-            Button::DPadDown => self.handle_input(OptionInputCommand::Down),
-            Button::A => self.handle_input(OptionInputCommand::Select),
+            Button::DPadUp => self.handle_input(OptionInputCommand::Up, assets),
+            Button::DPadDown => self.handle_input(OptionInputCommand::Down, assets),
+            Button::A => self.handle_input(OptionInputCommand::Select, assets),
             _ => (),
         }
     }

@@ -179,11 +179,12 @@ pub trait EventHandler {
 
     fn mouse_wheel_event(&mut self, _x: i32, _y: i32) {}
 
-    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool, assets: &Assets) {}
+    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool, _assets: &Assets) {
+    }
 
     fn key_up_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {}
 
-    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32, assets: &Assets) {}
+    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32, _assets: &Assets) {}
     fn controller_button_up_event(&mut self, _btn: Button, _instance_id: i32) {}
     fn controller_axis_event(&mut self, _axis: Axis, _value: i16, _instance_id: i32) {}
 
