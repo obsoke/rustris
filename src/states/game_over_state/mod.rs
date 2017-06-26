@@ -9,28 +9,41 @@ use states::play_state::PlayState;
 use states::menu_state::MenuState;
 use states::shared::option::{Option, OptionInputCommand};
 
-pub struct GameOverState {
+/// Describes whether to render `GameEndState` under either "Player Wins" or
+/// "Player Loses" conditions.
+pub enum GameEndMode {
+    Win,
+    Lose,
+}
+
+pub struct GameEndState {
     request_replay: bool,
     request_menu: bool,
     request_quit: bool,
     options: Vec<Option>,
     current_selection: usize,
 
-    game_over_text: graphics::Text,
+    game_end_text: graphics::Text,
     final_score_text: graphics::Text,
     final_line_text: graphics::Text,
     final_level_text: graphics::Text,
 }
 
-impl GameOverState {
+
+impl GameEndState {
     pub fn new(
         ctx: &mut Context,
         assets: &Assets,
+        mode: GameEndMode,
         final_score_value: u32,
         final_cleared: u32,
         final_level: u32,
-    ) -> GameResult<GameOverState> {
-        let game_over = graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?;
+    ) -> GameResult<GameEndState> {
+        let game_over: graphics::Text;
+        game_over = match mode {
+            GameEndMode::Lose => graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?,
+            GameEndMode::Win => graphics::Text::new(ctx, "YOU WIN!", assets.get_font("title")?)?,
+        };
 
         let score_str = format!("Final Score: {}", final_score_value);
         let lines_str = format!("Final Lines: {}", final_cleared);
@@ -60,14 +73,14 @@ impl GameOverState {
             Point::new(coords.w / 2.0, 600.0),
         ));
 
-        Ok(GameOverState {
+        Ok(GameEndState {
             request_replay: false,
             request_menu: false,
             request_quit: false,
             options: options_vec,
             current_selection: 0,
 
-            game_over_text: game_over,
+            game_end_text: game_over,
             final_score_text: final_score,
             final_line_text: final_lines,
             final_level_text: final_level,
@@ -103,7 +116,7 @@ impl GameOverState {
     }
 }
 
-impl EventHandler for GameOverState {
+impl EventHandler for GameEndState {
     fn update(
         &mut self,
         ctx: &mut Context,
@@ -149,7 +162,7 @@ impl EventHandler for GameOverState {
             ),
         )?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
-        graphics::draw(ctx, &self.game_over_text, game_over_dest, 0.0)?;
+        graphics::draw(ctx, &self.game_end_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
         graphics::draw(ctx, &self.final_line_text, game_over_lines_dest, 0.0)?;
         graphics::draw(ctx, &self.final_level_text, game_over_level_dest, 0.0)?;

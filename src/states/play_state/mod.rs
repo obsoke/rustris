@@ -13,7 +13,7 @@ use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
 use self::ui_element::{UIBlockView, UITextView};
 use self::input_state::InputState;
-use states::game_over_state::GameOverState;
+use states::game_over_state::{GameEndState, GameEndMode};
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use util::DurationExt;
 
@@ -24,7 +24,7 @@ const BLOCK_SIZE: f32 = 30.0;
 const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
 const LINES_PER_LEVEL: i32 = 10;
-const MAX_LEVEL: u32 = 20;
+const MAX_LEVEL: u32 = 15;
 const NON_PLAY_SONGS: u32 = 1; // ....
 
 pub struct PlayState {
@@ -396,14 +396,11 @@ impl PlayState {
     }
 
     fn increase_level(&mut self) {
-        if self.level < MAX_LEVEL {
-            self.level += 1;
+        self.level += 1;
 
-            // increase gravity
-            let change = self.time_until_gravity / FALL_SPEED_DIVISOR;
-            self.time_until_gravity -= change;
-            println!("New gravity value: {}", self.time_until_gravity);
-        }
+        // increase gravity
+        let change = self.time_until_gravity / FALL_SPEED_DIVISOR;
+        self.time_until_gravity -= change;
     }
 }
 
@@ -425,13 +422,25 @@ impl EventHandler for PlayState {
 
         if self.game_over {
             assets.get_music(&self.current_track_name)?.pause();
-            return Ok(Transition::Push(Box::new(GameOverState::new(
+            return Ok(Transition::Push(Box::new(GameEndState::new(
                 ctx,
                 assets,
+                GameEndMode::Lose,
                 self.score,
                 self.cleared_lines,
                 self.level + 1,
             )?)));
+        } else if self.level >= MAX_LEVEL {
+            assets.get_music(&self.current_track_name)?.pause();
+            return Ok(Transition::Push(Box::new(GameEndState::new(
+                ctx,
+                assets,
+                GameEndMode::Win,
+                self.score,
+                self.cleared_lines,
+                self.level + 1,
+            )?)));
+
         }
 
         // we pass Assets along so we can play sounds - not the greatest pattern
