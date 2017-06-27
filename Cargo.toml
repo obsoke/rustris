@@ -4,9 +4,7 @@ version = "0.1.0"
 authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]
-#ggez = { git = "https://github.com/obsoke/ggez", branch = "tetris-ver", features = ["cargo-resource-root"] }
 #ggez = { path = "../../../repos/ggez", features = ["cargo-resource-root"] }
 ggez = { version = "0.3.1", features = ["cargo-resource-root"] }
 sdl2 = "0.29"
-#ggez-goodies = { path = "../../../repos/ggez-goodies" }
 rand = "0.3.15"
