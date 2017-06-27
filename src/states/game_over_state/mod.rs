@@ -1,9 +1,7 @@
 use std::time::Duration;
-
 use ggez::{Context, GameResult, graphics};
 use ggez::event::{Mod, Keycode};
 use ggez::graphics::Point;
-
 use event::{Assets, Transition, EventHandler, Button};
 use states::play_state::PlayState;
 use states::menu_state::MenuState;
@@ -32,6 +30,8 @@ pub struct GameEndState {
 
 
 impl GameEndState {
+    /// A `GameEndState` takes values from `PlayState` to render certain values
+    /// such as no. of lines cleared, highest level cleared, final score, etc.
     pub fn new(
         ctx: &mut Context,
         assets: &Assets,
@@ -93,6 +93,9 @@ impl GameEndState {
         })
     }
 
+    // Ideally, I would not be coupling `Assets` to this method. Would a
+    // messaging system be fast enough to handle audio system stuff? Maybe
+    // something to try for v2.
     fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {

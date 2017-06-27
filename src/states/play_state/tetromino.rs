@@ -21,6 +21,7 @@ pub enum PieceType {
     O,
 }
 
+/// The tetromino piece that the player controls.
 pub struct Piece {
     shape: PieceShape,
     shape_type: PieceType,
@@ -31,6 +32,7 @@ pub struct Piece {
 }
 
 impl Piece {
+    /// Creates a new piece of type `PieceType`.
     pub fn new(shape_type: PieceType) -> Self {
         let shape = piece_type_to_shape(shape_type, 0);
 
@@ -44,6 +46,8 @@ impl Piece {
         }
     }
 
+    // I don't remember why I did this.
+    /// Create a new piece from a reference of a `PieceType`.
     pub fn new_from_ref(shape_type: &PieceType) -> Self {
         let shape = piece_type_to_shape(*shape_type, 0);
 
@@ -57,6 +61,7 @@ impl Piece {
         }
     }
 
+    /// Draw the current piece.
     pub fn draw(&self, ctx: &mut Context, image: &graphics::Image) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
@@ -85,6 +90,7 @@ impl Piece {
         Ok(())
     }
 
+    /// Draw the current piece's shadow.
     pub fn draw_shadow(
         &self,
         ctx: &mut Context,
@@ -114,7 +120,7 @@ impl Piece {
         Ok(())
     }
 
-    /// Draw the `Piece` outside of the grid at a given point.
+    /// Draw the current piece outside of the grid at a given point.
     pub fn draw_at_point(
         &self,
         ctx: &mut Context,
@@ -140,21 +146,25 @@ impl Piece {
         Ok(())
     }
 
-    // this only returns the next shape, it doesn't change the current shape
+    /// Return what the next shape of the current piece would be given a
+    /// particular rotation `direction` (-1 for left, 1 for right)
     pub fn get_next_shape(&self, direction: i32) -> PieceShape {
         let next_index = next_rotation_index(self.current_rotation_index, direction);
 
         piece_type_to_shape(self.shape_type, next_index as usize)
     }
 
+    /// Returns the current piece's shape.
     pub fn get_shape(&self) -> PieceShape {
         self.shape
     }
 
+    /// Returns the current piece's type.
     pub fn get_type(&self) -> PieceType {
         self.shape_type
     }
 
+    /// Given a direction, change the current piece's shape.
     pub fn change_shape(&mut self, direction: i32) {
         let next_index = next_rotation_index(self.current_rotation_index, direction);
 
@@ -162,10 +172,12 @@ impl Piece {
         self.current_rotation_index = next_index;
     }
 
+    /// Set the current piece's shadow position.
     pub fn set_shadow_position(&mut self, shadow_pos: Point) {
         self.shadow_position = shadow_pos;
     }
 
+    /// Get the current piece's shadow position.
     pub fn get_shadow_position(&self) -> Point {
         self.shadow_position
     }
@@ -175,6 +187,7 @@ impl Piece {
  * Utility methods
 */
 
+/// Given a type of piece, return the shape at the given rotation index.
 pub fn piece_type_to_shape(shape: PieceType, index: usize) -> PieceShape {
     match shape {
         PieceType::O => O_SHAPES[index],
@@ -187,6 +200,7 @@ pub fn piece_type_to_shape(shape: PieceType, index: usize) -> PieceShape {
     }
 }
 
+/// Given an integer that represents a type of piece, return the `PieceType`.
 pub fn u8_to_piece_type(num: u8) -> Option<PieceType> {
     match num {
         0 => Some(PieceType::I),
@@ -200,6 +214,8 @@ pub fn u8_to_piece_type(num: u8) -> Option<PieceType> {
     }
 }
 
+/// Get the block colour depending on the shape. If `shadow` is true, the
+/// colour's alpha channel is reduced.
 pub fn block_to_colour(num: u32, shadow: bool) -> Color {
     if shadow {
         match num {
@@ -226,6 +242,8 @@ pub fn block_to_colour(num: u32, shadow: bool) -> Color {
     }
 }
 
+/// Return the index of the next rotation shape, given the current rotation
+/// shape's index and a direction.
 pub fn next_rotation_index(current_index: u32, direction: i32) -> u32 {
     if direction == -1 {
         match current_index {

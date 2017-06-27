@@ -2,7 +2,6 @@ use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-
 use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::PlayState;
 use states::play_state::tetromino::{Piece, PieceType};
@@ -50,6 +49,9 @@ impl MenuState {
         })
     }
 
+    // Ideally, I would not be coupling `Assets` to this method. Would a
+    // messaging system be fast enough to handle audio system stuff? Maybe
+    // something to try for v2.
     fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {

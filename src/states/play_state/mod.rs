@@ -17,14 +17,16 @@ use states::game_over_state::{GameEndState, GameEndMode};
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use util::{DurationExt, play_click_sfx};
 
+// Tweakable values Would be nice to have a UI to fiddle with these in-game
+// without having to recompile. Another v2 to-do
 const INITIAL_DELAY_TIME: f64 = 0.15;
 const SECONDARY_DELAY_TIME: f64 = 0.05;
-
 const BLOCK_SIZE: f32 = 30.0;
 const BASE_FALL_SPEED: f64 = 1.0;
 const FALL_SPEED_DIVISOR: f64 = 4.0;
 const LINES_PER_LEVEL: i32 = 10;
 const MAX_LEVEL: u32 = 15;
+
 const NON_PLAY_SONGS: u32 = 1; // .... this sucks
 
 pub struct PlayState {
@@ -201,6 +203,7 @@ impl PlayState {
         Ok(())
     }
 
+    /// Attempt to move the current piece.
     fn move_piece(&mut self, potential_new_position: Point, assets: &Assets) {
         self.current_piece.potential_top_left.x += potential_new_position.x;
         self.current_piece.potential_top_left.y += potential_new_position.y;
@@ -221,6 +224,8 @@ impl PlayState {
         self.current_piece.top_left = self.current_piece.potential_top_left; // advance tetromino
     }
 
+    /// Attempt to rotate the current piece. This will also attempt to perform a
+    /// wall kick if possible.
     fn rotate_piece(&mut self, assets: &Assets, direction: i32) {
         let next_shape = self.current_piece.get_next_shape(direction);
         let collision_found = self.well.check_for_collisions(
@@ -303,6 +308,7 @@ impl PlayState {
         Ok(true)
     }
 
+    /// Calculatae the position of the shadow piece.
     fn handle_shadow_piece(&mut self) -> GameResult<()> {
         let mut shadow_position = self.current_piece.top_left;
         let mut potential_shadow_position = shadow_position;
@@ -324,6 +330,8 @@ impl PlayState {
         Ok(())
     }
 
+    /// Will attempt to add the current piece to the 'Hold' area. Cannot perform
+    /// a hold if piece in the Hold area is the same as the current piece.
     fn handle_hold(&mut self) -> GameResult<()> {
         // can only perform a hold once per piece turn
         // a piece turn ends when the current piece lands
@@ -345,25 +353,11 @@ impl PlayState {
         Ok(())
     }
 
+    /// Check for filled rows and asks the well to clear them. Adds the number
+    /// of lines cleared to `cleared_lines`. Also will increase the level if the
+    /// next level threshold has been met.
     fn handle_line_clears(&mut self) -> GameResult<()> {
-        // check for line clears
-        let mut lines_cleared: u32 = 0;
-        for r in (0..self.well.data.len()).rev() {
-            let mut is_row_filled = true;
-            for (c, _) in self.well.data[r].iter().enumerate() {
-                if self.well.data[r][c] == 0 {
-                    is_row_filled = false;
-                    break; // no need to continue iterating, line is not clear...
-                }
-            }
-
-            if is_row_filled {
-                // TODO: implement more line clearing algorithms
-                // TODO: make the current line clearing algorithm user selectable
-                self.well.naive_line_clear(r);
-                lines_cleared += 1;
-            }
-        }
+        let lines_cleared: u32 = self.well.clear_lines();
 
         // add to score
         let level = self.level;
@@ -385,10 +379,13 @@ impl PlayState {
         Ok(())
     }
 
+    /// Calculate the score increase based on current level and base score for
+    /// the number of lines cleared.
     fn increase_score(&mut self, base_score: u32, level: u32) {
         self.score += base_score * (level + 1);
     }
 
+    /// Increase the level and adjust the current rate at which pieces drop.
     fn increase_level(&mut self) {
         self.level += 1;
 

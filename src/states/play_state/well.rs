@@ -3,14 +3,14 @@ use ggez::graphics::{Color, DrawMode, Rect, Point};
 use super::BLOCK_SIZE;
 use super::tetromino::{Piece, PieceShape, block_to_colour};
 
-
 /// The y-offset to use as a starting point when drawing
 pub const Y_OFFSET: f32 = 10f32;
 
-/// The size (in pixels) of a single 'block' or 'cell' in the well or in a piece
+/// The playfield. The top two rows are where pieces spawn but they are not
+/// rendered.
 #[derive(Debug)]
 pub struct Well {
-    pub data: [[u32; 10]; 22],
+    data: [[u32; 10]; 22],
 }
 
 impl Well {
@@ -89,6 +89,30 @@ impl Well {
         }
 
         Ok(())
+    }
+
+    /// Checks for filled rows and clears any that are found. Returns the number
+    /// of rows cleared.
+    pub fn clear_lines(&mut self) -> u32 {
+        let mut lines_cleared: u32 = 0;
+        for r in (0..self.data.len()).rev() {
+            let mut is_row_filled = true;
+            for (c, _) in self.data[r].iter().enumerate() {
+                if self.data[r][c] == 0 {
+                    is_row_filled = false;
+                    break; // no need to continue iterating, line is not clear...
+                }
+            }
+
+            if is_row_filled {
+                // TODO: implement more line clearing algorithms
+                // TODO: make the current line clearing algorithm user selectable
+                self.naive_line_clear(r);
+                lines_cleared += 1;
+            }
+        }
+
+        lines_cleared
     }
 
     /// Perform a line clear using the 'naive' algorith. Starting at the line to
