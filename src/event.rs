@@ -24,9 +24,9 @@
 //
 // 2) I needed to add said `Transition` enum to `event.rs`. My attempts at
 // making `EventHandler` into a generic so the return type can be generic have
-// failed when I ran into lifetime issues when puting `EventHandler<T>` into a
-// `Box`.` The easiest solution around this was to add `Transition` to this
-// module directly.
+// failed when I ran into lifetime issues; in particular, when puting
+// `EventHandler<T>` into a `Box`.` The easiest solution around this was to add
+// `Transition` to this module directly.
 //
 // 3) Additionally, I wanted my state manager to own an `Assets` struct so I
 // could load my game assets once and pass it to whatever state needed it. To do
@@ -40,34 +40,30 @@
 
 /// A key code.
 pub use sdl2::keyboard::Keycode;
-
 /// A struct that holds the state of modifier buttons such as ctrl or shift.
 pub use sdl2::keyboard::Mod;
 /// A mouse button press.
 pub use sdl2::mouse::MouseButton;
 /// A struct containing the mouse state at a given instant.
 pub use sdl2::mouse::MouseState;
-
 /// A controller button.
 pub use sdl2::controller::Button;
 /// A controller axis.
 pub use sdl2::controller::Axis;
-
 use std::collections::HashMap;
 use std::time::Duration;
-
 use sdl2::event::Event::*;
 use sdl2::event as SdlEvent;
 use sdl2::mouse;
 use sdl2::keyboard;
-
 use ggez::graphics;
 use ggez::audio;
 use ggez::{GameResult, Context};
 use ggez::timer;
-
 use states::StateManager;
 
+/// A global structure that stores all game assets. This is passed down into a
+/// state by the `StateManager`.
 pub struct Assets {
     images: HashMap<String, graphics::Image>,
     font: HashMap<String, graphics::Font>,
@@ -85,57 +81,77 @@ impl Assets {
         }
     }
 
+    /// Add an image asset to the asset manager.
     pub fn add_image(&mut self, name: &str, image: graphics::Image) -> GameResult<()> {
         self.images.insert(name.to_string(), image);
         Ok(())
     }
 
+    /// Returns an image with the key `name` from the asset manager.
     pub fn get_image(&self, name: &str) -> GameResult<&graphics::Image> {
         let img = self.images.get(name);
         Ok(img.unwrap())
     }
 
+    /// Add a font asset to the asset manager.
     pub fn add_font(&mut self, name: &str, font: graphics::Font) -> GameResult<()> {
         self.font.insert(name.to_string(), font);
         Ok(())
     }
 
+    /// Returns a font with the key `name` from the asset manager.
     pub fn get_font(&self, name: &str) -> GameResult<&graphics::Font> {
         let font = self.font.get(name);
         Ok(font.unwrap())
     }
 
+    /// Add an audio asset meant for music to the asset manager.
     pub fn add_music(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
         self.music.insert(name.to_string(), audio);
         Ok(())
     }
 
+    /// Returns an audio asset meant for music with the key `name` from the
+    /// asset manager.
     pub fn get_music(&self, name: &str) -> GameResult<&audio::Source> {
         let audio = self.music.get(name);
         Ok(audio.unwrap())
     }
 
+    /// Returns the number of audio assets meant for music playback currently in
+    /// the asset manager.
     pub fn get_music_count(&self) -> u32 {
         self.music.len() as u32
     }
 
+    /// Add an audio asset meant for sound effects to the asset manager.
     pub fn add_sfx(&mut self, name: &str, audio: audio::Source) -> GameResult<()> {
         self.sfx.insert(name.to_string(), audio);
         Ok(())
     }
 
+    /// Returns an audio asset meant for sound effects with the key `name` from
+    /// the asset manager.
     pub fn get_sfx(&self, name: &str) -> GameResult<&audio::Source> {
         let audio = self.sfx.get(name);
         Ok(audio.unwrap())
     }
 }
 
+/// Describes a potential state transition. `EventHandler::update` returns a
+/// `GameResult<Transition>` that can be used to request a state change from the
+/// state manager.
 pub enum Transition {
+    /// Don't change states.
     None,
-    Push(Box<EventHandler>), // Pushes another state on the stack
-    Swap(Box<EventHandler>), // Removes current state from stack before adding the new one
-    Pop, // Remove state on top of stack
-    Drain, // Clear the stack, quitting the game
+    /// Push another state ontop of the current state.
+    Push(Box<EventHandler>),
+    /// Remove all states from the stack and then push a new one.
+    Swap(Box<EventHandler>),
+    /// Remove the state currently at the top of the stack.
+    Pop,
+    /// Clear the stack which in turn quits the game.
+    Drain,
 }
 
 
@@ -206,6 +222,9 @@ pub trait EventHandler {
 /// bit to update managers rather than states directly.
 pub fn run(ctx: &mut Context) -> GameResult<()> {
     {
+        // I think that all of this asset-related code would ideally be
+        // somewhere else, or the option to pass a callback to `run` so all of
+        // this setup code could live outside of engine code.
         let mut assets = Assets::new();
         assets.add_image(
             "block",
@@ -240,10 +259,8 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
         assets.add_sfx("gameover_win", gameover_win)?;
         assets.add_sfx("gameover_lose", gameover_lose)?;
 
-        let mut state_manager = StateManager::new(ctx, &assets);
-
         let mut event_pump = ctx.sdl_context.event_pump()?;
-
+        let mut state_manager = StateManager::new(ctx, &assets);
         while state_manager.is_running() {
             ctx.timer_context.tick();
 
@@ -251,7 +268,6 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
                 match event {
                     Quit { .. } => {
                         state_manager.quit();
-                        // println!("Quit event: {:?}", t);
                     }
                     KeyDown {
                         keycode,

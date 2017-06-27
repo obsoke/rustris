@@ -4,6 +4,7 @@ use std::time::Duration;
 
 const NANOS_PER_SEC: f64 = 1_000_000_000.0;
 
+/// A collection of utility extensions to `std::time::Duration`.
 pub trait DurationExt: Sized {
     fn as_subsec_millis(&self) -> f64;
 }
@@ -28,12 +29,11 @@ mod tests {
 }
 
 
-/////////////
-// play the click sfx - used in different states all over the game
-/////////////
 use ggez::GameResult;
 use event::Assets;
 
+/// Play the 'click' sound effect. This is a general utility method as it is
+/// used in a couple of different game states.
 pub fn play_click_sfx(assets: &Assets) -> GameResult<()> {
     Ok(assets.get_sfx("click")?.play()?)
 }

@@ -4,23 +4,24 @@ pub mod game_over_state;
 pub mod shared;
 
 use std::time::Duration;
-
 use sdl2::mouse;
-
 use ggez::{Context, GameResult, timer};
 use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
 use states::menu_state::MenuState;
 
-
 /// A `StateManager` will manage requests to push, pop or swap states on the
 /// state stack. It owns the `Assets` struct and dictates whether the game
 /// continues to run or not.
+///
+/// States must be put into a `Box` before being handed to the `StateManager`.
 pub struct StateManager {
     running: bool,
     states: Vec<Box<EventHandler>>,
 }
 
 impl StateManager {
+    // TODO: Pass the initial state as an argument.
+    /// Create a new `StateManager` and initializes the first state.
     pub fn new(ctx: &mut Context, assets: &Assets) -> StateManager {
         let state = Box::new(MenuState::new(ctx, assets).unwrap());
 
@@ -30,17 +31,22 @@ impl StateManager {
         }
     }
 
+    /// Returns `true` if the manager is running. If `false`, the game will
+    /// quit.
     pub fn is_running(&self) -> bool {
         self.running
     }
 
+    /// Clears the state stack and sets `running` to false which quits the game.
     pub fn quit(&mut self) {
-        // TODO: pop everything off the stack
+        self.states.clear();
         self.running = false
     }
 }
 
 impl StateManager {
+    /// Calls the state transition handler depending on the `Transition` given
+    /// as an argument.
     fn handle_transition(&mut self, transition: Transition) {
         match transition {
             Transition::None => (),
@@ -51,6 +57,8 @@ impl StateManager {
         }
     }
 
+    /// Pops the state at the top of the stack. If the size of the state stack
+    /// after this operation is `0`, the game quits.
     fn pop(&mut self) {
         self.states.pop();
 
@@ -59,15 +67,19 @@ impl StateManager {
         }
     }
 
+    /// Pushes a state onto the state stack.
     fn push(&mut self, boxed_state: Box<EventHandler>) {
         self.states.push(boxed_state)
     }
 
+    /// Removes all states from the state stack and then pushes the given
+    /// `boxed_state` onto the stack.
     fn swap(&mut self, boxed_state: Box<EventHandler>) {
         self.states.clear();
         self.push(boxed_state);
     }
 
+    /// Removes all states from the state stack and quits the game.
     fn drain(&mut self) {
         self.states.clear();
         self.quit();
@@ -90,6 +102,11 @@ impl EventHandler for StateManager {
 
         Ok(Transition::None)
     }
+
+    /// `StateManager::draw` handles drawing for all states on the stack. This
+    /// enables the use of having pause screens or other states render on top of
+    /// the current state. Due to this, `StateManager::draw` also controls both
+    /// clearing and swapping of buffers.
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         // draw everything in the stack
         use ggez::graphics;
