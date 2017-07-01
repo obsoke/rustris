@@ -1,3 +1,5 @@
+mod spawner;
+
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
@@ -6,11 +8,12 @@ use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::PlayState;
 use states::play_state::tetromino::{Piece, PieceType};
 use util::{DurationExt, play_click_sfx};
+use self::spawner::Spawner;
 
 pub struct MenuState {
     title_text: graphics::Text,
     title_rotation: f64,
-    piece: Piece,
+    piece_spawner: Spawner,
     options: Vec<Option>,
     current_selection: usize,
 
@@ -40,7 +43,7 @@ impl MenuState {
         Ok(MenuState {
             title_text: title,
             title_rotation: 0.0,
-            piece: Piece::new(PieceType::L),
+            piece_spawner: Spawner::new(),
             options: options_vec,
             current_selection: 0,
 
@@ -98,6 +101,8 @@ impl EventHandler for MenuState {
 
         self.title_rotation += dt.as_subsec_millis();
 
+        self.piece_spawner.update(ctx, assets, dt);
+
         if self.request_play {
             assets.get_music("menu")?.pause();
             return Ok(Transition::Swap(
@@ -123,17 +128,12 @@ impl EventHandler for MenuState {
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
+        self.piece_spawner.draw(ctx, assets);
+
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        let pos = Point::new(150.0, 150.0);
 
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
-        self.piece.draw_at_point(
-            ctx,
-            assets.get_image("block")?,
-            pos,
-            self.title_rotation,
-        )?;
 
         for option in &self.options {
             option.draw(ctx)?;

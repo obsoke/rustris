@@ -135,11 +135,9 @@ impl Piece {
             (starting_pos.y + (BLOCK_SIZE * 9.0)) / 2.0,
         );
 
-        println!("==========LOOP========"); // TOOD: debug flag?
         for (r, _) in self.shape.iter().enumerate() {
             for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
-                    println!("=======BLOCK======"); // TOOD: debug flag?
                     let colour = block_to_colour(self.shape[r][c], false);
                     graphics::set_color(ctx, colour)?;
 
