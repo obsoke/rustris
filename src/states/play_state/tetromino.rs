@@ -1,5 +1,5 @@
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color, Point};
+use ggez::graphics::{Color, Point, DrawParam};
 use super::BLOCK_SIZE;
 use super::shapes::*;
 use super::well::Y_OFFSET;
@@ -129,20 +129,65 @@ impl Piece {
         rotation: f64,
     ) -> GameResult<()> {
         let starting_pos = top_left;
+        // get the centre of our complex object in order to rotate around it
+        let centre = Point::new(
+            (starting_pos.x + (BLOCK_SIZE * 9.0)) / 2.0,
+            (starting_pos.y + (BLOCK_SIZE * 9.0)) / 2.0,
+        );
 
+        println!("==========LOOP========"); // TOOD: debug flag?
         for (r, _) in self.shape.iter().enumerate() {
             for (c, _) in self.shape[r].iter().enumerate() {
                 if self.shape[r][c] != 0 {
+                    println!("=======BLOCK======"); // TOOD: debug flag?
                     let colour = block_to_colour(self.shape[r][c], false);
                     graphics::set_color(ctx, colour)?;
 
-                    let x = starting_pos.x as f32 + ((c as f32 + 1.0) * BLOCK_SIZE);
-                    let y = starting_pos.y as f32 + (r as f32 * BLOCK_SIZE);
+                    let mut x = starting_pos.x as f32 + ((c as f32 + 1.0) * BLOCK_SIZE);
+                    let mut y = starting_pos.y as f32 + (r as f32 * BLOCK_SIZE);
 
-                    graphics::draw(ctx, image, graphics::Point::new(x, y), rotation as f32)?;
+                    let sin = rotation.sin() as f32;
+                    let cos = rotation.cos() as f32;
+
+                    // translate to origin
+                    x -= centre.x;
+                    y -= centre.y;
+
+                    // rotate
+                    let xnew = x * cos - y * sin;
+                    let ynew = x * sin + y * cos;
+
+                    // translate point back
+                    x = xnew + centre.x;
+                    y = ynew + centre.y;
+
+                    // let distance_x = (centre.x - x) * (centre.x - x);
+                    // let distance_y = (centre.y - y) * (centre.y - y);
+                    // println!("dx: {}, dy: {}", distance_x, distance_y);
+                    // let distance = (distance_x + distance_y).sqrt();
+                    // println!("distance: {}", distance);
+                    // println!("x: {}, y: {}", x, y);
+
+                    // let x = centre.x + distance as f32 * rotation.cos() as f32;
+                    // let y = centre.y + distance as f32 * rotation.sin() as f32;
+                    // println!("new x: {}, new y: {}", x, y);
+
+                    let draw_param = DrawParam {
+                        dest: graphics::Point::new(x, y),
+                        rotation: rotation as f32,
+                        ..Default::default()
+                    };
+
+                    graphics::draw_ex(ctx, image, draw_param)?;
                 }
             }
         }
+
+        graphics::set_color(ctx, Color::new(255.0, 0.0, 0.0, 255.0))?;
+        graphics::circle(ctx, graphics::DrawMode::Fill, centre, 2.0, 22)?;
+        graphics::set_color(ctx, Color::new(0.0, 0.0, 255.0, 255.0))?;
+        graphics::circle(ctx, graphics::DrawMode::Fill, top_left, 2.0, 22)?;
+
         Ok(())
     }
 

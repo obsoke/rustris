@@ -89,12 +89,12 @@ impl EventHandler for MenuState {
         dt: Duration,
     ) -> GameResult<Transition> {
         // play & loop menu theme
-        let current_song = assets.get_music("menu")?;
-        if current_song.paused() {
-            current_song.resume();
-        } else {
-            current_song.play()?;
-        }
+        // let current_song = assets.get_music("menu")?;
+        // if current_song.paused() {
+        //     current_song.resume();
+        // } else {
+        //     current_song.play()?;
+        // }
 
         self.title_rotation += dt.as_subsec_millis();
 
@@ -124,7 +124,7 @@ impl EventHandler for MenuState {
         let coords = graphics::get_screen_coordinates(ctx);
 
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        let pos = Point::new(5.0, 50.0);
+        let pos = Point::new(150.0, 150.0);
 
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
