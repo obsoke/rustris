@@ -8,8 +8,8 @@
 |-----------|-----------------------------|
 | Left      | <kbd>Left</kdb>             |
 | Right     | <kbd>Right</kbd>            |
-| Soft Drop | <kbd>Up</kbd>               |
-| Hard Drop | <kbd>Down</kbd>             |
+| Soft Drop | <kbd>Down</kbd>             |
+| Hard Drop | <kbd>Up</kbd>               |
 | Rotate    | <kbd>Z</kbd> & <kbd>X</kbd> |
 
 ### Gamepad
