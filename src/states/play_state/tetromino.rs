@@ -173,6 +173,9 @@ impl Piece {
             }
         }
 
+        // TODO: global debug flag to control whether this appears or not,
+        // should be able to toggle via an environmental variable for ease-of-use
+
         // graphics::set_color(ctx, Color::new(255.0, 0.0, 0.0, 255.0))?;
         // graphics::circle(ctx, graphics::DrawMode::Fill, centre, 2.0, 22)?;
         // graphics::set_color(ctx, Color::new(0.0, 0.0, 255.0, 255.0))?;
