@@ -240,6 +240,10 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?,
         )?;
         assets.add_font(
+            "title_shadow",
+            graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 33)?,
+        )?;
+        assets.add_font(
             "normal",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?,
         )?;

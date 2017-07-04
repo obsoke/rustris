@@ -6,12 +6,12 @@ use ggez::graphics::{Point, Color};
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::PlayState;
-use states::play_state::tetromino::{Piece, PieceType};
 use util::{DurationExt, play_click_sfx};
 use self::spawner::Spawner;
 
 pub struct MenuState {
     title_text: graphics::Text,
+    title_shadow: graphics::Text,
     title_rotation: f64,
     piece_spawner: Spawner,
     options: Vec<Option>,
@@ -24,6 +24,7 @@ pub struct MenuState {
 impl MenuState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<MenuState> {
         let title = graphics::Text::new(ctx, "Rustris", assets.get_font("title")?)?;
+        let title_shadow = graphics::Text::new(ctx, "Rustris", assets.get_font("title_shadow")?)?;
 
         let coords = graphics::get_screen_coordinates(ctx);
         let mut options_vec: Vec<Option> = Vec::new();
@@ -42,6 +43,7 @@ impl MenuState {
 
         Ok(MenuState {
             title_text: title,
+            title_shadow: title_shadow,
             title_rotation: 0.0,
             piece_spawner: Spawner::new(),
             options: options_vec,
@@ -140,10 +142,14 @@ impl EventHandler for MenuState {
         // draw piece spawner & all spawned pieces
         self.piece_spawner.draw(ctx, assets);
 
-        // title & options
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
+        // shadow/stroke
+        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.8))?;
+        graphics::draw(ctx, &self.title_shadow, title_dest, 0.0)?;
+        // main text
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
+
         for option in &self.options {
             option.draw(ctx)?;
         }

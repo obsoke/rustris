@@ -27,11 +27,13 @@ impl SpawnedPiece {
         }
     }
 
-    pub fn update(&mut self, _ctx: &mut Context, _assets: &Assets, dt: Duration) {
+    pub fn update(&mut self, ctx: &mut Context, _assets: &Assets, dt: Duration) {
         // TODO: update position
+        let coords = graphics::get_screen_coordinates(ctx);
+        let height = coords.h * -1.0;
         self.position.y += SPEED * dt.as_subsec_millis() as f32;
 
-        if self.position.y >= 720.0 {
+        if self.position.y >= height {
             self.is_dead = true;
         }
         self.extra_rotation += dt.as_subsec_millis();
@@ -44,6 +46,7 @@ impl SpawnedPiece {
                 assets.get_image("block").unwrap(),
                 self.position,
                 self.extra_rotation,
+                self.scale,
             )
             .unwrap();
     }
@@ -101,17 +104,21 @@ impl Spawner {
         let coords = graphics::get_screen_coordinates(ctx);
         let x = rand::thread_rng().gen_range(0.0, coords.w);
         let extra_rotation = rand::thread_rng().gen_range(0.0, MAX_ROTATION);
+        let normalized_rotation = extra_rotation / MAX_ROTATION;
+        let scale = 1.0 - normalized_rotation;
 
         let piece_type = {
             let piece_type_no = rand::thread_rng().gen_range(0, 7);
             u8_to_piece_type(piece_type_no).unwrap()
         };
 
-        let position = Point::new(x, 0.0);
+        // spawn at a random x position way above viewable screen so pieces just
+        // dont 'pop' in but kinda just float into view
+        let position = Point::new(x, -200.0);
         self.active_pieces.push(SpawnedPiece::new(
             position,
             extra_rotation,
-            1.0,
+            scale,
             piece_type,
         ));
     }

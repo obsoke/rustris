@@ -127,6 +127,7 @@ impl Piece {
         image: &graphics::Image,
         top_left: Point,
         rotation: f64,
+        scale: f64,
     ) -> GameResult<()> {
         let starting_pos = top_left;
         // get the centre of our complex object in order to rotate around it
@@ -160,8 +161,10 @@ impl Piece {
                     y = ynew + centre.y;
 
                     let draw_param = DrawParam {
+                        //dest: graphics::Point::new(x * scale as f32, y * scale as f32),
                         dest: graphics::Point::new(x, y),
                         rotation: rotation as f32,
+                        //scale: Point::new(scale as f32, scale as f32),
                         ..Default::default()
                     };
 
