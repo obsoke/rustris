@@ -34,6 +34,14 @@ cargo build
 
 Add the `--release` flag to create an optimized build.
 
+## Potential Future Features
+
+- [ ] Options menu
+- [ ] Advanced Tetris Techniques (e.g.: T-spins)
+- [ ] Animations & UX Love
+- [ ] Local multiplayer (vs. AI & another person)
+- [ ] Network multiplayer
+
 ## Attributions
 
 [Music by Abstraction Music](http://abstractionmusic.com/)
