@@ -1,13 +1,14 @@
 pub mod menu_state;
 pub mod play_state;
 pub mod game_over_state;
+pub mod intro_state;
 pub mod shared;
 
 use std::time::Duration;
 use sdl2::mouse;
 use ggez::{Context, GameResult, timer};
 use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
-use states::menu_state::MenuState;
+use states::intro_state::IntroState;
 
 /// A `StateManager` will manage requests to push, pop or swap states on the
 /// state stack. It owns the `Assets` struct and dictates whether the game
@@ -23,7 +24,7 @@ impl StateManager {
     // TODO: Pass the initial state as an argument.
     /// Create a new `StateManager` and initializes the first state.
     pub fn new(ctx: &mut Context, assets: &Assets) -> StateManager {
-        let state = Box::new(MenuState::new(ctx, assets).unwrap());
+        let state = Box::new(IntroState::new(ctx, assets).unwrap());
 
         StateManager {
             running: true,
