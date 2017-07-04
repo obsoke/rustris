@@ -1,5 +1,27 @@
 # Rustris
 
+## Controls
+
+### Keyboard
+
+| Action    | Key                         |
+|-----------|-----------------------------|
+| Left      | <kbd>Left</kdb>             |
+| Right     | <kbd>Right</kbd>            |
+| Soft Drop | <kbd>Up</kbd>               |
+| Hard Drop | <kbd>Down</kbd>             |
+| Rotate    | <kbd>Z</kbd> & <kbd>X</kbd> |
+
+### Gamepad
+
+| Action    | Button      |
+|-----------|-------------|
+| Left      | D-Pad Left  |
+| Right     | D-Pad Right |
+| Soft Drop | D-Pad Down  |
+| Hard Drop | D-Pad Up    |
+| Rotate    | A & B       |
+
 ## Building
 
 You should have *libsdl2* installed on your system.
