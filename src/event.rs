@@ -230,6 +230,11 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "block",
             graphics::Image::new(ctx, "/block.png")?,
         )?;
+        assets.add_image(
+            "menu_bg",
+            graphics::Image::new(ctx, "/blackhole2.png")?,
+        )?;
+
         assets.add_font(
             "title",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?,
