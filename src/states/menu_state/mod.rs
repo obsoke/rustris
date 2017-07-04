@@ -2,7 +2,7 @@ mod spawner;
 
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
-use ggez::graphics::Point;
+use ggez::graphics::{Point, Color};
 use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
 use states::shared::option::{Option, OptionInputCommand};
 use states::play_state::PlayState;
@@ -128,13 +128,22 @@ impl EventHandler for MenuState {
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
+        // draw background
+        graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
+        graphics::draw(
+            ctx,
+            assets.get_image("menu_bg")?,
+            Point::new(coords.w / 2.0, coords.h / -2.0),
+            self.title_rotation as f32 * 0.3,
+        )?;
+
+        // draw piece spawner & all spawned pieces
         self.piece_spawner.draw(ctx, assets);
 
+        // title & options
         let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
-
         for option in &self.options {
             option.draw(ctx)?;
         }

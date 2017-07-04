@@ -1,6 +1,6 @@
 use std::time::Duration;
 use rand;
-use ggez::Context;
+use ggez::{Context, graphics};
 use ggez::graphics::Point;
 use event::Assets;
 use states::play_state::tetromino::{Piece, PieceType, u8_to_piece_type};
@@ -53,8 +53,8 @@ impl SpawnedPiece {
     }
 }
 
-// const TIME_BETWEEN_SPAWNS: f64 = 0.5;
-const TIME_BETWEEN_SPAWNS: f64 = 2.5;
+const TIME_BETWEEN_SPAWNS: f64 = 0.5;
+const MAX_ROTATION: f64 = 50.0;
 
 pub struct Spawner {
     active_pieces: Vec<SpawnedPiece>,
@@ -74,7 +74,7 @@ impl Spawner {
         self.time_until_next_spawn += dt.as_subsec_millis();
         if self.time_until_next_spawn >= TIME_BETWEEN_SPAWNS {
             self.time_until_next_spawn -= TIME_BETWEEN_SPAWNS;
-            self.spawn_new_piece();
+            self.spawn_new_piece(ctx);
         }
 
         // check for dead pieces
@@ -83,7 +83,6 @@ impl Spawner {
                 self.active_pieces.remove(i);
             }
         }
-
 
         // check if time to spawn new piece
         for piece in &mut self.active_pieces {
@@ -97,16 +96,17 @@ impl Spawner {
         }
     }
 
-    fn spawn_new_piece(&mut self) {
+    fn spawn_new_piece(&mut self, ctx: &Context) {
         use rand::Rng;
-        let x = rand::thread_rng().gen_range(0.0, 1024.0);
-        let extra_rotation = rand::thread_rng().gen_range(0.0, 50.0);
+        let coords = graphics::get_screen_coordinates(ctx);
+        let x = rand::thread_rng().gen_range(0.0, coords.w);
+        let extra_rotation = rand::thread_rng().gen_range(0.0, MAX_ROTATION);
+
         let piece_type = {
             let piece_type_no = rand::thread_rng().gen_range(0, 7);
             u8_to_piece_type(piece_type_no).unwrap()
         };
-        // TODO: add new piece to 'active_pieces' give it a random X position,
-        // random extra rotation
+
         let position = Point::new(x, 0.0);
         self.active_pieces.push(SpawnedPiece::new(
             position,

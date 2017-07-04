@@ -131,8 +131,8 @@ impl Piece {
         let starting_pos = top_left;
         // get the centre of our complex object in order to rotate around it
         let centre = Point::new(
-            (starting_pos.x + (BLOCK_SIZE * 9.0)) / 2.0,
-            (starting_pos.y + (BLOCK_SIZE * 9.0)) / 2.0,
+            (starting_pos.x + (BLOCK_SIZE * 8.0) / 2.0),
+            (starting_pos.y + (BLOCK_SIZE * 8.0) / 2.0),
         );
 
         for (r, _) in self.shape.iter().enumerate() {
@@ -159,17 +159,6 @@ impl Piece {
                     x = xnew + centre.x;
                     y = ynew + centre.y;
 
-                    // let distance_x = (centre.x - x) * (centre.x - x);
-                    // let distance_y = (centre.y - y) * (centre.y - y);
-                    // println!("dx: {}, dy: {}", distance_x, distance_y);
-                    // let distance = (distance_x + distance_y).sqrt();
-                    // println!("distance: {}", distance);
-                    // println!("x: {}, y: {}", x, y);
-
-                    // let x = centre.x + distance as f32 * rotation.cos() as f32;
-                    // let y = centre.y + distance as f32 * rotation.sin() as f32;
-                    // println!("new x: {}, new y: {}", x, y);
-
                     let draw_param = DrawParam {
                         dest: graphics::Point::new(x, y),
                         rotation: rotation as f32,
@@ -181,10 +170,10 @@ impl Piece {
             }
         }
 
-        graphics::set_color(ctx, Color::new(255.0, 0.0, 0.0, 255.0))?;
-        graphics::circle(ctx, graphics::DrawMode::Fill, centre, 2.0, 22)?;
-        graphics::set_color(ctx, Color::new(0.0, 0.0, 255.0, 255.0))?;
-        graphics::circle(ctx, graphics::DrawMode::Fill, top_left, 2.0, 22)?;
+        // graphics::set_color(ctx, Color::new(255.0, 0.0, 0.0, 255.0))?;
+        // graphics::circle(ctx, graphics::DrawMode::Fill, centre, 2.0, 22)?;
+        // graphics::set_color(ctx, Color::new(0.0, 0.0, 255.0, 255.0))?;
+        // graphics::circle(ctx, graphics::DrawMode::Fill, top_left, 2.0, 22)?;
 
         Ok(())
     }
