@@ -75,12 +75,6 @@ impl EventHandler for IntroState {
 
         let intro_text_dest = graphics::Point::new(coords.w / 2.0, 300.0);
 
-        println!(
-            "fader: {}, normalized fader: {}",
-            self.fader,
-            self.fader / FADE_TIME
-        );
-
         graphics::set_color(
             ctx,
             graphics::Color::new(1.0, 1.0, 1.0, self.fader / FADE_TIME),
