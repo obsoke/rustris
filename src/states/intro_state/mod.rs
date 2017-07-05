@@ -79,7 +79,6 @@ impl EventHandler for IntroState {
             ctx,
             graphics::Color::new(1.0, 1.0, 1.0, self.fader / FADE_TIME),
         )?;
-
         graphics::draw(ctx, &self.intro_text, intro_text_dest, 0.0)?;
 
         Ok(())

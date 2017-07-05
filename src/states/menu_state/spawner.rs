@@ -46,7 +46,6 @@ impl SpawnedPiece {
                 assets.get_image("block").unwrap(),
                 self.position,
                 self.extra_rotation,
-                self.scale,
             )
             .unwrap();
     }

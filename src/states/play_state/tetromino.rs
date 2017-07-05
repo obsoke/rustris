@@ -127,7 +127,6 @@ impl Piece {
         image: &graphics::Image,
         top_left: Point,
         rotation: f64,
-        scale: f64,
     ) -> GameResult<()> {
         let starting_pos = top_left;
         // get the centre of our complex object in order to rotate around it

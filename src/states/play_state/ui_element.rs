@@ -162,7 +162,6 @@ impl UIBlockView {
                 assets.get_image("block")?,
                 next_piece_pos,
                 0.0,
-                1.0,
             )?;
         }
         Ok(())
