@@ -6,7 +6,7 @@ mod ui_element;
 mod input_state;
 
 use std::time::Duration;
-use ggez::{Context, GameResult};
+use ggez::{Context, GameResult, graphics};
 use ggez::graphics::Point;
 use self::well::Well;
 use self::tetromino::{Piece, PieceType};
@@ -474,6 +474,14 @@ impl EventHandler for PlayState {
     }
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+        let coords = graphics::get_screen_coordinates(ctx);
+        graphics::draw(
+            ctx,
+            assets.get_image("game_bg")?,
+            Point::new(coords.w / 2.0, (coords.h * -1 as f32) / 2.0),
+            0.0,
+        )?;
+
         self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece.draw_shadow(
             ctx,

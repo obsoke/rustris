@@ -234,7 +234,10 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "menu_bg",
             graphics::Image::new(ctx, "/blackhole2.png")?,
         )?;
-
+        assets.add_image(
+            "game_bg",
+            graphics::Image::new(ctx, "/space_bg.png")?,
+        )?;
         assets.add_font(
             "title",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 32)?,
