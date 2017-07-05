@@ -156,7 +156,13 @@ impl UIBlockView {
         graphics::rectangle(ctx, DrawMode::Line, value_rect)?;
         if let Some(shape) = self.shape {
             let piece = Piece::new(shape);
-            let next_piece_pos = Point::new(self.top_left.x - 90.0, self.top_left.y + 45.0);
+            // the magic numbers below were derived by fiddling with values
+            // until it looked right
+            let next_piece_pos = if piece.get_type() == PieceType::I {
+                Point::new(self.top_left.x - 95.0, self.top_left.y + 45.0)
+            } else {
+                Point::new(self.top_left.x - 110.0, self.top_left.y + 45.0)
+            };
             piece.draw_at_point(
                 ctx,
                 assets.get_image("block")?,
