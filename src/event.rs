@@ -250,6 +250,10 @@ pub fn run(ctx: &mut Context) -> GameResult<()> {
             "normal",
             graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 18)?,
         )?;
+        assets.add_font(
+            "ui",
+            graphics::Font::new(ctx, "/DejaVuSansMono.ttf", 16)?,
+        )?;
 
         let mut play_0 = audio::Source::new(ctx, "/music/Track2.ogg")?;
         let mut play_1 = audio::Source::new(ctx, "/music/Track4.ogg")?;

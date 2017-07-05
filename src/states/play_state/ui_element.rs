@@ -36,10 +36,8 @@ impl UITextView {
         title: &str,
         value: &str,
     ) -> Self {
-        let title_txt = graphics::Text::new(ctx, title, assets.get_font("normal").unwrap())
-            .unwrap();
-        let value_txt = graphics::Text::new(ctx, value, assets.get_font("normal").unwrap())
-            .unwrap();
+        let title_txt = graphics::Text::new(ctx, title, assets.get_font("ui").unwrap()).unwrap();
+        let value_txt = graphics::Text::new(ctx, value, assets.get_font("ui").unwrap()).unwrap();
         Self {
             // ggez draws coords at center; we want to use top left as reference
             top_left: Point::new(
@@ -58,15 +56,15 @@ impl UITextView {
         if new_value != self.value {
             self.value.clear(); // is this necessary?
             self.value = new_value.to_string();
-            self.value_text =
-                graphics::Text::new(ctx, new_value, assets.get_font("normal").unwrap()).unwrap();
+            self.value_text = graphics::Text::new(ctx, new_value, assets.get_font("ui").unwrap())
+                .unwrap();
         }
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         let title_rect = Rect::new(self.top_left.x, self.top_left.y, WIDTH, UITEXT_HEIGHT);
         let title_point = Point::new(
-            self.top_left.x as f32 - (WIDTH / 4.0),
+            self.top_left.x as f32 - (WIDTH / 2.5) + 15.0,
             self.top_left.y as f32,
         );
         graphics::set_color(ctx, UI_BG_COLOUR)?;
@@ -75,7 +73,7 @@ impl UITextView {
         graphics::draw(ctx, &self.title_text, title_point, 0.0)?;
 
         let value_point = Point::new(
-            self.top_left.x as f32 + (WIDTH / 3.0),
+            self.top_left.x as f32 + (WIDTH / 4.5),
             self.top_left.y as f32,
         );
         graphics::set_color(ctx, Color::new(1.0, 1.0, 0.0, 1.0))?;
@@ -99,8 +97,7 @@ impl UIBlockView {
         title: &str,
         shape: Option<PieceType>,
     ) -> Self {
-        let title_txt = graphics::Text::new(ctx, title, assets.get_font("normal").unwrap())
-            .unwrap();
+        let title_txt = graphics::Text::new(ctx, title, assets.get_font("ui").unwrap()).unwrap();
         Self {
             // ggez draws coords at center; we want to use top left as reference
             top_left: Point::new(
