@@ -3,11 +3,15 @@ use ggez::graphics::{DrawMode, Color, Rect, Point};
 use event::Assets;
 use states::play_state::tetromino::{Piece, PieceType};
 
-const WIDTH: f32 = 170.0;
-const HEIGHT: f32 = 50.0;
-// text view's have their own height
-const UITEXTVIEW_HEIGHT: f32 = 35.0;
-const CIRCLE_RADIUS: f32 = 25.0;
+const WIDTH: f32 = 150.0;
+const UIBLOCK_HEIGHT: f32 = 130.0;
+const UITEXT_HEIGHT: f32 = 40.0;
+const UI_BG_COLOUR: Color = Color {
+    r: 0.1,
+    b: 0.1,
+    g: 0.1,
+    a: 0.1,
+};
 
 // Ideally, there would be a general `View` trait or type or whatnot that I
 // could implement these two views in a DRY way but UI design/creation wasn't
@@ -17,7 +21,6 @@ const CIRCLE_RADIUS: f32 = 25.0;
 /// Represents a UI element that displays a String.
 pub struct UITextView {
     top_left: Point,
-    centre: Point,
     title_text: graphics::Text,
     value: String,
     value_text: graphics::Text,
@@ -41,9 +44,8 @@ impl UITextView {
             // ggez draws coords at center; we want to use top left as reference
             top_left: Point::new(
                 top_left.x + (WIDTH / 2.0),
-                top_left.y + (UITEXTVIEW_HEIGHT / 2.0),
+                top_left.y + (UITEXT_HEIGHT / 2.0),
             ),
-            centre: top_left,
             title_text: title_txt,
             value: value.to_string(),
             value_text: value_txt,
@@ -62,35 +64,21 @@ impl UITextView {
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        // title portion
-        let title_rect = Rect::new(self.top_left.x, self.top_left.y, WIDTH, UITEXTVIEW_HEIGHT);
-        let title_point = Point::new(self.top_left.x as f32, self.top_left.y as f32);
-        graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
+        let title_rect = Rect::new(self.top_left.x, self.top_left.y, WIDTH, UITEXT_HEIGHT);
+        let title_point = Point::new(
+            self.top_left.x as f32 - (WIDTH / 4.0),
+            self.top_left.y as f32,
+        );
+        graphics::set_color(ctx, UI_BG_COLOUR)?;
         graphics::rectangle(ctx, DrawMode::Fill, title_rect)?;
-        graphics::circle(
-            ctx,
-            DrawMode::Fill,
-            Point::new(self.centre.x as f32 + WIDTH as f32, self.top_left.y as f32),
-            CIRCLE_RADIUS,
-            32,
-        )?;
         graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_point, 0.0)?;
 
-        // value portion
-        let value_rect = Rect::new(
-            self.top_left.x - 20.0,
-            self.top_left.y + UITEXTVIEW_HEIGHT,
-            WIDTH - 40.0,
-            UITEXTVIEW_HEIGHT,
-        );
         let value_point = Point::new(
-            self.top_left.x as f32,
-            self.top_left.y as f32 + UITEXTVIEW_HEIGHT as f32,
+            self.top_left.x as f32 + (WIDTH / 3.0),
+            self.top_left.y as f32,
         );
-        graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
-        graphics::rectangle(ctx, DrawMode::Fill, value_rect)?;
-        graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
+        graphics::set_color(ctx, Color::new(1.0, 1.0, 0.0, 1.0))?;
         graphics::draw(ctx, &self.value_text, value_point, 0.0)?;
         Ok(())
     }
@@ -99,7 +87,6 @@ impl UITextView {
 /// A UI element that renders `Pieces`. Used for elements like 'Next' or 'Hold'.
 pub struct UIBlockView {
     top_left: Point,
-    centre: Point,
     title_text: graphics::Text,
     shape: Option<PieceType>,
 }
@@ -116,8 +103,10 @@ impl UIBlockView {
             .unwrap();
         Self {
             // ggez draws coords at center; we want to use top left as reference
-            top_left: Point::new(top_left.x + (WIDTH / 2.0), top_left.y + (HEIGHT / 2.0)),
-            centre: top_left,
+            top_left: Point::new(
+                top_left.x + (WIDTH / 2.0),
+                top_left.y + (UIBLOCK_HEIGHT / 2.0),
+            ),
             title_text: title_txt,
             shape: shape,
         }
@@ -131,37 +120,25 @@ impl UIBlockView {
 
     pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         // title portion
-        let title_rect = Rect::new(self.top_left.x, self.top_left.y, WIDTH, HEIGHT);
-        let title_point = Point::new(self.top_left.x as f32, self.top_left.y as f32);
-        graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
+        let title_rect = Rect::new(self.top_left.x, self.top_left.y, WIDTH, UIBLOCK_HEIGHT);
+        let title_point = Point::new(
+            self.top_left.x as f32 - (WIDTH / 3.0) + 10.0,
+            self.top_left.y as f32 - (UIBLOCK_HEIGHT / 3.0),
+        );
+        graphics::set_color(ctx, UI_BG_COLOUR)?;
         graphics::rectangle(ctx, DrawMode::Fill, title_rect)?;
-        graphics::circle(
-            ctx,
-            DrawMode::Fill,
-            Point::new(self.centre.x as f32 + WIDTH as f32, self.top_left.y as f32),
-            CIRCLE_RADIUS,
-            32,
-        )?;
         graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_point, 0.0)?;
 
-        // value portion
-        let value_rect = Rect::new(
-            self.top_left.x - 20.0,
-            self.top_left.y + HEIGHT + (HEIGHT / 2.0),
-            WIDTH - 40.0,
-            HEIGHT * 2.0,
-        );
-        graphics::set_color(ctx, Color::new(1.0, 0.0, 0.0, 1.0))?;
-        graphics::rectangle(ctx, DrawMode::Line, value_rect)?;
         if let Some(shape) = self.shape {
             let piece = Piece::new(shape);
             // the magic numbers below were derived by fiddling with values
-            // until it looked right
+            // until it looked right. ideally, some kind of object graph would
+            // be used to make relative positioning easier
             let next_piece_pos = if piece.get_type() == PieceType::I {
-                Point::new(self.top_left.x - 95.0, self.top_left.y + 45.0)
+                Point::new(self.top_left.x - 77.0, self.top_left.y - 10.0)
             } else {
-                Point::new(self.top_left.x - 110.0, self.top_left.y + 45.0)
+                Point::new(self.top_left.x - 90.0, self.top_left.y - 15.0)
             };
             piece.draw_at_point(
                 ctx,
