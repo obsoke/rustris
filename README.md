@@ -1,5 +1,7 @@
 # Rustris
 
+![screenshot of rustris](screenshot.png)
+
 ## Controls
 
 ### Keyboard
