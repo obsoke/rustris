@@ -11,17 +11,15 @@ const SPEED: f32 = 170.0;
 struct SpawnedPiece {
     position: Point,
     extra_rotation: f64,
-    scale: f64,
     piece: Piece,
     is_dead: bool,
 }
 
 impl SpawnedPiece {
-    pub fn new(pos: Point, rot: f64, scale: f64, ptype: PieceType) -> Self {
+    pub fn new(pos: Point, rot: f64, ptype: PieceType) -> Self {
         Self {
             position: pos,
             extra_rotation: rot,
-            scale: scale,
             piece: Piece::new(ptype),
             is_dead: false,
         }
@@ -103,8 +101,6 @@ impl Spawner {
         let coords = graphics::get_screen_coordinates(ctx);
         let x = rand::thread_rng().gen_range(0.0, coords.w);
         let extra_rotation = rand::thread_rng().gen_range(0.0, MAX_ROTATION);
-        let normalized_rotation = extra_rotation / MAX_ROTATION;
-        let scale = 1.0 - normalized_rotation;
 
         let piece_type = {
             let piece_type_no = rand::thread_rng().gen_range(0, 7);
@@ -117,7 +113,6 @@ impl Spawner {
         self.active_pieces.push(SpawnedPiece::new(
             position,
             extra_rotation,
-            scale,
             piece_type,
         ));
     }
