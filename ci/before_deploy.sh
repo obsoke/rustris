@@ -9,6 +9,8 @@ main() {
     case $TRAVIS_OS_NAME in
         linux)
             stage=$(mktemp -d)
+            sudo apt-get -qq update;
+            sudo apt-get install -y libsdl2-dev
             ;;
         osx)
             stage=$(mktemp -d -t tmp)
