@@ -10,6 +10,7 @@ main() {
     else
         target=x86_64-apple-darwin
         sort=gsort  # for `sort --sort-version`, from brew's coreutils.
+        brew install sdl2;
     fi
 
     # This fetches latest stable release
