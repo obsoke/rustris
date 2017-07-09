@@ -6,7 +6,7 @@ main() {
         target=x86_64-unknown-linux-musl
         sort=sort
         sudo apt-get -qq update;
-        sudo apt-get install -y libsdl2-dev alsa-base;
+        sudo apt-get install -y libsdl2-dev alsa-base alsa-source;
     else
         target=x86_64-apple-darwin
         sort=gsort  # for `sort --sort-version`, from brew's coreutils.
