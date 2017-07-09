@@ -1,6 +1,6 @@
 [package]
-name = "tetris-ggez"
-version = "0.9.0"
+name = "rustris"
+version = "1.0.0"
 authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]
