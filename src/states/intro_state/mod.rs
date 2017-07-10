@@ -23,7 +23,7 @@ impl IntroState {
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
         let intro_text = graphics::Text::new(
             ctx,
-            "a (bad) game (clone) by obsoke",
+            "a game by obsoke",
             assets.get_font("normal")?,
         )?;
 
