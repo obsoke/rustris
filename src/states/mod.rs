@@ -7,8 +7,8 @@ pub mod shared;
 use std::time::Duration;
 use sdl2::mouse;
 use ggez::{Context, GameResult, timer};
-use event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
-use states::intro_state::IntroState;
+use crate::event::{Assets, EventHandler, Transition, Keycode, Mod, Button, Axis};
+use crate::states::intro_state::IntroState;
 
 /// A `StateManager` will manage requests to push, pop or swap states on the
 /// state stack. It owns the `Assets` struct and dictates whether the game

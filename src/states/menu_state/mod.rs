@@ -3,10 +3,10 @@ mod spawner;
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Point, Color};
-use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-use states::shared::option::{Option, OptionInputCommand};
-use states::play_state::PlayState;
-use util::{DurationExt, play_click_sfx};
+use crate::event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
+use crate::states::shared::option::{Option, OptionInputCommand};
+use crate::states::play_state::PlayState;
+use crate::util::{DurationExt, play_click_sfx};
 use self::spawner::Spawner;
 
 pub struct MenuState {

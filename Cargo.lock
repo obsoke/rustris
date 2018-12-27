@@ -1,12 +1,3 @@
-[root]
-name = "rustris"
-version = "1.0.1"
-dependencies = [
- "ggez 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "sdl2 0.29.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
 [[package]]
 name = "adler32"
 version = "1.0.0"
@@ -704,6 +695,15 @@ dependencies = [
 name = "rustc-serialize"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "rustris"
+version = "2.0.0"
+dependencies = [
+ "ggez 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sdl2 0.29.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "rusttype"

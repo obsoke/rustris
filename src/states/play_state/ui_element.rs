@@ -1,7 +1,7 @@
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{DrawMode, Color, Rect, Point};
-use event::Assets;
-use states::play_state::tetromino::{Piece, PieceType};
+use crate::event::Assets;
+use crate::states::play_state::tetromino::{Piece, PieceType};
 
 const WIDTH: f32 = 150.0;
 const UIBLOCK_HEIGHT: f32 = 130.0;

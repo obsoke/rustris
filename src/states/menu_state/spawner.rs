@@ -2,9 +2,9 @@ use std::time::Duration;
 use rand;
 use ggez::{Context, graphics};
 use ggez::graphics::Point;
-use event::Assets;
-use states::play_state::tetromino::{Piece, PieceType, u8_to_piece_type};
-use util::DurationExt;
+use crate::event::Assets;
+use crate::states::play_state::tetromino::{Piece, PieceType, u8_to_piece_type};
+use crate::util::DurationExt;
 
 const SPEED: f32 = 170.0;
 

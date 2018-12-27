@@ -1,6 +1,6 @@
 use ggez::{Context, GameResult, graphics};
 use ggez::graphics::{Point, Color};
-use event::Assets;
+use crate::event::Assets;
 
 
 /// Different representations of possible commands that could be received from

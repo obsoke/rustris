@@ -1,4 +1,4 @@
-use states::play_state::tetromino::PieceShape;
+use crate::states::play_state::tetromino::PieceShape;
 
 // define all of our shapes & rotations
 pub const O_SHAPES: [PieceShape; 4] = [

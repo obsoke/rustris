@@ -131,8 +131,8 @@ impl Piece {
         let starting_pos = top_left;
         // get the centre of our complex object in order to rotate around it
         let centre = Point::new(
-            (starting_pos.x + (BLOCK_SIZE * 8.0) / 2.0),
-            (starting_pos.y + (BLOCK_SIZE * 8.0) / 2.0),
+            starting_pos.x + (BLOCK_SIZE * 8.0) / 2.0,
+            starting_pos.y + (BLOCK_SIZE * 8.0) / 2.0,
         );
 
         for (r, _) in self.shape.iter().enumerate() {

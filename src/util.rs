@@ -30,7 +30,7 @@ mod tests {
 
 
 use ggez::GameResult;
-use event::Assets;
+use crate::event::Assets;
 
 /// Play the 'click' sound effect. This is a general utility method as it is
 /// used in a couple of different game states.

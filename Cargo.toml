@@ -1,6 +1,6 @@
 [package]
 name = "rustris"
-version = "1.0.1"
+version = "2.0.0"
 authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]

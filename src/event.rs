@@ -60,7 +60,7 @@ use ggez::graphics;
 use ggez::audio;
 use ggez::{GameResult, Context};
 use ggez::timer;
-use states::StateManager;
+use crate::states::StateManager;
 
 /// A global structure that stores all game assets. This is passed down into a
 /// state by the `StateManager`.

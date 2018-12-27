@@ -13,9 +13,9 @@ use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
 use self::ui_element::{UIBlockView, UITextView};
 use self::input_state::InputState;
-use states::game_over_state::{GameEndState, GameEndMode};
-use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-use util::{DurationExt, play_click_sfx};
+use crate::states::game_over_state::{GameEndState, GameEndMode};
+use crate::event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
+use crate::util::{DurationExt, play_click_sfx};
 
 // Tweakable values Would be nice to have a UI to fiddle with these in-game
 // without having to recompile. Another v2 to-do

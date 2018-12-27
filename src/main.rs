@@ -7,7 +7,7 @@ mod event;
 mod util;
 
 use ggez::{Context, conf, graphics};
-use event::run;
+use crate::event::run;
 
 fn main() {
     let mut conf = conf::Conf::new();

@@ -2,11 +2,11 @@ use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::event::{Mod, Keycode};
 use ggez::graphics::Point;
-use event::{Assets, Transition, EventHandler, Button};
-use states::play_state::PlayState;
-use states::menu_state::MenuState;
-use states::shared::option::{Option, OptionInputCommand};
-use util::play_click_sfx;
+use crate::event::{Assets, Transition, EventHandler, Button};
+use crate::states::play_state::PlayState;
+use crate::states::menu_state::MenuState;
+use crate::states::shared::option::{Option, OptionInputCommand};
+use crate::util::play_click_sfx;
 
 /// Describes whether to render `GameEndState` under either "Player Wins" or
 /// "Player Loses" conditions.

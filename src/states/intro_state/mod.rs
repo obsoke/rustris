@@ -1,9 +1,9 @@
 use std::time::Duration;
 use ggez::{Context, GameResult, graphics};
 use ggez::event::{Mod, Keycode};
-use event::{Assets, Transition, EventHandler, Button};
-use states::menu_state::MenuState;
-use util::DurationExt;
+use crate::event::{Assets, Transition, EventHandler, Button};
+use crate::states::menu_state::MenuState;
+use crate::util::DurationExt;
 
 const FADE_TIME: f32 = 3.0;
 const WAIT_TIME: f32 = 1.5;
