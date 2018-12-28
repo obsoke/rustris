@@ -93,9 +93,9 @@ pub enum Transition {
     /// Don't change states.
     None,
     /// Push another state ontop of the current state.
-    Push(Box<State>),
+    Push(Box<dyn State>),
     /// Remove all states from the stack and then push a new one.
-    Swap(Box<State>),
+    Swap(Box<dyn State>),
     /// Remove the state currently at the top of the stack.
     Pop,
     /// Clear the stack which in turn quits the game.
@@ -135,7 +135,7 @@ pub trait State {
 pub struct StateManager {
     assets: Assets,
     running: bool,
-    states: Vec<Box<State>>,
+    states: Vec<Box<dyn State>>,
 }
 
 impl StateManager {
@@ -224,13 +224,13 @@ impl StateManager {
     }
 
     /// Pushes a state onto the state stack.
-    fn push(&mut self, boxed_state: Box<State>) {
+    fn push(&mut self, boxed_state: Box<dyn State>) {
         self.states.push(boxed_state)
     }
 
     /// Removes all states from the state stack and then pushes the given
     /// `boxed_state` onto the stack.
-    fn swap(&mut self, boxed_state: Box<State>) {
+    fn swap(&mut self, boxed_state: Box<dyn State>) {
         self.states.clear();
         self.push(boxed_state);
     }

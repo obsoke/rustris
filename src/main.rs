@@ -1,6 +1,3 @@
-extern crate ggez;
-extern crate rand;
-
 mod states;
 mod util;
 
