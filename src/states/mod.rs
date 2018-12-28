@@ -244,6 +244,10 @@ impl StateManager {
 
 impl EventHandler for StateManager {
     fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+        if !self.running {
+            ctx.quit()?;
+        }
+
         let transition = match self.states.last_mut() {
             Some(state) => state.update(ctx, &self.assets, dt),
             None => Ok(Transition::None),
