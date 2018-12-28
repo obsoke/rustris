@@ -1,6 +1,5 @@
 extern crate ggez;
 extern crate rand;
-extern crate sdl2;
 
 mod states;
 mod util;

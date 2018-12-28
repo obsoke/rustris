@@ -4,7 +4,5 @@ version = "2.0.0"
 authors = ["Dale Karp <dale@dale.io>"]
 
 [dependencies]
-#ggez = { path = "../../../repos/ggez", features = ["cargo-resource-root"] }
 ggez = { version = "0.3.2", features = ["cargo-resource-root"] }
-sdl2 = "0.29"
 rand = "0.3.15"
