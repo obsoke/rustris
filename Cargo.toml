@@ -2,6 +2,7 @@
 name = "rustris"
 version = "2.0.0"
 authors = ["Dale Karp <dale@dale.io>"]
+edition = "2018"
 
 [dependencies]
 ggez = { version = "0.3.2", features = ["cargo-resource-root"] }
