@@ -1,6 +1,6 @@
 use super::tetromino::{block_to_colour, Piece, PieceShape};
 use super::BLOCK_SIZE;
-use ggez::graphics::{Color, DrawMode, Point, Rect};
+use ggez::graphics::{Color, DrawMode, Point2, Rect};
 use ggez::{graphics, Context, GameResult};
 
 /// The y-offset to use as a starting point when drawing
@@ -68,13 +68,13 @@ impl Well {
                     let x = starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32;
                     let y = Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32;
 
-                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
+                    graphics::draw(ctx, image, Point2::new(x, y), 0.0)?;
                 } else {
                     graphics::set_color(ctx, Color::from((100, 100, 100, 20)))?;
 
                     graphics::rectangle(
                         ctx,
-                        DrawMode::Line,
+                        DrawMode::Line(1.0), // TODO: This may have to be changed
                         Rect {
                             x: starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32,
                             y: Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32,
@@ -130,7 +130,7 @@ impl Well {
 
     /// Check if a collision would occur in the well given the shape and shape's
     /// position.
-    pub fn check_for_collisions(&self, shape: &PieceShape, position: Point) -> bool {
+    pub fn check_for_collisions(&self, shape: &PieceShape, position: Point2) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {
@@ -153,7 +153,7 @@ impl Well {
     }
 
     /// Check if a landing would occur given the shape and the shape's position.
-    pub fn check_for_landing(&self, shape: &PieceShape, position: Point) -> bool {
+    pub fn check_for_landing(&self, shape: &PieceShape, position: Point2) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {

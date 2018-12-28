@@ -14,7 +14,7 @@ use crate::states::game_over_state::{GameEndMode, GameEndState};
 use crate::states::{Assets, State, Transition};
 use crate::util::{play_click_sfx, DurationExt};
 use ggez::event::{Button, Keycode, Mod};
-use ggez::graphics::Point;
+use ggez::graphics::Point2;
 use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
 
@@ -99,14 +99,14 @@ impl PlayState {
             ui_next: UIBlockView::new(
                 ctx,
                 assets,
-                Point::new(775.0, 70.0),
+                Point2::new(775.0, 70.0),
                 "Next",
                 Some(first_type),
             ),
-            ui_hold: UIBlockView::new(ctx, assets, Point::new(775.0, 250.0), "Hold", None),
-            ui_level: UITextView::new(ctx, assets, Point::new(775.0, 420.0), "Level", "1"),
-            ui_lines: UITextView::new(ctx, assets, Point::new(775.0, 500.0), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Point::new(775.0, 580.0), "Score", "0"),
+            ui_hold: UIBlockView::new(ctx, assets, Point2::new(775.0, 250.0), "Hold", None),
+            ui_level: UITextView::new(ctx, assets, Point2::new(775.0, 420.0), "Level", "1"),
+            ui_lines: UITextView::new(ctx, assets, Point2::new(775.0, 500.0), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Point2::new(775.0, 580.0), "Score", "0"),
         })
     }
 
@@ -115,7 +115,7 @@ impl PlayState {
             // initial piece movement
             if self.input.left.initial_delay_timer == 0.0 {
                 self.input.left.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0), assets);
+                self.move_piece(Point2::new(-1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.left.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -124,7 +124,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.left.secondary_delay_timer == 0.0 {
                 self.input.left.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0), assets);
+                self.move_piece(Point2::new(-1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -137,7 +137,7 @@ impl PlayState {
             // initial piece movement
             if self.input.right.initial_delay_timer == 0.0 {
                 self.input.right.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0), assets);
+                self.move_piece(Point2::new(1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.right.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -146,7 +146,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.right.secondary_delay_timer == 0.0 {
                 self.input.right.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0), assets);
+                self.move_piece(Point2::new(1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -159,7 +159,7 @@ impl PlayState {
             // initial piece movement
             if self.input.soft_drop.initial_delay_timer == 0.0 {
                 self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0), assets);
+                self.move_piece(Point2::new(0.0, 1.0), assets);
             }
             // initial movement delay
             else if self.input.soft_drop.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -168,7 +168,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.soft_drop.secondary_delay_timer == 0.0 {
                 self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0), assets);
+                self.move_piece(Point2::new(0.0, 1.0), assets);
             }
             // secondary movement delay
             else {
@@ -205,7 +205,7 @@ impl PlayState {
     }
 
     /// Attempt to move the current piece.
-    fn move_piece(&mut self, potential_new_position: Point, assets: &Assets) {
+    fn move_piece(&mut self, potential_new_position: Point2, assets: &Assets) {
         self.current_piece.potential_top_left.x += potential_new_position.x;
         self.current_piece.potential_top_left.y += potential_new_position.y;
 
@@ -459,7 +459,7 @@ impl State for PlayState {
         graphics::draw(
             ctx,
             assets.get_image("game_bg")?,
-            Point::new(coords.w / 2.0, (coords.h * -1 as f32) / 2.0),
+            Point2::new(coords.w / 2.0, (coords.h * -1 as f32) / 2.0),
             0.0,
         )?;
 

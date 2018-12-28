@@ -1,5 +1,5 @@
 use crate::states::Assets;
-use ggez::graphics::{Color, Point};
+use ggez::graphics::{Color, Point2};
 use ggez::{graphics, Context, GameResult};
 
 /// Different representations of possible commands that could be received from
@@ -13,13 +13,13 @@ pub enum OptionInputCommand {
 /// A menu option.
 pub struct Option {
     text: graphics::Text,
-    centre: Point,
+    centre: Point2,
     is_selected: bool,
 }
 
 impl Option {
     /// Creates a new `Option`.
-    pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point) -> Self {
+    pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point2) -> Self {
         let text = graphics::Text::new(ctx, name, assets.get_font("normal").unwrap()).unwrap();
         Self {
             text,

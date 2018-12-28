@@ -6,7 +6,7 @@ use crate::states::shared::option::{Option, OptionInputCommand};
 use crate::states::{Assets, State, Transition};
 use crate::util::{play_click_sfx, DurationExt};
 use ggez::event::{Button, Keycode, Mod};
-use ggez::graphics::{Color, Point};
+use ggez::graphics::{Color, Point2};
 use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
 
@@ -33,13 +33,13 @@ impl MenuState {
             ctx,
             assets,
             "Play!",
-            Point::new(coords.w / 2.0, 250.0),
+            Point2::new(coords.w / 2.0, 250.0),
         ));
         options_vec.push(Option::new(
             ctx,
             assets,
             "Exit",
-            Point::new(coords.w / 2.0, 325.0),
+            Point2::new(coords.w / 2.0, 325.0),
         ));
 
         Ok(MenuState {
@@ -136,14 +136,14 @@ impl State for MenuState {
         graphics::draw(
             ctx,
             assets.get_image("menu_bg")?,
-            Point::new(coords.w / 2.0, coords.h / -2.0),
+            Point2::new(coords.w / 2.0, coords.h / -2.0),
             self.title_rotation as f32 * 0.3,
         )?;
 
         // draw piece spawner & all spawned pieces
         self.piece_spawner.draw(ctx, assets);
 
-        let title_dest = graphics::Point::new(coords.w / 2.0, 100.0);
+        let title_dest = graphics::Point2::new(coords.w / 2.0, 100.0);
         // shadow/stroke
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.8))?;
         graphics::draw(ctx, &self.title_shadow, title_dest, 0.0)?;

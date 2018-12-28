@@ -243,10 +243,12 @@ impl StateManager {
 }
 
 impl EventHandler for StateManager {
-    fn update(&mut self, ctx: &mut Context, dt: Duration) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         if !self.running {
             ctx.quit()?;
         }
+
+        let dt = timer::get_delta(ctx);
 
         let transition = match self.states.last_mut() {
             Some(state) => state.update(ctx, &self.assets, dt),
@@ -277,59 +279,96 @@ impl EventHandler for StateManager {
         timer::sleep(Duration::from_secs(0));
         Ok(())
     }
-    fn mouse_button_down_event(&mut self, _button: MouseButton, _x: i32, _y: i32) {
+    fn mouse_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _button: MouseButton,
+        _x: i32,
+        _y: i32,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.mouse_button_down_event(_button, _x, _y);
         }
     }
 
-    fn mouse_button_up_event(&mut self, _button: MouseButton, _x: i32, _y: i32) {
+    fn mouse_button_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        _button: MouseButton,
+        _x: i32,
+        _y: i32,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.mouse_button_up_event(_button, _x, _y);
         }
     }
 
-    fn mouse_motion_event(&mut self, _state: MouseState, _x: i32, _y: i32, _xrel: i32, _yrel: i32) {
+    fn mouse_motion_event(
+        &mut self,
+        _ctx: &mut Context,
+        _state: MouseState,
+        _x: i32,
+        _y: i32,
+        _xrel: i32,
+        _yrel: i32,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.mouse_motion_event(_state, _x, _y, _xrel, _yrel);
         }
     }
 
-    fn mouse_wheel_event(&mut self, _x: i32, _y: i32) {
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: i32, _y: i32) {
         if let Some(state) = self.states.last_mut() {
             state.mouse_wheel_event(_x, _y);
         }
     }
 
-    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _keycode: Keycode,
+        _keymod: Mod,
+        _repeat: bool,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.key_down_event(_keycode, _keymod, _repeat, &self.assets);
         }
     }
 
-    fn key_up_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
         if let Some(state) = self.states.last_mut() {
             state.key_up_event(_keycode, _keymod, _repeat);
         }
     }
 
-    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _btn: Button,
+        _instance_id: i32,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.controller_button_down_event(_btn, _instance_id, &self.assets);
         }
     }
-    fn controller_button_up_event(&mut self, _btn: Button, _instance_id: i32) {
+    fn controller_button_up_event(&mut self, _ctx: &mut Context, _btn: Button, _instance_id: i32) {
         if let Some(state) = self.states.last_mut() {
             state.controller_button_up_event(_btn, _instance_id);
         }
     }
-    fn controller_axis_event(&mut self, _axis: Axis, _value: i16, _instance_id: i32) {
+    fn controller_axis_event(
+        &mut self,
+        _ctx: &mut Context,
+        _axis: Axis,
+        _value: i16,
+        _instance_id: i32,
+    ) {
         if let Some(state) = self.states.last_mut() {
             state.controller_axis_event(_axis, _value, _instance_id);
         }
     }
 
-    fn focus_event(&mut self, _gained: bool) {
+    fn focus_event(&mut self, _ctx: &mut Context, _gained: bool) {
         if let Some(state) = self.states.last_mut() {
             state.focus_event(_gained);
         }
@@ -337,7 +376,7 @@ impl EventHandler for StateManager {
 
     /// Called upon a quit event.  If it returns true,
     /// the game does not exit.
-    fn quit_event(&mut self) -> bool {
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
         match self.states.last_mut() {
             Some(state) => state.quit_event(),
             None => false,

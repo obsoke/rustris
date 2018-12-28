@@ -4,7 +4,7 @@ use crate::states::shared::option::{Option, OptionInputCommand};
 use crate::states::{Assets, State, Transition};
 use crate::util::play_click_sfx;
 use ggez::event::{Button, Keycode, Mod};
-use ggez::graphics::Point;
+use ggez::graphics::Point2;
 use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
 
@@ -58,19 +58,19 @@ impl GameEndState {
             ctx,
             assets,
             "Play again",
-            Point::new(coords.w / 2.0, 450.0),
+            Point2::new(coords.w / 2.0, 450.0),
         ));
         options_vec.push(Option::new(
             ctx,
             assets,
             "Return to Menu",
-            Point::new(coords.w / 2.0, 525.0),
+            Point2::new(coords.w / 2.0, 525.0),
         ));
         options_vec.push(Option::new(
             ctx,
             assets,
             "Quit",
-            Point::new(coords.w / 2.0, 600.0),
+            Point2::new(coords.w / 2.0, 600.0),
         ));
 
         match mode {
@@ -155,10 +155,10 @@ impl State for GameEndState {
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
-        let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
-        let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
-        let game_over_level_dest = graphics::Point::new(coords.w / 2.0, 300.0);
+        let game_over_dest = Point2::new(coords.w / 2.0, 100.0);
+        let game_over_score_dest = Point2::new(coords.w / 2.0, 200.0);
+        let game_over_lines_dest = Point2::new(coords.w / 2.0, 250.0);
+        let game_over_level_dest = Point2::new(coords.w / 2.0, 300.0);
 
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
         graphics::rectangle(

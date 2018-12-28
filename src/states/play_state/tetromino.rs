@@ -1,7 +1,7 @@
 use super::shapes::*;
 use super::well::Y_OFFSET;
 use super::BLOCK_SIZE;
-use ggez::graphics::{Color, DrawParam, Point};
+use ggez::graphics::{Color, DrawParam, Point2};
 use ggez::{graphics, Context, GameResult};
 
 /// A `PieceShape` is a 4x4 array that represents the shape of a piece. A 0 is
@@ -25,9 +25,9 @@ pub struct Piece {
     shape: PieceShape,
     shape_type: PieceType,
     current_rotation_index: u32,
-    pub top_left: Point,
-    pub potential_top_left: Point,
-    shadow_position: Point,
+    pub top_left: Point2,
+    pub potential_top_left: Point2,
+    shadow_position: Point2,
 }
 
 impl Piece {
@@ -38,9 +38,9 @@ impl Piece {
         Piece {
             shape,
             shape_type,
-            top_left: Point::new(3.0, 0.0),
-            potential_top_left: Point::new(3.0, 0.0),
-            shadow_position: Point::new(3.0, 0.0),
+            top_left: Point2::new(3.0, 0.0),
+            potential_top_left: Point2::new(3.0, 0.0),
+            shadow_position: Point2::new(3.0, 0.0),
             current_rotation_index: 0,
         }
     }
@@ -53,9 +53,9 @@ impl Piece {
         Piece {
             shape,
             shape_type,
-            top_left: Point::new(3.0, 0.0),
-            potential_top_left: Point::new(3.0, 0.0),
-            shadow_position: Point::new(3.0, 0.0),
+            top_left: Point2::new(3.0, 0.0),
+            potential_top_left: Point2::new(3.0, 0.0),
+            shadow_position: Point2::new(3.0, 0.0),
             current_rotation_index: 0,
         }
     }
@@ -81,7 +81,7 @@ impl Piece {
                     let x = starting_pos + ((c as f32 + self.top_left.x as f32) * BLOCK_SIZE);
                     let y = Y_OFFSET + ((r as f32 + self.top_left.y as f32) * BLOCK_SIZE) as f32;
 
-                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
+                    graphics::draw(ctx, image, Point2::new(x, y), 0.0)?;
                 }
             }
         }
@@ -94,7 +94,7 @@ impl Piece {
         &self,
         ctx: &mut Context,
         image: &graphics::Image,
-        shadow_position: Point,
+        shadow_position: Point2,
     ) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad
@@ -111,7 +111,7 @@ impl Piece {
                     let x = starting_pos + ((c as f32 + shadow_position.x as f32) * BLOCK_SIZE);
                     let y = Y_OFFSET + ((r as f32 + shadow_position.y as f32) * BLOCK_SIZE) as f32;
 
-                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
+                    graphics::draw(ctx, image, Point2::new(x, y), 0.0)?;
                 }
             }
         }
@@ -124,12 +124,12 @@ impl Piece {
         &self,
         ctx: &mut Context,
         image: &graphics::Image,
-        top_left: Point,
+        top_left: Point2,
         rotation: f64,
     ) -> GameResult<()> {
         let starting_pos = top_left;
         // get the centre of our complex object in order to rotate around it
-        let centre = Point::new(
+        let centre = Point2::new(
             starting_pos.x + (BLOCK_SIZE * 8.0) / 2.0,
             starting_pos.y + (BLOCK_SIZE * 8.0) / 2.0,
         );
@@ -159,10 +159,8 @@ impl Piece {
                     y = ynew + centre.y;
 
                     let draw_param = DrawParam {
-                        //dest: graphics::Point::new(x * scale as f32, y * scale as f32),
-                        dest: graphics::Point::new(x, y),
+                        dest: Point2::new(x, y),
                         rotation: rotation as f32,
-                        //scale: Point::new(scale as f32, scale as f32),
                         ..Default::default()
                     };
 
@@ -209,12 +207,12 @@ impl Piece {
     }
 
     /// Set the current piece's shadow position.
-    pub fn set_shadow_position(&mut self, shadow_pos: Point) {
+    pub fn set_shadow_position(&mut self, shadow_pos: Point2) {
         self.shadow_position = shadow_pos;
     }
 
     /// Get the current piece's shadow position.
-    pub fn get_shadow_position(&self) -> Point {
+    pub fn get_shadow_position(&self) -> Point2 {
         self.shadow_position
     }
 }

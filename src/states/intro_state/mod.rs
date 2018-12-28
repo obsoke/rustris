@@ -2,6 +2,7 @@ use crate::states::menu_state::MenuState;
 use crate::states::{Assets, State, Transition};
 use crate::util::DurationExt;
 use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::Point2;
 use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
 
@@ -67,7 +68,7 @@ impl State for IntroState {
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
-        let intro_text_dest = graphics::Point::new(coords.w / 2.0, 300.0);
+        let intro_text_dest = Point2::new(coords.w / 2.0, 300.0);
 
         graphics::set_color(
             ctx,

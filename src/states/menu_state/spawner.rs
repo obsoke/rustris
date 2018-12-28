@@ -1,7 +1,7 @@
 use crate::states::play_state::tetromino::{u8_to_piece_type, Piece, PieceType};
 use crate::states::Assets;
 use crate::util::DurationExt;
-use ggez::graphics::Point;
+use ggez::graphics::Point2;
 use ggez::{graphics, Context};
 use rand;
 use std::time::Duration;
@@ -9,14 +9,14 @@ use std::time::Duration;
 const SPEED: f32 = 170.0;
 
 struct SpawnedPiece {
-    position: Point,
+    position: Point2,
     extra_rotation: f64,
     piece: Piece,
     is_dead: bool,
 }
 
 impl SpawnedPiece {
-    pub fn new(pos: Point, rot: f64, ptype: PieceType) -> Self {
+    pub fn new(pos: Point2, rot: f64, ptype: PieceType) -> Self {
         Self {
             position: pos,
             extra_rotation: rot,
@@ -109,7 +109,7 @@ impl Spawner {
 
         // spawn at a random x position way above viewable screen so pieces just
         // dont 'pop' in but kinda just float into view
-        let position = Point::new(x, -200.0);
+        let position = Point2::new(x, -200.0);
         self.active_pieces
             .push(SpawnedPiece::new(position, extra_rotation, piece_type));
     }
