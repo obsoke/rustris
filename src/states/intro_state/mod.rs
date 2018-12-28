@@ -1,9 +1,9 @@
-use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::event::{Mod, Keycode};
-use crate::event::{Assets, Transition, EventHandler, Button};
 use crate::states::menu_state::MenuState;
+use crate::states::{Assets, State, Transition};
 use crate::util::DurationExt;
+use ggez::event::{Button, Keycode, Mod};
+use ggez::{graphics, Context, GameResult};
+use std::time::Duration;
 
 const FADE_TIME: f32 = 3.0;
 const WAIT_TIME: f32 = 1.5;
@@ -21,12 +21,7 @@ impl IntroState {
     /// A `GameEndState` takes values from `PlayState` to render certain values
     /// such as no. of lines cleared, highest level cleared, final score, etc.
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
-        let intro_text = graphics::Text::new(
-            ctx,
-            "a game by obsoke",
-            assets.get_font("normal")?,
-        )?;
-
+        let intro_text = graphics::Text::new(ctx, "a game by obsoke", assets.get_font("normal")?)?;
 
         Ok(IntroState {
             intro_text: intro_text,
@@ -43,14 +38,13 @@ impl IntroState {
     }
 }
 
-impl EventHandler for IntroState {
+impl State for IntroState {
     fn update(
         &mut self,
         ctx: &mut Context,
         assets: &Assets,
         dt: Duration,
     ) -> GameResult<Transition> {
-
         if self.hit_any_key {
             return Ok(Transition::Swap(Box::new(MenuState::new(ctx, assets)?)));
         }

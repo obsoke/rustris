@@ -1,12 +1,12 @@
-use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::event::{Mod, Keycode};
-use ggez::graphics::Point;
-use crate::event::{Assets, Transition, EventHandler, Button};
-use crate::states::play_state::PlayState;
 use crate::states::menu_state::MenuState;
+use crate::states::play_state::PlayState;
 use crate::states::shared::option::{Option, OptionInputCommand};
+use crate::states::{Assets, State, Transition};
 use crate::util::play_click_sfx;
+use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::Point;
+use ggez::{graphics, Context, GameResult};
+use std::time::Duration;
 
 /// Describes whether to render `GameEndState` under either "Player Wins" or
 /// "Player Loses" conditions.
@@ -27,7 +27,6 @@ pub struct GameEndState {
     final_line_text: graphics::Text,
     final_level_text: graphics::Text,
 }
-
 
 impl GameEndState {
     /// A `GameEndState` takes values from `PlayState` to render certain values
@@ -127,7 +126,7 @@ impl GameEndState {
     }
 }
 
-impl EventHandler for GameEndState {
+impl State for GameEndState {
     fn update(
         &mut self,
         ctx: &mut Context,

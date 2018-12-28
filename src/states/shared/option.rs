@@ -1,7 +1,6 @@
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Point, Color};
-use crate::event::Assets;
-
+use crate::states::Assets;
+use ggez::graphics::{Color, Point};
+use ggez::{graphics, Context, GameResult};
 
 /// Different representations of possible commands that could be received from
 /// the user in the menu state.

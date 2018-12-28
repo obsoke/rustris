@@ -1,13 +1,12 @@
 extern crate ggez;
-extern crate sdl2;
 extern crate rand;
+extern crate sdl2;
 
 mod states;
-mod event;
 mod util;
 
-use ggez::{Context, conf, graphics};
-use crate::event::run;
+use crate::states::StateManager;
+use ggez::{conf, event, graphics, Context};
 
 fn main() {
     let mut conf = conf::Conf::new();
@@ -16,16 +15,16 @@ fn main() {
     conf.window_height = 720;
     conf.vsync = true;
 
-    let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf).expect(
-        "Could not load configuartion",
-    );
+    let ctx = &mut Context::load_from_conf("rustris", "obsoke", conf)
+        .expect("Could not load configuartion");
 
     // Our logical render target is 1280x720
-    graphics::set_screen_coordinates(ctx, 0.0, 1280.0, 0.0, 720.0).expect(
-        "Could not set logical screen coordinates before running initial state.",
-    );
+    graphics::set_screen_coordinates(ctx, 0.0, 1280.0, 0.0, 720.0)
+        .expect("Could not set logical screen coordinates before running initial state.");
 
-    if let Err(e) = run(ctx) {
+    // Initialize & run the state manager
+    let mut state = StateManager::new(ctx);
+    if let Err(e) = event::run(ctx, &mut state) {
         println!("Error encountered in run: {}", e);
     }
 }

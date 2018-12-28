@@ -1,7 +1,7 @@
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{DrawMode, Color, Rect, Point};
-use crate::event::Assets;
 use crate::states::play_state::tetromino::{Piece, PieceType};
+use crate::states::Assets;
+use ggez::graphics::{Color, DrawMode, Point, Rect};
+use ggez::{graphics, Context, GameResult};
 
 const WIDTH: f32 = 150.0;
 const UIBLOCK_HEIGHT: f32 = 130.0;
@@ -56,8 +56,8 @@ impl UITextView {
         if new_value != self.value {
             self.value.clear(); // is this necessary?
             self.value = new_value.to_string();
-            self.value_text = graphics::Text::new(ctx, new_value, assets.get_font("ui").unwrap())
-                .unwrap();
+            self.value_text =
+                graphics::Text::new(ctx, new_value, assets.get_font("ui").unwrap()).unwrap();
         }
     }
 
@@ -137,12 +137,7 @@ impl UIBlockView {
             } else {
                 Point::new(self.top_left.x - 90.0, self.top_left.y - 15.0)
             };
-            piece.draw_at_point(
-                ctx,
-                assets.get_image("block")?,
-                next_piece_pos,
-                0.0,
-            )?;
+            piece.draw_at_point(ctx, assets.get_image("block")?, next_piece_pos, 0.0)?;
         }
         Ok(())
     }
