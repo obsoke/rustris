@@ -34,11 +34,11 @@ impl GameEndState {
     pub fn new(
         ctx: &mut Context,
         assets: &Assets,
-        mode: GameEndMode,
+        mode: &GameEndMode,
         final_score_value: u32,
         final_cleared: u32,
         final_level: u32,
-    ) -> GameResult<GameEndState> {
+    ) -> GameResult<Self> {
         let game_over: graphics::Text;
         game_over = match mode {
             GameEndMode::Lose => graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?,
@@ -95,7 +95,7 @@ impl GameEndState {
     // Ideally, I would not be coupling `Assets` to this method. Would a
     // messaging system be fast enough to handle audio system stuff? Maybe
     // something to try for v2.
-    fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
+    fn handle_input(&mut self, command: &OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {
                 play_click_sfx(assets).expect("Could not play click sfx in game end state -> up");
@@ -190,18 +190,18 @@ impl State for GameEndState {
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(OptionInputCommand::Up, assets),
-            Keycode::Down => self.handle_input(OptionInputCommand::Down, assets),
-            Keycode::Return => self.handle_input(OptionInputCommand::Select, assets),
+            Keycode::Up => self.handle_input(&OptionInputCommand::Up, assets),
+            Keycode::Down => self.handle_input(&OptionInputCommand::Down, assets),
+            Keycode::Return => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }
 
     fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
-            Button::DPadUp => self.handle_input(OptionInputCommand::Up, assets),
-            Button::DPadDown => self.handle_input(OptionInputCommand::Down, assets),
-            Button::A => self.handle_input(OptionInputCommand::Select, assets),
+            Button::DPadUp => self.handle_input(&OptionInputCommand::Up, assets),
+            Button::DPadDown => self.handle_input(&OptionInputCommand::Down, assets),
+            Button::A => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }

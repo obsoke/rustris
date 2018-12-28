@@ -1,14 +1,14 @@
 mod spawner;
 
-use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::event::{Keycode, Mod, Button};
-use ggez::graphics::{Point, Color};
-use crate::states::shared::option::{Option, OptionInputCommand};
-use crate::states::play_state::PlayState;
-use crate::states::{State, Assets, Transition};
-use crate::util::{DurationExt, play_click_sfx};
 use self::spawner::Spawner;
+use crate::states::play_state::PlayState;
+use crate::states::shared::option::{Option, OptionInputCommand};
+use crate::states::{Assets, State, Transition};
+use crate::util::{play_click_sfx, DurationExt};
+use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::{Color, Point};
+use ggez::{graphics, Context, GameResult};
+use std::time::Duration;
 
 pub struct MenuState {
     title_text: graphics::Text,
@@ -44,7 +44,7 @@ impl MenuState {
 
         Ok(MenuState {
             title_text: title,
-            title_shadow: title_shadow,
+            title_shadow,
             title_rotation: 0.0,
             piece_spawner: Spawner::new(),
             options: options_vec,
@@ -58,7 +58,7 @@ impl MenuState {
     // Ideally, I would not be coupling `Assets` to this method. Would a
     // messaging system be fast enough to handle audio system stuff? Maybe
     // something to try for v2.
-    fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
+    fn handle_input(&mut self, command: &OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {
                 play_click_sfx(assets).expect("Could not play click sfx in menu state -> up");
@@ -108,9 +108,9 @@ impl State for MenuState {
 
         if self.request_play {
             assets.get_music("menu")?.pause();
-            return Ok(Transition::Swap(
-                Box::new(PlayState::new(ctx, assets).unwrap()),
-            ));
+            return Ok(Transition::Swap(Box::new(
+                PlayState::new(ctx, assets).unwrap(),
+            )));
         } else if self.request_exit {
             assets.get_music("menu")?.pause();
             return Ok(Transition::Pop);
@@ -164,18 +164,18 @@ impl State for MenuState {
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(OptionInputCommand::Up, assets),
-            Keycode::Down => self.handle_input(OptionInputCommand::Down, assets),
-            Keycode::Return => self.handle_input(OptionInputCommand::Select, assets),
+            Keycode::Up => self.handle_input(&OptionInputCommand::Up, assets),
+            Keycode::Down => self.handle_input(&OptionInputCommand::Down, assets),
+            Keycode::Return => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }
 
     fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
         match btn {
-            Button::DPadUp => self.handle_input(OptionInputCommand::Up, assets),
-            Button::DPadDown => self.handle_input(OptionInputCommand::Down, assets),
-            Button::A => self.handle_input(OptionInputCommand::Select, assets),
+            Button::DPadUp => self.handle_input(&OptionInputCommand::Up, assets),
+            Button::DPadDown => self.handle_input(&OptionInputCommand::Down, assets),
+            Button::A => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }

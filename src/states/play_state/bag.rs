@@ -1,7 +1,7 @@
 use rand;
 use rand::Rng;
 
-use super::tetromino::{PieceType, Piece, u8_to_piece_type};
+use super::tetromino::{u8_to_piece_type, Piece, PieceType};
 
 /// A bag of `Pieces`. Takes care of dispensing, refilling and giving a peek at
 /// the next piece.
@@ -11,7 +11,9 @@ pub struct PieceBag {
 
 impl PieceBag {
     pub fn new() -> Self {
-        PieceBag { queue: PieceBag::generate_full_bag() }
+        PieceBag {
+            queue: PieceBag::generate_full_bag(),
+        }
     }
 
     /// Takes the next piece from the bag. If the bag is empty after removing a
@@ -32,7 +34,7 @@ impl PieceBag {
     pub fn peek_at_next_piece(&self) -> Piece {
         let next_piece_shape = self.queue.first().expect("Could not peek into PieceBag");
 
-        Piece::new_from_ref(next_piece_shape)
+        Piece::new_from_ref(*next_piece_shape)
     }
 
     /// Generates a a full bag of 7 pieces. This is a static function rather

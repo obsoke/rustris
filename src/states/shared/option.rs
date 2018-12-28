@@ -22,7 +22,7 @@ impl Option {
     pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point) -> Self {
         let text = graphics::Text::new(ctx, name, assets.get_font("normal").unwrap()).unwrap();
         Self {
-            text: text,
+            text,
             centre: top_left,
             is_selected: false,
         }

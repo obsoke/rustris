@@ -24,7 +24,7 @@ impl IntroState {
         let intro_text = graphics::Text::new(ctx, "a game by obsoke", assets.get_font("normal")?)?;
 
         Ok(IntroState {
-            intro_text: intro_text,
+            intro_text,
             hit_any_key: false,
             fader: 0.0,
             waiter: WAIT_TIME,

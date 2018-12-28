@@ -11,7 +11,7 @@ pub trait DurationExt: Sized {
 
 impl DurationExt for Duration {
     fn as_subsec_millis(&self) -> f64 {
-        self.subsec_nanos() as f64 / NANOS_PER_SEC
+        f64::from(self.subsec_nanos()) / NANOS_PER_SEC
     }
 }
 
@@ -34,5 +34,6 @@ use ggez::GameResult;
 /// Play the 'click' sound effect. This is a general utility method as it is
 /// used in a couple of different game states.
 pub fn play_click_sfx(assets: &Assets) -> GameResult<()> {
-    Ok(assets.get_sfx("click")?.play()?)
+    assets.get_sfx("click")?.play()?;
+    Ok(())
 }

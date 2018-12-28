@@ -1,13 +1,12 @@
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color, Point, DrawParam};
-use super::BLOCK_SIZE;
 use super::shapes::*;
 use super::well::Y_OFFSET;
+use super::BLOCK_SIZE;
+use ggez::graphics::{Color, DrawParam, Point};
+use ggez::{graphics, Context, GameResult};
 
 /// A `PieceShape` is a 4x4 array that represents the shape of a piece. A 0 is
 /// an empty space while a 1 is solid.
 pub type PieceShape = [[u32; 4]; 4];
-
 
 /// All the possible piece types that can be taken out of `PieceBag`.
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -37,8 +36,8 @@ impl Piece {
         let shape = piece_type_to_shape(shape_type, 0);
 
         Piece {
-            shape: shape,
-            shape_type: shape_type,
+            shape,
+            shape_type,
             top_left: Point::new(3.0, 0.0),
             potential_top_left: Point::new(3.0, 0.0),
             shadow_position: Point::new(3.0, 0.0),
@@ -48,12 +47,12 @@ impl Piece {
 
     // I don't remember why I did this.
     /// Create a new piece from a reference of a `PieceType`.
-    pub fn new_from_ref(shape_type: &PieceType) -> Self {
-        let shape = piece_type_to_shape(*shape_type, 0);
+    pub fn new_from_ref(shape_type: PieceType) -> Self {
+        let shape = piece_type_to_shape(shape_type, 0);
 
         Piece {
-            shape: shape,
-            shape_type: *shape_type,
+            shape,
+            shape_type,
             top_left: Point::new(3.0, 0.0),
             potential_top_left: Point::new(3.0, 0.0),
             shadow_position: Point::new(3.0, 0.0),
@@ -95,7 +94,7 @@ impl Piece {
         &self,
         ctx: &mut Context,
         image: &graphics::Image,
-        shadow_position: &Point,
+        shadow_position: Point,
     ) -> GameResult<()> {
         // get starting position to draw window
         // TODO: doing all of this work every frame seems bad

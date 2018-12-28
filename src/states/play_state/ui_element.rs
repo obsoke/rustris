@@ -105,7 +105,7 @@ impl UIBlockView {
                 top_left.y + (UIBLOCK_HEIGHT / 2.0),
             ),
             title_text: title_txt,
-            shape: shape,
+            shape,
         }
     }
 

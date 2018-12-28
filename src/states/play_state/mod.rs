@@ -81,7 +81,7 @@ impl PlayState {
             prev_input: InputState::default(),
 
             well: Well::new(),
-            bag: bag,
+            bag,
             current_piece: first_piece,
             hold_piece_type: None,
 
@@ -212,7 +212,7 @@ impl PlayState {
         let current_shape = self.current_piece.get_shape();
         let collision_found = self
             .well
-            .check_for_collisions(&current_shape, &self.current_piece.potential_top_left);
+            .check_for_collisions(&current_shape, self.current_piece.potential_top_left);
 
         if collision_found {
             self.current_piece.potential_top_left = self.current_piece.top_left;
@@ -230,7 +230,7 @@ impl PlayState {
         let next_shape = self.current_piece.get_next_shape(direction);
         let collision_found = self
             .well
-            .check_for_collisions(&next_shape, &self.current_piece.top_left);
+            .check_for_collisions(&next_shape, self.current_piece.top_left);
 
         if !collision_found {
             self.current_piece.change_shape(direction);
@@ -243,7 +243,7 @@ impl PlayState {
             potential_position.x += 1.0;
             let collision_found = self
                 .well
-                .check_for_collisions(&next_shape, &potential_position);
+                .check_for_collisions(&next_shape, potential_position);
 
             if !collision_found {
                 self.current_piece.top_left = potential_position;
@@ -255,7 +255,7 @@ impl PlayState {
                 potential_position.x -= 1.0;
                 let collision_found = self
                     .well
-                    .check_for_collisions(&next_shape, &potential_position);
+                    .check_for_collisions(&next_shape, potential_position);
 
                 if !collision_found {
                     self.current_piece.top_left = potential_position;
@@ -281,7 +281,7 @@ impl PlayState {
 
             let did_land = self
                 .well
-                .check_for_landing(&current_shape, &self.current_piece.potential_top_left);
+                .check_for_landing(&current_shape, self.current_piece.potential_top_left);
 
             if did_land {
                 if self.current_piece.top_left.y < 2.0 {
@@ -311,7 +311,7 @@ impl PlayState {
             potential_shadow_position.y += 1.0;
             let collision_found = self
                 .well
-                .check_for_landing(&self.current_piece.get_shape(), &potential_shadow_position);
+                .check_for_landing(&self.current_piece.get_shape(), potential_shadow_position);
 
             if collision_found {
                 break;
@@ -408,7 +408,7 @@ impl State for PlayState {
             return Ok(Transition::Push(Box::new(GameEndState::new(
                 ctx,
                 assets,
-                GameEndMode::Lose,
+                &GameEndMode::Lose,
                 self.score,
                 self.cleared_lines,
                 self.level + 1,
@@ -418,7 +418,7 @@ impl State for PlayState {
             return Ok(Transition::Push(Box::new(GameEndState::new(
                 ctx,
                 assets,
-                GameEndMode::Win,
+                &GameEndMode::Win,
                 self.score,
                 self.cleared_lines,
                 self.level + 1,
@@ -467,7 +467,7 @@ impl State for PlayState {
         self.current_piece.draw_shadow(
             ctx,
             assets.get_image("block")?,
-            &self.current_piece.get_shadow_position(),
+            self.current_piece.get_shadow_position(),
         )?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
