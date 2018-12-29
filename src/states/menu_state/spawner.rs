@@ -26,9 +26,8 @@ impl SpawnedPiece {
     }
 
     pub fn update(&mut self, ctx: &mut Context, _assets: &Assets, dt: Duration) {
-        // TODO: update position
         let coords = graphics::get_screen_coordinates(ctx);
-        let height = coords.h * -1.0;
+        let height = coords.h;
         self.position.y += SPEED * dt.as_subsec_millis() as f32;
 
         if self.position.y >= height {
