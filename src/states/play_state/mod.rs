@@ -1,21 +1,22 @@
-pub mod tetromino;
-mod well;
-mod shapes;
 mod bag;
-mod ui_element;
 mod input_state;
+mod shapes;
+pub mod tetromino;
+mod ui_element;
+mod well;
 
-use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::Point;
-use self::well::Well;
-use self::tetromino::{Piece, PieceType};
 use self::bag::PieceBag;
-use self::ui_element::{UIBlockView, UITextView};
 use self::input_state::InputState;
-use states::game_over_state::{GameEndState, GameEndMode};
-use event::{Assets, Transition, EventHandler, Keycode, Mod, Button};
-use util::{DurationExt, play_click_sfx};
+use self::tetromino::{Piece, PieceType};
+use self::ui_element::{UIBlockView, UITextView};
+use self::well::Well;
+use crate::states::game_over_state::{GameEndMode, GameEndState};
+use crate::states::{Assets, State, Transition};
+use crate::util::{play_click_sfx, DurationExt};
+use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::Point2;
+use ggez::{graphics, Context, GameResult};
+use std::time::Duration;
 
 // Tweakable values Would be nice to have a UI to fiddle with these in-game
 // without having to recompile. Another v2 to-do
@@ -80,7 +81,7 @@ impl PlayState {
             prev_input: InputState::default(),
 
             well: Well::new(),
-            bag: bag,
+            bag,
             current_piece: first_piece,
             hold_piece_type: None,
 
@@ -98,14 +99,14 @@ impl PlayState {
             ui_next: UIBlockView::new(
                 ctx,
                 assets,
-                Point::new(775.0, 70.0),
+                Point2::new(790.0, 75.0),
                 "Next",
                 Some(first_type),
             ),
-            ui_hold: UIBlockView::new(ctx, assets, Point::new(775.0, 250.0), "Hold", None),
-            ui_level: UITextView::new(ctx, assets, Point::new(775.0, 420.0), "Level", "1"),
-            ui_lines: UITextView::new(ctx, assets, Point::new(775.0, 500.0), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Point::new(775.0, 580.0), "Score", "0"),
+            ui_hold: UIBlockView::new(ctx, assets, Point2::new(790.0, 250.0), "Hold", None),
+            ui_level: UITextView::new(ctx, assets, Point2::new(790.0, 440.0), "Level", "1"),
+            ui_lines: UITextView::new(ctx, assets, Point2::new(790.0, 520.0), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Point2::new(790.0, 600.0), "Score", "0"),
         })
     }
 
@@ -114,7 +115,7 @@ impl PlayState {
             // initial piece movement
             if self.input.left.initial_delay_timer == 0.0 {
                 self.input.left.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0), assets);
+                self.move_piece(Point2::new(-1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.left.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -123,7 +124,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.left.secondary_delay_timer == 0.0 {
                 self.input.left.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(-1.0, 0.0), assets);
+                self.move_piece(Point2::new(-1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -136,7 +137,7 @@ impl PlayState {
             // initial piece movement
             if self.input.right.initial_delay_timer == 0.0 {
                 self.input.right.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0), assets);
+                self.move_piece(Point2::new(1.0, 0.0), assets);
             }
             // initial movement delay
             else if self.input.right.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -145,7 +146,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.right.secondary_delay_timer == 0.0 {
                 self.input.right.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(1.0, 0.0), assets);
+                self.move_piece(Point2::new(1.0, 0.0), assets);
             }
             // secondary movement delay
             else {
@@ -158,7 +159,7 @@ impl PlayState {
             // initial piece movement
             if self.input.soft_drop.initial_delay_timer == 0.0 {
                 self.input.soft_drop.initial_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0), assets);
+                self.move_piece(Point2::new(0.0, 1.0), assets);
             }
             // initial movement delay
             else if self.input.soft_drop.initial_delay_timer <= INITIAL_DELAY_TIME {
@@ -167,7 +168,7 @@ impl PlayState {
             // secondary piece movement
             else if self.input.soft_drop.secondary_delay_timer == 0.0 {
                 self.input.soft_drop.secondary_delay_timer += dt.as_subsec_millis();
-                self.move_piece(Point::new(0.0, 1.0), assets);
+                self.move_piece(Point2::new(0.0, 1.0), assets);
             }
             // secondary movement delay
             else {
@@ -181,8 +182,8 @@ impl PlayState {
                 self.rotate_piece(assets, 1);
             }
         } else if self.input.rotate_counterclockwise.is_active {
-            if self.input.rotate_counterclockwise.is_active !=
-                self.prev_input.rotate_counterclockwise.is_active
+            if self.input.rotate_counterclockwise.is_active
+                != self.prev_input.rotate_counterclockwise.is_active
             {
                 self.rotate_piece(assets, -1);
             }
@@ -194,8 +195,8 @@ impl PlayState {
                 self.can_hold = true;
                 play_click_sfx(assets).expect("Could not play click after hard drop");
             }
-        } else if self.input.hold.is_active &&
-                   self.input.hold.is_active != self.prev_input.hold.is_active
+        } else if self.input.hold.is_active
+            && self.input.hold.is_active != self.prev_input.hold.is_active
         {
             self.handle_hold()?;
         }
@@ -204,15 +205,14 @@ impl PlayState {
     }
 
     /// Attempt to move the current piece.
-    fn move_piece(&mut self, potential_new_position: Point, assets: &Assets) {
+    fn move_piece(&mut self, potential_new_position: Point2, assets: &Assets) {
         self.current_piece.potential_top_left.x += potential_new_position.x;
         self.current_piece.potential_top_left.y += potential_new_position.y;
 
         let current_shape = self.current_piece.get_shape();
-        let collision_found = self.well.check_for_collisions(
-            &current_shape,
-            &self.current_piece.potential_top_left,
-        );
+        let collision_found = self
+            .well
+            .check_for_collisions(&current_shape, self.current_piece.potential_top_left);
 
         if collision_found {
             self.current_piece.potential_top_left = self.current_piece.top_left;
@@ -228,10 +228,9 @@ impl PlayState {
     /// wall kick if possible.
     fn rotate_piece(&mut self, assets: &Assets, direction: i32) {
         let next_shape = self.current_piece.get_next_shape(direction);
-        let collision_found = self.well.check_for_collisions(
-            &next_shape,
-            &self.current_piece.top_left,
-        );
+        let collision_found = self
+            .well
+            .check_for_collisions(&next_shape, self.current_piece.top_left);
 
         if !collision_found {
             self.current_piece.change_shape(direction);
@@ -242,10 +241,9 @@ impl PlayState {
             // move one piece to the right & perform all above checks
             let mut potential_position = self.current_piece.top_left; // creates a copy of 'Position' struct
             potential_position.x += 1.0;
-            let collision_found = self.well.check_for_collisions(
-                &next_shape,
-                &potential_position,
-            );
+            let collision_found = self
+                .well
+                .check_for_collisions(&next_shape, potential_position);
 
             if !collision_found {
                 self.current_piece.top_left = potential_position;
@@ -255,10 +253,9 @@ impl PlayState {
             } else {
                 let mut potential_position = self.current_piece.top_left;
                 potential_position.x -= 1.0;
-                let collision_found = self.well.check_for_collisions(
-                    &next_shape,
-                    &potential_position,
-                );
+                let collision_found = self
+                    .well
+                    .check_for_collisions(&next_shape, potential_position);
 
                 if !collision_found {
                     self.current_piece.top_left = potential_position;
@@ -268,7 +265,6 @@ impl PlayState {
                 }
             }
         }
-
     }
 
     /// Advance the fall time. If enough time has passed, allow gravity to
@@ -283,10 +279,9 @@ impl PlayState {
             self.fall_timer = 0.0;
             self.current_piece.potential_top_left.y += 1.0;
 
-            let did_land = self.well.check_for_landing(
-                &current_shape,
-                &self.current_piece.potential_top_left,
-            );
+            let did_land = self
+                .well
+                .check_for_landing(&current_shape, self.current_piece.potential_top_left);
 
             if did_land {
                 if self.current_piece.top_left.y < 2.0 {
@@ -314,10 +309,9 @@ impl PlayState {
         let mut potential_shadow_position = shadow_position;
         loop {
             potential_shadow_position.y += 1.0;
-            let collision_found = self.well.check_for_landing(
-                &self.current_piece.get_shape(),
-                &potential_shadow_position,
-            );
+            let collision_found = self
+                .well
+                .check_for_landing(&self.current_piece.get_shape(), potential_shadow_position);
 
             if collision_found {
                 break;
@@ -348,7 +342,6 @@ impl PlayState {
                 self.hold_piece_type = Some(current_type);
                 self.can_hold = false;
             }
-
         }
         Ok(())
     }
@@ -395,8 +388,7 @@ impl PlayState {
     }
 }
 
-
-impl EventHandler for PlayState {
+impl State for PlayState {
     fn update(
         &mut self,
         ctx: &mut Context,
@@ -416,7 +408,7 @@ impl EventHandler for PlayState {
             return Ok(Transition::Push(Box::new(GameEndState::new(
                 ctx,
                 assets,
-                GameEndMode::Lose,
+                &GameEndMode::Lose,
                 self.score,
                 self.cleared_lines,
                 self.level + 1,
@@ -426,12 +418,11 @@ impl EventHandler for PlayState {
             return Ok(Transition::Push(Box::new(GameEndState::new(
                 ctx,
                 assets,
-                GameEndMode::Win,
+                &GameEndMode::Win,
                 self.score,
                 self.cleared_lines,
                 self.level + 1,
             )?)));
-
         }
 
         // we pass Assets along so we can play sounds - not the greatest pattern
@@ -452,41 +443,26 @@ impl EventHandler for PlayState {
 
         // update ui
         self.ui_hold.update(ctx, assets, self.hold_piece_type);
-        self.ui_next.update(
-            ctx,
-            assets,
-            Some(self.bag.peek_at_next_piece().get_type()),
-        );
-        self.ui_level.update(
-            ctx,
-            assets,
-            &(&self.level + 1).to_string(),
-        );
-        self.ui_lines.update(
-            ctx,
-            assets,
-            &self.cleared_lines.to_string(),
-        );
+        self.ui_next
+            .update(ctx, assets, Some(self.bag.peek_at_next_piece().get_type()));
+        self.ui_level
+            .update(ctx, assets, &(&self.level + 1).to_string());
+        self.ui_lines
+            .update(ctx, assets, &self.cleared_lines.to_string());
         self.ui_score.update(ctx, assets, &self.score.to_string());
-
 
         Ok(Transition::None)
     }
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        let coords = graphics::get_screen_coordinates(ctx);
-        graphics::draw(
-            ctx,
-            assets.get_image("game_bg")?,
-            Point::new(coords.w / 2.0, (coords.h * -1 as f32) / 2.0),
-            0.0,
-        )?;
+        let _coords = graphics::get_screen_coordinates(ctx);
+        graphics::draw(ctx, assets.get_image("game_bg")?, Point2::origin(), 0.0)?;
 
         self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece.draw_shadow(
             ctx,
             assets.get_image("block")?,
-            &self.current_piece.get_shadow_position(),
+            self.current_piece.get_shadow_position(),
         )?;
         self.current_piece.draw(ctx, assets.get_image("block")?)?;
 
@@ -499,7 +475,14 @@ impl EventHandler for PlayState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool, _assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        _repeat: bool,
+        _assets: &Assets,
+    ) {
         match keycode {
             Keycode::Left => self.input.left.is_active = true,
             Keycode::Right => self.input.right.is_active = true,
@@ -508,12 +491,15 @@ impl EventHandler for PlayState {
             Keycode::Z => self.input.rotate_counterclockwise.is_active = true,
             Keycode::X => self.input.rotate_clockwise.is_active = true,
             Keycode::Space => self.input.hold.is_active = true,
+            Keycode::Escape => {
+                ctx.quit().unwrap();
+                ()
+            }
             _ => (),
         }
-
     }
 
-    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, _repeat: bool) {
         match keycode {
             Keycode::Left => self.input.left.reset(),
             Keycode::Right => self.input.right.reset(),
@@ -526,7 +512,13 @@ impl EventHandler for PlayState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, _assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        _assets: &Assets,
+    ) {
         match btn {
             Button::DPadLeft => self.input.left.is_active = true,
             Button::DPadRight => self.input.right.is_active = true,
@@ -539,7 +531,7 @@ impl EventHandler for PlayState {
         }
     }
 
-    fn controller_button_up_event(&mut self, btn: Button, _instance_id: i32) {
+    fn controller_button_up_event(&mut self, _ctx: &mut Context, btn: Button, _instance_id: i32) {
         match btn {
             Button::DPadLeft => self.input.left.reset(),
             Button::DPadRight => self.input.right.reset(),
@@ -550,5 +542,10 @@ impl EventHandler for PlayState {
             Button::LeftShoulder => self.input.hold.reset(),
             _ => (),
         }
+    }
+
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+        println!("In PlayState quit event...");
+        false
     }
 }

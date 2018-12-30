@@ -1,12 +1,12 @@
+use crate::states::menu_state::MenuState;
+use crate::states::play_state::PlayState;
+use crate::states::shared::option::{Option, OptionInputCommand};
+use crate::states::{Assets, State, Transition};
+use crate::util::play_click_sfx;
+use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::Point2;
+use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::event::{Mod, Keycode};
-use ggez::graphics::Point;
-use event::{Assets, Transition, EventHandler, Button};
-use states::play_state::PlayState;
-use states::menu_state::MenuState;
-use states::shared::option::{Option, OptionInputCommand};
-use util::play_click_sfx;
 
 /// Describes whether to render `GameEndState` under either "Player Wins" or
 /// "Player Loses" conditions.
@@ -28,18 +28,17 @@ pub struct GameEndState {
     final_level_text: graphics::Text,
 }
 
-
 impl GameEndState {
     /// A `GameEndState` takes values from `PlayState` to render certain values
     /// such as no. of lines cleared, highest level cleared, final score, etc.
     pub fn new(
         ctx: &mut Context,
         assets: &Assets,
-        mode: GameEndMode,
+        mode: &GameEndMode,
         final_score_value: u32,
         final_cleared: u32,
         final_level: u32,
-    ) -> GameResult<GameEndState> {
+    ) -> GameResult<Self> {
         let game_over: graphics::Text;
         game_over = match mode {
             GameEndMode::Lose => graphics::Text::new(ctx, "GAME OVER", assets.get_font("title")?)?,
@@ -59,19 +58,19 @@ impl GameEndState {
             ctx,
             assets,
             "Play again",
-            Point::new(coords.w / 2.0, 450.0),
+            Point2::new(coords.w / 2.0, 450.0),
         ));
         options_vec.push(Option::new(
             ctx,
             assets,
             "Return to Menu",
-            Point::new(coords.w / 2.0, 525.0),
+            Point2::new(coords.w / 2.0, 525.0),
         ));
         options_vec.push(Option::new(
             ctx,
             assets,
             "Quit",
-            Point::new(coords.w / 2.0, 600.0),
+            Point2::new(coords.w / 2.0, 600.0),
         ));
 
         match mode {
@@ -96,7 +95,7 @@ impl GameEndState {
     // Ideally, I would not be coupling `Assets` to this method. Would a
     // messaging system be fast enough to handle audio system stuff? Maybe
     // something to try for v2.
-    fn handle_input(&mut self, command: OptionInputCommand, assets: &Assets) {
+    fn handle_input(&mut self, command: &OptionInputCommand, assets: &Assets) {
         match command {
             OptionInputCommand::Up => {
                 play_click_sfx(assets).expect("Could not play click sfx in game end state -> up");
@@ -127,7 +126,7 @@ impl GameEndState {
     }
 }
 
-impl EventHandler for GameEndState {
+impl State for GameEndState {
     fn update(
         &mut self,
         ctx: &mut Context,
@@ -156,22 +155,25 @@ impl EventHandler for GameEndState {
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
-        let game_over_dest = graphics::Point::new(coords.w / 2.0, 100.0);
-        let game_over_score_dest = graphics::Point::new(coords.w / 2.0, 200.0);
-        let game_over_lines_dest = graphics::Point::new(coords.w / 2.0, 250.0);
-        let game_over_level_dest = graphics::Point::new(coords.w / 2.0, 300.0);
+        let game_over_dest = Point2::new(
+            coords.w / 2.0 - (self.game_end_text.width() / 2) as f32,
+            100.0,
+        );
+        let game_over_score_dest = Point2::new(
+            coords.w / 2.0 - (self.final_level_text.width() / 2) as f32,
+            200.0,
+        );
+        let game_over_lines_dest = Point2::new(
+            coords.w / 2.0 - (self.final_line_text.width() / 2) as f32,
+            250.0,
+        );
+        let game_over_level_dest = Point2::new(
+            coords.w / 2.0 - (self.final_level_text.width() / 2) as f32,
+            300.0,
+        );
 
-        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
-        graphics::rectangle(
-            ctx,
-            graphics::DrawMode::Fill,
-            graphics::Rect::new(
-                0.0 + (coords.w / 2.0),
-                0.0 + ((coords.h * -1.0) / 2.0),
-                coords.w,
-                coords.h * -1.0,
-            ),
-        )?;
+        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.75))?;
+        graphics::rectangle(ctx, graphics::DrawMode::Fill, coords)?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.game_end_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
@@ -185,24 +187,37 @@ impl EventHandler for GameEndState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        repeat: bool,
+        assets: &Assets,
+    ) {
         if repeat {
             return;
         }
 
         match keycode {
-            Keycode::Up => self.handle_input(OptionInputCommand::Up, assets),
-            Keycode::Down => self.handle_input(OptionInputCommand::Down, assets),
-            Keycode::Return => self.handle_input(OptionInputCommand::Select, assets),
+            Keycode::Up => self.handle_input(&OptionInputCommand::Up, assets),
+            Keycode::Down => self.handle_input(&OptionInputCommand::Down, assets),
+            Keycode::Return => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        assets: &Assets,
+    ) {
         match btn {
-            Button::DPadUp => self.handle_input(OptionInputCommand::Up, assets),
-            Button::DPadDown => self.handle_input(OptionInputCommand::Down, assets),
-            Button::A => self.handle_input(OptionInputCommand::Select, assets),
+            Button::DPadUp => self.handle_input(&OptionInputCommand::Up, assets),
+            Button::DPadDown => self.handle_input(&OptionInputCommand::Down, assets),
+            Button::A => self.handle_input(&OptionInputCommand::Select, assets),
             _ => (),
         }
     }

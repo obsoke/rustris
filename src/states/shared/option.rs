@@ -1,7 +1,6 @@
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Point, Color};
-use event::Assets;
-
+use crate::states::Assets;
+use ggez::graphics::{Color, Point2};
+use ggez::{graphics, Context, GameResult};
 
 /// Different representations of possible commands that could be received from
 /// the user in the menu state.
@@ -14,17 +13,18 @@ pub enum OptionInputCommand {
 /// A menu option.
 pub struct Option {
     text: graphics::Text,
-    centre: Point,
+    position: Point2,
     is_selected: bool,
 }
 
 impl Option {
     /// Creates a new `Option`.
-    pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point) -> Self {
+    pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point2) -> Self {
         let text = graphics::Text::new(ctx, name, assets.get_font("normal").unwrap()).unwrap();
+        let real_pos = Point2::new(top_left.x - (text.width() / 2) as f32, top_left.y);
         Self {
-            text: text,
-            centre: top_left,
+            text,
+            position: real_pos,
             is_selected: false,
         }
     }
@@ -47,7 +47,7 @@ impl Option {
             graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
         }
 
-        graphics::draw(ctx, &self.text, self.centre, 0.0)?;
+        graphics::draw(ctx, &self.text, self.position, 0.0)?;
 
         Ok(())
     }

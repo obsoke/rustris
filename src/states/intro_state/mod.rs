@@ -1,9 +1,10 @@
+use crate::states::menu_state::MenuState;
+use crate::states::{Assets, State, Transition};
+use crate::util::DurationExt;
+use ggez::event::{Button, Keycode, Mod};
+use ggez::graphics::Point2;
+use ggez::{graphics, Context, GameResult};
 use std::time::Duration;
-use ggez::{Context, GameResult, graphics};
-use ggez::event::{Mod, Keycode};
-use event::{Assets, Transition, EventHandler, Button};
-use states::menu_state::MenuState;
-use util::DurationExt;
 
 const FADE_TIME: f32 = 3.0;
 const WAIT_TIME: f32 = 1.5;
@@ -21,15 +22,10 @@ impl IntroState {
     /// A `GameEndState` takes values from `PlayState` to render certain values
     /// such as no. of lines cleared, highest level cleared, final score, etc.
     pub fn new(ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
-        let intro_text = graphics::Text::new(
-            ctx,
-            "a game by obsoke",
-            assets.get_font("normal")?,
-        )?;
-
+        let intro_text = graphics::Text::new(ctx, "a game by obsoke", assets.get_font("normal")?)?;
 
         Ok(IntroState {
-            intro_text: intro_text,
+            intro_text,
             hit_any_key: false,
             fader: 0.0,
             waiter: WAIT_TIME,
@@ -43,14 +39,13 @@ impl IntroState {
     }
 }
 
-impl EventHandler for IntroState {
+impl State for IntroState {
     fn update(
         &mut self,
         ctx: &mut Context,
         assets: &Assets,
         dt: Duration,
     ) -> GameResult<Transition> {
-
         if self.hit_any_key {
             return Ok(Transition::Swap(Box::new(MenuState::new(ctx, assets)?)));
         }
@@ -72,8 +67,9 @@ impl EventHandler for IntroState {
 
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
+        let text_offset = (self.intro_text.width() / 2) as f32;
 
-        let intro_text_dest = graphics::Point::new(coords.w / 2.0, 300.0);
+        let intro_text_dest = Point2::new(coords.w / 2.0 - text_offset, 300.0);
 
         graphics::set_color(
             ctx,
@@ -84,7 +80,14 @@ impl EventHandler for IntroState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, _assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        repeat: bool,
+        _assets: &Assets,
+    ) {
         if repeat {
             return;
         }
@@ -94,7 +97,13 @@ impl EventHandler for IntroState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, _assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        _assets: &Assets,
+    ) {
         match btn {
             _ => self.handle_input(),
         }

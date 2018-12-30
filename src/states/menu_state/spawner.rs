@@ -1,22 +1,22 @@
-use std::time::Duration;
+use crate::states::play_state::tetromino::{u8_to_piece_type, Piece, PieceType};
+use crate::states::Assets;
+use crate::util::DurationExt;
+use ggez::graphics::Point2;
+use ggez::{graphics, Context};
 use rand;
-use ggez::{Context, graphics};
-use ggez::graphics::Point;
-use event::Assets;
-use states::play_state::tetromino::{Piece, PieceType, u8_to_piece_type};
-use util::DurationExt;
+use std::time::Duration;
 
 const SPEED: f32 = 170.0;
 
 struct SpawnedPiece {
-    position: Point,
+    position: Point2,
     extra_rotation: f64,
     piece: Piece,
     is_dead: bool,
 }
 
 impl SpawnedPiece {
-    pub fn new(pos: Point, rot: f64, ptype: PieceType) -> Self {
+    pub fn new(pos: Point2, rot: f64, ptype: PieceType) -> Self {
         Self {
             position: pos,
             extra_rotation: rot,
@@ -26,9 +26,8 @@ impl SpawnedPiece {
     }
 
     pub fn update(&mut self, ctx: &mut Context, _assets: &Assets, dt: Duration) {
-        // TODO: update position
         let coords = graphics::get_screen_coordinates(ctx);
-        let height = coords.h * -1.0;
+        let height = coords.h;
         self.position.y += SPEED * dt.as_subsec_millis() as f32;
 
         if self.position.y >= height {
@@ -109,11 +108,8 @@ impl Spawner {
 
         // spawn at a random x position way above viewable screen so pieces just
         // dont 'pop' in but kinda just float into view
-        let position = Point::new(x, -200.0);
-        self.active_pieces.push(SpawnedPiece::new(
-            position,
-            extra_rotation,
-            piece_type,
-        ));
+        let position = Point2::new(x, -200.0);
+        self.active_pieces
+            .push(SpawnedPiece::new(position, extra_rotation, piece_type));
     }
 }

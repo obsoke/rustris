@@ -11,14 +11,14 @@ pub trait DurationExt: Sized {
 
 impl DurationExt for Duration {
     fn as_subsec_millis(&self) -> f64 {
-        self.subsec_nanos() as f64 / NANOS_PER_SEC
+        f64::from(self.subsec_nanos()) / NANOS_PER_SEC
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
     use super::DurationExt;
+    use std::time::Duration;
 
     #[test]
     fn it_works() {
@@ -28,12 +28,12 @@ mod tests {
     }
 }
 
-
+use crate::states::Assets;
 use ggez::GameResult;
-use event::Assets;
 
 /// Play the 'click' sound effect. This is a general utility method as it is
 /// used in a couple of different game states.
 pub fn play_click_sfx(assets: &Assets) -> GameResult<()> {
-    Ok(assets.get_sfx("click")?.play()?)
+    assets.get_sfx("click")?.play()?;
+    Ok(())
 }

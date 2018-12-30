@@ -1,7 +1,7 @@
-use ggez::{Context, GameResult, graphics};
-use ggez::graphics::{Color, DrawMode, Rect, Point};
+use super::tetromino::{block_to_colour, Piece, PieceShape};
 use super::BLOCK_SIZE;
-use super::tetromino::{Piece, PieceShape, block_to_colour};
+use ggez::graphics::{Color, DrawMode, Point2, Rect};
+use ggez::{graphics, Context, GameResult};
 
 /// The y-offset to use as a starting point when drawing
 pub const Y_OFFSET: f32 = 10f32;
@@ -15,7 +15,9 @@ pub struct Well {
 
 impl Well {
     pub fn new() -> Self {
-        Well { data: [[0; 10]; 22] }
+        Well {
+            data: [[0; 10]; 22],
+        }
     }
 
     /// Add's the current piece, `current_t`, to the well.
@@ -26,10 +28,8 @@ impl Well {
             for (c, _) in current_shape[r].iter().enumerate() {
                 if current_shape[r][c] != 0 {
                     // add shape to well
-                    self.data[r.wrapping_add(current_t.top_left.y as usize)][c.wrapping_add(
-                        current_t.top_left.x as
-                            usize,
-                    )] = current_shape[r][c];
+                    self.data[r.wrapping_add(current_t.top_left.y as usize)]
+                        [c.wrapping_add(current_t.top_left.x as usize)] = current_shape[r][c];
                 }
             }
         }
@@ -68,14 +68,13 @@ impl Well {
                     let x = starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32;
                     let y = Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32;
 
-                    graphics::draw(ctx, image, graphics::Point::new(x, y), 0.0)?;
-
+                    graphics::draw(ctx, image, Point2::new(x, y), 0.0)?;
                 } else {
                     graphics::set_color(ctx, Color::from((100, 100, 100, 20)))?;
 
                     graphics::rectangle(
                         ctx,
-                        DrawMode::Line,
+                        DrawMode::Line(1.0), // TODO: This may have to be changed
                         Rect {
                             x: starting_pos as f32 + (c as f32 * BLOCK_SIZE) as f32,
                             y: Y_OFFSET + (r as f32 * BLOCK_SIZE) as f32,
@@ -84,7 +83,6 @@ impl Well {
                         },
                     )?;
                 }
-
             }
         }
 
@@ -119,7 +117,7 @@ impl Well {
     /// be cleared, pull the content of the row above down to the current row.
     /// If we are at row 0 (the top row), simply clear out that row.
     pub fn naive_line_clear(&mut self, starting_row: usize) {
-        for row in (0..starting_row + 1).rev() {
+        for row in (0..=starting_row).rev() {
             if row != 0 {
                 self.data[row] = self.data[row - 1];
             } else {
@@ -130,10 +128,9 @@ impl Well {
         }
     }
 
-
     /// Check if a collision would occur in the well given the shape and shape's
     /// position.
-    pub fn check_for_collisions(&self, shape: &PieceShape, position: &Point) -> bool {
+    pub fn check_for_collisions(&self, shape: &PieceShape, position: Point2) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {
@@ -149,7 +146,6 @@ impl Well {
                 {
                     collision_found = true;
                 }
-
             }
         }
 
@@ -157,7 +153,7 @@ impl Well {
     }
 
     /// Check if a landing would occur given the shape and the shape's position.
-    pub fn check_for_landing(&self, shape: &PieceShape, position: &Point) -> bool {
+    pub fn check_for_landing(&self, shape: &PieceShape, position: Point2) -> bool {
         let mut collision_found = false;
 
         for (r, _) in shape.iter().enumerate() {
@@ -171,8 +167,8 @@ impl Well {
                     // space is not empty
                     {
                         collision_found = true;
-                    } else if (c as f32 + position.x) >= self.data[r].len() as f32 ||
-                               (c as f32 + position.x) < 0.0
+                    } else if (c as f32 + position.x) >= self.data[r].len() as f32
+                        || (c as f32 + position.x) < 0.0
                     {
                         // do nothing
                     }
