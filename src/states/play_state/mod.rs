@@ -99,14 +99,14 @@ impl PlayState {
             ui_next: UIBlockView::new(
                 ctx,
                 assets,
-                Point2::new(775.0, 70.0),
+                Point2::new(790.0, 75.0),
                 "Next",
                 Some(first_type),
             ),
-            ui_hold: UIBlockView::new(ctx, assets, Point2::new(775.0, 250.0), "Hold", None),
-            ui_level: UITextView::new(ctx, assets, Point2::new(775.0, 420.0), "Level", "1"),
-            ui_lines: UITextView::new(ctx, assets, Point2::new(775.0, 500.0), "Lines", "0"),
-            ui_score: UITextView::new(ctx, assets, Point2::new(775.0, 580.0), "Score", "0"),
+            ui_hold: UIBlockView::new(ctx, assets, Point2::new(790.0, 250.0), "Hold", None),
+            ui_level: UITextView::new(ctx, assets, Point2::new(790.0, 440.0), "Level", "1"),
+            ui_lines: UITextView::new(ctx, assets, Point2::new(790.0, 520.0), "Lines", "0"),
+            ui_score: UITextView::new(ctx, assets, Point2::new(790.0, 600.0), "Score", "0"),
         })
     }
 
@@ -455,13 +455,8 @@ impl State for PlayState {
     }
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        let coords = graphics::get_screen_coordinates(ctx);
-        graphics::draw(
-            ctx,
-            assets.get_image("game_bg")?,
-            Point2::new(coords.w / 2.0, (coords.h * -1 as f32) / 2.0),
-            0.0,
-        )?;
+        let _coords = graphics::get_screen_coordinates(ctx);
+        graphics::draw(ctx, assets.get_image("game_bg")?, Point2::origin(), 0.0)?;
 
         self.well.draw(ctx, assets.get_image("block")?)?;
         self.current_piece.draw_shadow(
@@ -480,7 +475,14 @@ impl State for PlayState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool, _assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        _repeat: bool,
+        _assets: &Assets,
+    ) {
         match keycode {
             Keycode::Left => self.input.left.is_active = true,
             Keycode::Right => self.input.right.is_active = true,
@@ -489,11 +491,15 @@ impl State for PlayState {
             Keycode::Z => self.input.rotate_counterclockwise.is_active = true,
             Keycode::X => self.input.rotate_clockwise.is_active = true,
             Keycode::Space => self.input.hold.is_active = true,
+            Keycode::Escape => {
+                ctx.quit().unwrap();
+                ()
+            }
             _ => (),
         }
     }
 
-    fn key_up_event(&mut self, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, _repeat: bool) {
         match keycode {
             Keycode::Left => self.input.left.reset(),
             Keycode::Right => self.input.right.reset(),
@@ -506,7 +512,13 @@ impl State for PlayState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, _assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        _assets: &Assets,
+    ) {
         match btn {
             Button::DPadLeft => self.input.left.is_active = true,
             Button::DPadRight => self.input.right.is_active = true,
@@ -519,7 +531,7 @@ impl State for PlayState {
         }
     }
 
-    fn controller_button_up_event(&mut self, btn: Button, _instance_id: i32) {
+    fn controller_button_up_event(&mut self, _ctx: &mut Context, btn: Button, _instance_id: i32) {
         match btn {
             Button::DPadLeft => self.input.left.reset(),
             Button::DPadRight => self.input.right.reset(),
@@ -530,5 +542,10 @@ impl State for PlayState {
             Button::LeftShoulder => self.input.hold.reset(),
             _ => (),
         }
+    }
+
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+        println!("In PlayState quit event...");
+        false
     }
 }

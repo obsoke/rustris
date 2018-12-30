@@ -67,8 +67,9 @@ impl State for IntroState {
 
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
+        let text_offset = (self.intro_text.width() / 2) as f32;
 
-        let intro_text_dest = Point2::new(coords.w / 2.0, 300.0);
+        let intro_text_dest = Point2::new(coords.w / 2.0 - text_offset, 300.0);
 
         graphics::set_color(
             ctx,
@@ -79,7 +80,14 @@ impl State for IntroState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, _assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        repeat: bool,
+        _assets: &Assets,
+    ) {
         if repeat {
             return;
         }
@@ -89,7 +97,13 @@ impl State for IntroState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, _assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        _assets: &Assets,
+    ) {
         match btn {
             _ => self.handle_input(),
         }

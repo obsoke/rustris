@@ -13,7 +13,7 @@ pub enum OptionInputCommand {
 /// A menu option.
 pub struct Option {
     text: graphics::Text,
-    centre: Point2,
+    position: Point2,
     is_selected: bool,
 }
 
@@ -21,9 +21,10 @@ impl Option {
     /// Creates a new `Option`.
     pub fn new(ctx: &mut Context, assets: &Assets, name: &'static str, top_left: Point2) -> Self {
         let text = graphics::Text::new(ctx, name, assets.get_font("normal").unwrap()).unwrap();
+        let real_pos = Point2::new(top_left.x - (text.width() / 2) as f32, top_left.y);
         Self {
             text,
-            centre: top_left,
+            position: real_pos,
             is_selected: false,
         }
     }
@@ -46,7 +47,7 @@ impl Option {
             graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
         }
 
-        graphics::draw(ctx, &self.text, self.centre, 0.0)?;
+        graphics::draw(ctx, &self.text, self.position, 0.0)?;
 
         Ok(())
     }

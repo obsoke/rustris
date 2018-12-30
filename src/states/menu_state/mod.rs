@@ -130,23 +130,34 @@ impl State for MenuState {
 
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
-
         // draw background
+        let img = assets.get_image("menu_bg")?;
+        let rotate_point = Point2::new(coords.w / 2.0, coords.h / 2.0);
+        let angle = self.title_rotation as f32 * 0.3;
+
         graphics::set_color(ctx, Color::new(1.0, 1.0, 1.0, 1.0))?;
-        graphics::draw(
+        graphics::draw_ex(
             ctx,
-            assets.get_image("menu_bg")?,
-            Point2::new(coords.w / 2.0, coords.h / -2.0),
-            self.title_rotation as f32 * 0.3,
+            img,
+            graphics::DrawParam {
+                // dest: Point2::new(300.0, 500.0),
+                dest: rotate_point,
+                offset: Point2::new(0.5, 0.5),
+                rotation: angle,
+                ..Default::default()
+            },
         )?;
 
         // draw piece spawner & all spawned pieces
         self.piece_spawner.draw(ctx, assets);
 
-        let title_dest = graphics::Point2::new(coords.w / 2.0, 100.0);
+        let title_dest =
+            graphics::Point2::new(coords.w / 2.0 - (self.title_text.width() / 2) as f32, 100.0);
+
         // shadow/stroke
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.8))?;
         graphics::draw(ctx, &self.title_shadow, title_dest, 0.0)?;
+
         // main text
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.title_text, title_dest, 0.0)?;
@@ -158,7 +169,14 @@ impl State for MenuState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        repeat: bool,
+        assets: &Assets,
+    ) {
         if repeat {
             return;
         }
@@ -171,7 +189,13 @@ impl State for MenuState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        assets: &Assets,
+    ) {
         match btn {
             Button::DPadUp => self.handle_input(&OptionInputCommand::Up, assets),
             Button::DPadDown => self.handle_input(&OptionInputCommand::Down, assets),

@@ -110,19 +110,64 @@ pub trait State {
         dt: Duration,
     ) -> GameResult<Transition>;
     fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()>;
-    fn key_down_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool, _assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _keycode: Keycode,
+        _keymod: Mod,
+        _repeat: bool,
+        _assets: &Assets,
+    ) {
     }
-    fn key_up_event(&mut self, _keycode: Keycode, _keymod: Mod, _repeat: bool) {}
-    fn mouse_button_down_event(&mut self, _button: MouseButton, _x: i32, _y: i32) {}
-    fn mouse_button_up_event(&mut self, _button: MouseButton, _x: i32, _y: i32) {}
-    fn mouse_motion_event(&mut self, _state: MouseState, _x: i32, _y: i32, _xrel: i32, _yrel: i32) {
+    fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
     }
-    fn mouse_wheel_event(&mut self, _x: i32, _y: i32) {}
-    fn controller_button_down_event(&mut self, _btn: Button, _instance_id: i32, _assets: &Assets) {}
-    fn controller_button_up_event(&mut self, _btn: Button, _instance_id: i32) {}
-    fn controller_axis_event(&mut self, _axis: Axis, _value: i16, _instance_id: i32) {}
-    fn focus_event(&mut self, _gained: bool) {}
-    fn quit_event(&mut self) -> bool {
+    fn mouse_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _button: MouseButton,
+        _x: i32,
+        _y: i32,
+    ) {
+    }
+    fn mouse_button_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        _button: MouseButton,
+        _x: i32,
+        _y: i32,
+    ) {
+    }
+    fn mouse_motion_event(
+        &mut self,
+        _ctx: &mut Context,
+        _state: MouseState,
+        _x: i32,
+        _y: i32,
+        _xrel: i32,
+        _yrel: i32,
+    ) {
+    }
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: i32, _y: i32) {}
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        _btn: Button,
+        _instance_id: i32,
+        _assets: &Assets,
+    ) {
+    }
+    fn controller_button_up_event(&mut self, _ctx: &mut Context, _btn: Button, _instance_id: i32) {}
+    fn controller_axis_event(
+        &mut self,
+        _ctx: &mut Context,
+        _axis: Axis,
+        _value: i16,
+        _instance_id: i32,
+    ) {
+    }
+    fn focus_event(&mut self, _ctx: &mut Context, _gained: bool) {}
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+        println!("In default quit_event handler...");
         false
     }
 }
@@ -279,106 +324,84 @@ impl EventHandler for StateManager {
         timer::sleep(Duration::from_secs(0));
         Ok(())
     }
-    fn mouse_button_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        _button: MouseButton,
-        _x: i32,
-        _y: i32,
-    ) {
+    fn mouse_button_down_event(&mut self, ctx: &mut Context, button: MouseButton, x: i32, y: i32) {
         if let Some(state) = self.states.last_mut() {
-            state.mouse_button_down_event(_button, _x, _y);
+            state.mouse_button_down_event(ctx, button, x, y);
         }
     }
 
-    fn mouse_button_up_event(
-        &mut self,
-        _ctx: &mut Context,
-        _button: MouseButton,
-        _x: i32,
-        _y: i32,
-    ) {
+    fn mouse_button_up_event(&mut self, ctx: &mut Context, button: MouseButton, x: i32, y: i32) {
         if let Some(state) = self.states.last_mut() {
-            state.mouse_button_up_event(_button, _x, _y);
+            state.mouse_button_up_event(ctx, button, x, y);
         }
     }
 
     fn mouse_motion_event(
         &mut self,
-        _ctx: &mut Context,
-        _state: MouseState,
-        _x: i32,
-        _y: i32,
-        _xrel: i32,
-        _yrel: i32,
+        ctx: &mut Context,
+        m_state: MouseState,
+        x: i32,
+        y: i32,
+        xrel: i32,
+        yrel: i32,
     ) {
         if let Some(state) = self.states.last_mut() {
-            state.mouse_motion_event(_state, _x, _y, _xrel, _yrel);
+            state.mouse_motion_event(ctx, m_state, x, y, xrel, yrel);
         }
     }
 
-    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: i32, _y: i32) {
+    fn mouse_wheel_event(&mut self, ctx: &mut Context, x: i32, y: i32) {
         if let Some(state) = self.states.last_mut() {
-            state.mouse_wheel_event(_x, _y);
+            state.mouse_wheel_event(ctx, x, y);
         }
     }
 
-    fn key_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        _keycode: Keycode,
-        _keymod: Mod,
-        _repeat: bool,
-    ) {
+    fn key_down_event(&mut self, ctx: &mut Context, keycode: Keycode, keymod: Mod, repeat: bool) {
         if let Some(state) = self.states.last_mut() {
-            state.key_down_event(_keycode, _keymod, _repeat, &self.assets);
+            state.key_down_event(ctx, keycode, keymod, repeat, &self.assets);
         }
     }
 
-    fn key_up_event(&mut self, _ctx: &mut Context, _keycode: Keycode, _keymod: Mod, _repeat: bool) {
+    fn key_up_event(&mut self, ctx: &mut Context, keycode: Keycode, keymod: Mod, repeat: bool) {
         if let Some(state) = self.states.last_mut() {
-            state.key_up_event(_keycode, _keymod, _repeat);
+            state.key_up_event(ctx, keycode, keymod, repeat);
         }
     }
 
-    fn controller_button_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        _btn: Button,
-        _instance_id: i32,
-    ) {
+    fn controller_button_down_event(&mut self, ctx: &mut Context, btn: Button, instance_id: i32) {
         if let Some(state) = self.states.last_mut() {
-            state.controller_button_down_event(_btn, _instance_id, &self.assets);
+            state.controller_button_down_event(ctx, btn, instance_id, &self.assets);
         }
     }
-    fn controller_button_up_event(&mut self, _ctx: &mut Context, _btn: Button, _instance_id: i32) {
+    fn controller_button_up_event(&mut self, ctx: &mut Context, btn: Button, instance_id: i32) {
         if let Some(state) = self.states.last_mut() {
-            state.controller_button_up_event(_btn, _instance_id);
+            state.controller_button_up_event(ctx, btn, instance_id);
         }
     }
     fn controller_axis_event(
         &mut self,
-        _ctx: &mut Context,
-        _axis: Axis,
-        _value: i16,
-        _instance_id: i32,
+        ctx: &mut Context,
+        axis: Axis,
+        value: i16,
+        instance_id: i32,
     ) {
         if let Some(state) = self.states.last_mut() {
-            state.controller_axis_event(_axis, _value, _instance_id);
+            state.controller_axis_event(ctx, axis, value, instance_id);
         }
     }
 
-    fn focus_event(&mut self, _ctx: &mut Context, _gained: bool) {
+    fn focus_event(&mut self, ctx: &mut Context, gained: bool) {
         if let Some(state) = self.states.last_mut() {
-            state.focus_event(_gained);
+            state.focus_event(ctx, gained);
         }
     }
 
     /// Called upon a quit event.  If it returns true,
     /// the game does not exit.
-    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+    fn quit_event(&mut self, ctx: &mut Context) -> bool {
+        println!("In StateManager quit_event handler...");
         match self.states.last_mut() {
-            Some(state) => state.quit_event(),
+            Some(state) => state.quit_event(ctx),
             None => false,
         }
     }

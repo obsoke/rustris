@@ -155,22 +155,25 @@ impl State for GameEndState {
     fn draw(&mut self, ctx: &mut Context, _: &Assets) -> GameResult<()> {
         let coords = graphics::get_screen_coordinates(ctx);
 
-        let game_over_dest = Point2::new(coords.w / 2.0, 100.0);
-        let game_over_score_dest = Point2::new(coords.w / 2.0, 200.0);
-        let game_over_lines_dest = Point2::new(coords.w / 2.0, 250.0);
-        let game_over_level_dest = Point2::new(coords.w / 2.0, 300.0);
+        let game_over_dest = Point2::new(
+            coords.w / 2.0 - (self.game_end_text.width() / 2) as f32,
+            100.0,
+        );
+        let game_over_score_dest = Point2::new(
+            coords.w / 2.0 - (self.final_level_text.width() / 2) as f32,
+            200.0,
+        );
+        let game_over_lines_dest = Point2::new(
+            coords.w / 2.0 - (self.final_line_text.width() / 2) as f32,
+            250.0,
+        );
+        let game_over_level_dest = Point2::new(
+            coords.w / 2.0 - (self.final_level_text.width() / 2) as f32,
+            300.0,
+        );
 
-        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.7))?;
-        graphics::rectangle(
-            ctx,
-            graphics::DrawMode::Fill,
-            graphics::Rect::new(
-                0.0 + (coords.w / 2.0),
-                0.0 + ((coords.h * -1.0) / 2.0),
-                coords.w,
-                coords.h * -1.0,
-            ),
-        )?;
+        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.75))?;
+        graphics::rectangle(ctx, graphics::DrawMode::Fill, coords)?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         graphics::draw(ctx, &self.game_end_text, game_over_dest, 0.0)?;
         graphics::draw(ctx, &self.final_score_text, game_over_score_dest, 0.0)?;
@@ -184,7 +187,14 @@ impl State for GameEndState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, keycode: Keycode, _keymod: Mod, repeat: bool, assets: &Assets) {
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        repeat: bool,
+        assets: &Assets,
+    ) {
         if repeat {
             return;
         }
@@ -197,7 +207,13 @@ impl State for GameEndState {
         }
     }
 
-    fn controller_button_down_event(&mut self, btn: Button, _instance_id: i32, assets: &Assets) {
+    fn controller_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        btn: Button,
+        _instance_id: i32,
+        assets: &Assets,
+    ) {
         match btn {
             Button::DPadUp => self.handle_input(&OptionInputCommand::Up, assets),
             Button::DPadDown => self.handle_input(&OptionInputCommand::Down, assets),
