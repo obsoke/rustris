@@ -253,24 +253,24 @@ pub fn u8_to_piece_type(num: u8) -> Option<PieceType> {
 pub fn block_to_colour(num: u32, shadow: bool) -> Color {
     if shadow {
         match num {
-            1 => Color::from((0, 255, 255, 75)),
-            2 => Color::from((0, 0, 255, 75)),
-            3 => Color::from((255, 165, 0, 75)),
-            4 => Color::from((255, 255, 0, 75)),
-            5 => Color::from((128, 255, 0, 75)),
-            6 => Color::from((128, 0, 128, 75)),
-            7 => Color::from((255, 0, 0, 75)),
+            1 => Color::from((0, 255, 255, 75)),   // I
+            2 => Color::from((128, 70, 255, 130)), // J
+            3 => Color::from((255, 165, 0, 75)),   // L
+            4 => Color::from((255, 255, 0, 75)),   // O
+            5 => Color::from((128, 255, 0, 75)),   // S
+            6 => Color::from((255, 128, 128, 75)), // T
+            7 => Color::from((255, 0, 0, 75)),     // Z
             _ => unreachable!(),
         }
     } else {
         match num {
-            1 => Color::from((0, 255, 255, 255)),
-            2 => Color::from((0, 0, 255, 255)),
-            3 => Color::from((255, 165, 0, 255)),
-            4 => Color::from((255, 255, 0, 255)),
-            5 => Color::from((128, 255, 0, 255)),
-            6 => Color::from((128, 0, 128, 255)),
-            7 => Color::from((255, 0, 0, 255)),
+            1 => Color::from((0, 255, 255, 255)),   // I
+            2 => Color::from((128, 70, 255, 255)),  // J
+            3 => Color::from((255, 165, 0, 255)),   // L
+            4 => Color::from((255, 255, 0, 255)),   // O
+            5 => Color::from((128, 255, 0, 255)),   // S
+            6 => Color::from((255, 128, 128, 255)), // T
+            7 => Color::from((255, 0, 0, 255)),     // Z
             _ => unreachable!(),
         }
     }
